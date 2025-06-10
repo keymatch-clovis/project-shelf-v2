@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name" translatable="false">Zamya</string>
+    <string name="products">Products</string>
+    <string name="product">Product</string>
+    <string name="name">Name</string>
+    <string name="price">Price</string>
+    <string name="amount">Amount</string>
+    <string name="clients">Clients</string>
+    <string name="invoice">Invoice</string>
+    <string name="invoices">Invoices</string>
+</resources>
