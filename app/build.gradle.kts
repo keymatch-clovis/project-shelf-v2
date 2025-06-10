@@ -75,4 +75,10 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.androidx.compose.ui.unit)
     implementation(libs.androidx.compose.material.icons)
+
+    /// Splashscreen
+    implementation(libs.androidx.core.splashscreen)
+
+    /// Test Coroutines
+    testImplementation(libs.kotlinx.coroutines.test)
 }

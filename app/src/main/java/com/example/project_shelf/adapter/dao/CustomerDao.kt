@@ -11,5 +11,5 @@ interface CustomerDao {
     fun select(): List<CustomerDto>
 
     @Insert
-    fun insert(dto: CustomerDto)
+    suspend fun insert(dto: CustomerDto)
 }

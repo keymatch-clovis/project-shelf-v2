@@ -11,7 +11,11 @@ enum class Destination(
     PRODUCT("product"),
     PRODUCT_LIST("product.list"),
 
-    // Invoice Category
+    /// Invoice Category
     INVOICE("invoice"),
     INVOICE_LIST("invoice.list"),
+
+    /// Config Category
+    CONFIG("config"),
+    CONFIG_LIST("config.list"),
 }

@@ -3,6 +3,7 @@ package com.example.project_shelf.framework.room
 import android.content.Context
 import androidx.room.Room
 
+const val DATABASE_NAME = "shelf"
 const val VERSION = 1
 
 // Companion Singleton Class to encapsulate the SQLite Database.
@@ -19,7 +20,7 @@ class ShelfDatabase private constructor(val database: SqliteDatabase) {
                             Room.databaseBuilder(
                                 context,
                                 SqliteDatabase::class.java,
-                                "shelf_database"
+                                DATABASE_NAME
                             ).build()
                         )
                     }
