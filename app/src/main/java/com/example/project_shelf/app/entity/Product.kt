@@ -1,4 +1,4 @@
-package com.example.project_shelf.lib.entity
+package com.example.project_shelf.app.entity
 
 import java.math.BigInteger
 

@@ -1,10 +1,14 @@
 package com.example.project_shelf.ui
 
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Category
 import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.Receipt
+import androidx.compose.material3.BottomAppBarDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -21,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.example.project_shelf.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview()
 @Composable
 fun MainScreen() {
@@ -34,16 +39,31 @@ fun MainScreen() {
                 NavigationBarItem(
                     selected = selectedDestination == Destination.PRODUCT.ordinal,
                     onClick = {
-                        navController.navigate(route = Destination.PRODUCT.path)
-                        selectedDestination = Destination.PRODUCT.ordinal
+                        if (selectedDestination != Destination.PRODUCT.ordinal) {
+                            navController.navigate(route = Destination.PRODUCT.path) {
+                                // Avoid multiple copies of the same destination when re-selecting the
+                                // same item.
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                            selectedDestination = Destination.PRODUCT.ordinal
+                        }
                     },
                     icon = { Icon(Icons.Rounded.Category, contentDescription = null) },
                     label = { Text(stringResource(R.string.products)) })
+
                 NavigationBarItem(
                     selected = selectedDestination == Destination.CLIENT.ordinal,
                     onClick = {
-                        navController.navigate(route = Destination.CLIENT.path)
-                        selectedDestination = Destination.CLIENT.ordinal
+                        if (selectedDestination != Destination.CLIENT.ordinal) {
+                            navController.navigate(route = Destination.CLIENT.path) {
+                                // Avoid multiple copies of the same destination when re-selecting the
+                                // same item.
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                            selectedDestination = Destination.CLIENT.ordinal
+                        }
                     },
                     icon = { Icon(Icons.Rounded.Groups, contentDescription = null) },
                     label = { Text(stringResource(R.string.clients)) })
@@ -57,6 +77,9 @@ fun MainScreen() {
                     label = { Text(stringResource(R.string.invoices)) })
             }
         }) { contentPadding ->
-        AppNavHost(navController, startDestination, Modifier.padding(contentPadding))
+        AppNavHost(
+            navController, startDestination,
+            Modifier.padding(contentPadding),
+        )
     }
 }

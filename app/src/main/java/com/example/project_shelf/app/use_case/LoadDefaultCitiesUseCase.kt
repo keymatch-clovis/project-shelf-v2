@@ -1,8 +1,8 @@
-package com.example.project_shelf.lib.use_case
+package com.example.project_shelf.app.use_case
 
 import android.util.Log
-import com.example.project_shelf.lib.entity.City
-import com.example.project_shelf.lib.service.CityService
+import com.example.project_shelf.app.entity.City
+import com.example.project_shelf.app.service.CityService
 import java.io.InputStream
 
 class LoadDefaultCitiesUseCase(private val cityService: CityService) {

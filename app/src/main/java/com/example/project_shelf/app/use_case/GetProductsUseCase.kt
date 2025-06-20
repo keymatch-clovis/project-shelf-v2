@@ -1,7 +1,7 @@
-package com.example.project_shelf.lib.use_case
+package com.example.project_shelf.app.use_case
 
-import com.example.project_shelf.lib.entity.Product
-import com.example.project_shelf.lib.service.ProductService
+import com.example.project_shelf.app.entity.Product
+import com.example.project_shelf.app.service.ProductService
 import kotlinx.coroutines.flow.Flow
 
 class GetProductsUseCase(private val productService: ProductService) {

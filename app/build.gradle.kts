@@ -7,6 +7,9 @@ plugins {
 
     /// Compose Plugin
     alias(libs.plugins.compose.compiler)
+
+    /// Hilt
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -50,6 +53,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.navigation.compose)
@@ -81,4 +85,12 @@ dependencies {
 
     /// Test Coroutines
     testImplementation(libs.kotlinx.coroutines.test)
+
+    /// Hilt
+    implementation(libs.androidx.hilt)
+    implementation(libs.hilt)
+    ksp(libs.hilt.compiler)
+
+    /// Konform
+    implementation(libs.konform)
 }

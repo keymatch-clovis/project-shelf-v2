@@ -8,4 +8,7 @@ plugins {
 
     /// Compose
     alias(libs.plugins.compose.compiler) apply false
+
+    /// Hilt
+    alias(libs.plugins.hilt) apply false
 }

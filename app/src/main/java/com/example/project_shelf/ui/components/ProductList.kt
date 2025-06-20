@@ -1,26 +1,27 @@
 package com.example.project_shelf.ui.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.example.project_shelf.adapter.view_model.ProductUiState
+import androidx.compose.ui.unit.dp
 
-@Preview
 @Composable
-fun ProductList() {
-    Column(
-        Modifier
-            .verticalScroll(rememberScrollState())
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceContainer)
+fun ProductList(
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    nestedScrollConnection: NestedScrollConnection,
+) {
+    LazyColumn(
+        modifier = Modifier
+            .nestedScroll(nestedScrollConnection)
+            .fillMaxWidth(),
+        contentPadding = contentPadding,
     ) {
-        repeat(20) {
+        items(20) {
             ProductListItem(
                 product = ProductUiState(
                     name = "Testing"

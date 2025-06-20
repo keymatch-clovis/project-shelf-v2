@@ -1,8 +1,8 @@
 package com.example.project_shelf.adapter.service_impl
 
 import com.example.project_shelf.adapter.dao.ProductDao
-import com.example.project_shelf.lib.entity.Product
-import com.example.project_shelf.lib.service.ProductService
+import com.example.project_shelf.app.entity.Product
+import com.example.project_shelf.app.service.ProductService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.math.BigInteger

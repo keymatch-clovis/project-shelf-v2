@@ -1,6 +1,6 @@
-package com.example.project_shelf.lib.service
+package com.example.project_shelf.app.service
 
-import com.example.project_shelf.lib.entity.Product
+import com.example.project_shelf.app.entity.Product
 import kotlinx.coroutines.flow.Flow
 
 interface ProductService {

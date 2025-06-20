@@ -8,4 +8,11 @@
     <string name="clients">Clients</string>
     <string name="invoice">Invoice</string>
     <string name="invoices">Invoices</string>
+    <string name="product_create">Create Product</string>
+    <string name="err_value_required">A value is required</string>
+    <string name="err_negative_value">Negative values are not supported</string>
+    <string name="err_decimal_required">A decimal value is required</string>
+    <string name="err_value_length">The value is too long</string>
+    <string name="err_integer_required">An integer value is required</string>
+    <string name="search">Search</string>
 </resources>
