@@ -15,4 +15,5 @@
     <string name="err_value_length">The value is too long</string>
     <string name="err_integer_required">An integer value is required</string>
     <string name="search">Search</string>
+    <string name="add">Add</string>
 </resources>

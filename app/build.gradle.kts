@@ -61,10 +61,11 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    /// KSP
+    /// Room
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.paging)
 
     /// Compose
     implementation(platform(libs.androidx.compose))
@@ -93,4 +94,11 @@ dependencies {
 
     /// Konform
     implementation(libs.konform)
+
+    /// Faker
+    testImplementation(libs.faker)
+
+    /// Paging
+    implementation(libs.androidx.paging)
+    implementation(libs.androidx.paging.compose)
 }

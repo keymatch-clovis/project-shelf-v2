@@ -1,4 +1,4 @@
-package com.example.project_shelf.adapter.dto
+package com.example.project_shelf.adapter.dto.room
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

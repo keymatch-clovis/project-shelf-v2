@@ -1,7 +1,7 @@
 package com.example.project_shelf.adapter.service_impl
 
 import com.example.project_shelf.adapter.dao.CityDao
-import com.example.project_shelf.adapter.dto.CityDto
+import com.example.project_shelf.adapter.dto.room.CityDto
 import com.example.project_shelf.app.entity.City
 import com.example.project_shelf.app.service.CityService
 

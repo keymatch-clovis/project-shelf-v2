@@ -1,8 +1,10 @@
 package com.example.project_shelf.app.service
 
+import androidx.paging.PagingData
 import com.example.project_shelf.app.entity.Product
 import kotlinx.coroutines.flow.Flow
 
 interface ProductService {
-    fun getProducts(): Flow<List<Product>>
+    fun getProducts(): Flow<PagingData<Product>>
+    suspend fun createProduct(product: Product): Unit
 }

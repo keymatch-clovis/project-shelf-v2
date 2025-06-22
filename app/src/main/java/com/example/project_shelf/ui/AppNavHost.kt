@@ -8,7 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.project_shelf.ui.screen.ConfigScreen
 import com.example.project_shelf.ui.screen.InvoicesScreen
-import com.example.project_shelf.ui.screen.ProductsScreen
+import com.example.project_shelf.ui.screen.product.ProductsScreen
 import com.example.project_shelf.ui.screen.product.CreateProductScreen
 
 @Composable

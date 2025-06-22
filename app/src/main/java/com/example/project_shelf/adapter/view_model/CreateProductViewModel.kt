@@ -22,10 +22,6 @@ import javax.inject.Inject
 
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.handler.ProductHandler
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.transformLatest
 import java.io.Serializable
 
 data class CreateProductUiState(
