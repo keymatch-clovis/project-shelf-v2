@@ -1,5 +1,6 @@
 package com.example.project_shelf.adapter.view_model
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,35 +19,44 @@ import javax.inject.Inject
 
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.handler.ProductHandler
+import kotlinx.coroutines.flow.StateFlow
 import java.io.Serializable
 
-data class CreateProductUiState(
-    val name: String = "",
+data class EditProductUiState(
+    val name: String,
     val nameErrors: List<Int> = listOf(),
 
-    val price: String = "",
+    val price: String,
     val priceErrors: List<Int> = listOf(),
 
-    val count: String = "",
+    val count: String,
     val countErrors: List<Int> = listOf(),
 ) : Serializable
 
 @HiltViewModel
-class CreateProductViewModel @Inject constructor(
+class EditProductViewModel @Inject constructor(
     private val savedState: SavedStateHandle,
-    private val productHandler: ProductHandler,
 ) : ViewModel() {
-    private val _uiState: MutableStateFlow<CreateProductUiState> =
-        savedState.getMutableStateFlow<CreateProductUiState>(
-            "uiState",
-            CreateProductUiState(),
+    private lateinit var _uiState: MutableStateFlow<EditProductUiState>
+    private lateinit var _validationState: MutableStateFlow<ValidationResult<EditProductUiState>?>
+
+    lateinit var uiState: StateFlow<EditProductUiState>
+    lateinit var validationState: StateFlow<ValidationResult<EditProductUiState>?>
+
+    fun setProduct(product: ProductUiState) {
+        _uiState = MutableStateFlow(
+            EditProductUiState(
+                name = product.name,
+                // Don't fill the input with zeros. It looks ugly in my opinion.
+                price = if (product.price == "0") "" else product.price,
+                count = if (product.count == "0") "" else product.count,
+            )
         )
+        _validationState = MutableStateFlow(null)
 
-    private var _validationState: MutableStateFlow<ValidationResult<CreateProductUiState>?> =
-        MutableStateFlow(null)
-
-    val uiState = _uiState.asStateFlow()
-    val validationState = _validationState.asStateFlow()
+        uiState = _uiState.asStateFlow()
+        validationState = _validationState.asStateFlow()
+    }
 
     fun updateName(value: String) {
         // Update the UI regardless of validation result.
@@ -55,7 +65,7 @@ class CreateProductViewModel @Inject constructor(
         // Update errors with the validation result
         _uiState.update {
             it.copy(
-                nameErrors = validationState.value!!.errors.messagesAtPath(CreateProductUiState::name)
+                nameErrors = validationState.value!!.errors.messagesAtPath(EditProductUiState::name)
                     .map { it.toInt() })
         }
         // Save the state.
@@ -69,7 +79,7 @@ class CreateProductViewModel @Inject constructor(
         // Update errors with the validation result
         _uiState.update {
             it.copy(
-                priceErrors = validationState.value!!.errors.messagesAtPath(CreateProductUiState::price)
+                priceErrors = validationState.value!!.errors.messagesAtPath(EditProductUiState::price)
                     .map { it.toInt() })
         }
     }
@@ -81,26 +91,23 @@ class CreateProductViewModel @Inject constructor(
         // Update errors with the validation result
         _uiState.update {
             it.copy(
-                countErrors = validationState.value!!.errors.messagesAtPath(CreateProductUiState::count)
+                countErrors = validationState.value!!.errors.messagesAtPath(EditProductUiState::count)
                     .map { it.toInt() })
         }
     }
 
     fun create() {
         assert(_validationState.value?.isValid == true)
-        viewModelScope.launch {
-            productHandler.create(_uiState.value.name, _uiState.value.price, _uiState.value.count)
-        }
     }
 }
 
-private val validateState = Validation<CreateProductUiState> {
-    CreateProductUiState::name {
+private val validateState = Validation<EditProductUiState> {
+    EditProductUiState::name {
         notBlank() hint R.string.err_value_required.toString()
     }
 
     validate(
-        CreateProductUiState::price,
+        EditProductUiState::price,
         // If the price is empty, treat it as zero, if it's not, check the value is correct.
         { if (it.price.trim().isNotEmpty()) it.price.toBigDecimalOrNull() else BigDecimal.ZERO },
     ) {
@@ -111,7 +118,7 @@ private val validateState = Validation<CreateProductUiState> {
     }
 
     validate(
-        CreateProductUiState::count,
+        EditProductUiState::count,
         // If the count is empty, treat it as zero, if it's not, check the value is correct.
         { if (it.count.trim().isNotEmpty()) it.count.toIntOrNull() else 0 },
     ) {

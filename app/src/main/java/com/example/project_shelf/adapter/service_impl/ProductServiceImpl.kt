@@ -11,19 +11,19 @@ import com.example.project_shelf.app.service.ProductService
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.math.BigInteger
 import javax.inject.Inject
 
+// Recommended value for simple text data.
+const val PAGE_SIZE = 100;
+
 class ProductServiceImpl @Inject constructor(private val dao: ProductDao) : ProductService {
     override fun getProducts(): Flow<PagingData<Product>> {
         return Pager(
-            config = PagingConfig(
-                pageSize = 20
-            )
+            config = PagingConfig(pageSize = PAGE_SIZE)
         ) { dao.select() }.flow.map {
             it.map { dto ->
                 Product(

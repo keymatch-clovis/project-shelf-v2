@@ -8,7 +8,7 @@
     <string name="clients">Clientes</string>
     <string name="invoice">Factura</string>
     <string name="invoices">Facturas</string>
-    <string name="product_create">Crear Producto</string>
+    <string name="product_create">Crear producto</string>
     <string name="err_value_required">Un valor es requerido</string>
     <string name="err_negative_value">No se aceptan valores negativos</string>
     <string name="err_decimal_required">Se requiere un valor decimal</string>
@@ -16,4 +16,6 @@
     <string name="err_integer_required">Se requiere un valor entero</string>
     <string name="search">Buscar</string>
     <string name="add">Añadir</string>
+    <string name="save">Guardar</string>
+    <string name="product_edit">Editar producto</string>
 </resources>

@@ -49,15 +49,18 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.project_shelf.ui.components.ProductList
 import kotlinx.coroutines.launch
 import com.example.project_shelf.R
+import com.example.project_shelf.adapter.view_model.EditProductViewModel
 import com.example.project_shelf.adapter.view_model.ProductsViewModel
+import com.example.project_shelf.ui.components.dialog.CreateProductDialog
+import com.example.project_shelf.ui.components.dialog.EditProductDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun ProductsScreen(
     viewModel: ProductsViewModel = hiltViewModel(),
-    onCreateProduct: () -> Unit = {},
 ) {
+    val state = viewModel.uiState.collectAsState()
     val lazyPagingItems = viewModel.products.collectAsLazyPagingItems()
 
     val isVisible = rememberSaveable { mutableStateOf(true) }
@@ -87,6 +90,18 @@ fun ProductsScreen(
             textFieldState = textFieldState,
             onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
             placeholder = { Text("Search") },
+        )
+    }
+
+    if (state.value.isShowingCreateProductDialog) {
+        CreateProductDialog(
+            onDismissRequest = { viewModel.closeCreateProductDialog() })
+    }
+
+    if (state.value.isShowingEditProductDialog) {
+        EditProductDialog(
+            onDismissRequest = { viewModel.closeEditProductDialog() },
+            product = state.value.selectedProduct!!,
         )
     }
 
@@ -127,7 +142,7 @@ fun ProductsScreen(
             ) {
                 ExtendedFloatingActionButton(
                     modifier = Modifier.height(56.dp),
-                    onClick = onCreateProduct,
+                    onClick = { viewModel.openCreateProductDialog() },
                     shape = MaterialTheme.shapes.small,
                 ) {
                     Icon(
@@ -141,6 +156,11 @@ fun ProductsScreen(
             }
         },
     ) { innerPadding ->
-        ProductList(innerPadding, nestedScrollConnection, lazyPagingItems)
+        ProductList(
+            innerPadding,
+            nestedScrollConnection,
+            lazyPagingItems,
+            lazyListState = viewModel.lazyListState,
+            onProductClicked = { viewModel.openEditProductDialog(it) })
     }
 }

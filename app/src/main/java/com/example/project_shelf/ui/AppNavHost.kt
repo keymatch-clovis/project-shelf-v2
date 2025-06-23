@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.example.project_shelf.ui.screen.ClientsScreen
 import com.example.project_shelf.ui.screen.ConfigScreen
 import com.example.project_shelf.ui.screen.InvoicesScreen
 import com.example.project_shelf.ui.screen.product.ProductsScreen
@@ -23,16 +24,7 @@ fun AppNavHost(
             startDestination = Destination.PRODUCT_LIST.path
         ) {
             composable(Destination.PRODUCT_LIST.path) {
-                ProductsScreen(
-                    onCreateProduct = {
-                        navController.navigate(route = Destination.CREATE_PRODUCT.path) {
-                            restoreState = true
-                        }
-                    }
-                )
-            }
-            composable(Destination.CREATE_PRODUCT.path) {
-                CreateProductScreen()
+                ProductsScreen()
             }
         }
 
@@ -41,7 +33,7 @@ fun AppNavHost(
             startDestination = Destination.CLIENT_LIST.path
         ) {
             composable(Destination.CLIENT_LIST.path) {
-                CreateProductScreen()
+                ClientsScreen()
             }
         }
 

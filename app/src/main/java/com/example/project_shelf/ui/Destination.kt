@@ -10,7 +10,6 @@ enum class Destination(
     /// Product Category
     PRODUCT("product"),
     PRODUCT_LIST("product.list"),
-    CREATE_PRODUCT("product.create"),
 
     /// Invoice Category
     INVOICE("invoice"),

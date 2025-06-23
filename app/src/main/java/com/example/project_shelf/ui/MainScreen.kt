@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.rounded.Category
 import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.Receipt
@@ -49,7 +50,13 @@ fun MainScreen() {
                             selectedDestination = Destination.PRODUCT.ordinal
                         }
                     },
-                    icon = { Icon(Icons.Rounded.Category, contentDescription = null) },
+                    icon = {
+                        if (selectedDestination == Destination.PRODUCT.ordinal) {
+                            Icon(Icons.Rounded.Category, contentDescription = null)
+                        } else {
+                            Icon(Icons.Outlined.Category, contentDescription = null)
+                        }
+                    },
                     label = { Text(stringResource(R.string.products)) })
 
                 NavigationBarItem(

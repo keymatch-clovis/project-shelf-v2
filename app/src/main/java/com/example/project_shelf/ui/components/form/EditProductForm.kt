@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
@@ -15,11 +14,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -27,17 +23,17 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.example.project_shelf.adapter.view_model.CreateProductViewModel
 import com.example.project_shelf.R
-import com.example.project_shelf.adapter.view_model.EditProductViewModel
+import com.example.project_shelf.adapter.view_model.EditProductUiState
 
 @Composable
-fun CreateProductForm(
-    viewModel: CreateProductViewModel,
+fun EditProductForm(
+    state: State<EditProductUiState>,
     innerPadding: PaddingValues = PaddingValues(0.dp),
+    onNameChange: (value: String) -> Unit,
+    onPriceChange: (value: String) -> Unit,
+    onCountChange: (value: String) -> Unit,
 ) {
-    val state = viewModel.uiState.collectAsState()
-
     Box(modifier = Modifier.padding(innerPadding)) {
         Column(
             modifier = Modifier.padding(24.dp),
@@ -52,7 +48,7 @@ fun CreateProductForm(
                 isError = state.value.nameErrors.isNotEmpty(),
                 singleLine = true,
                 value = state.value.name,
-                onValueChange = { viewModel.updateName(it) },
+                onValueChange = onNameChange,
                 label = { Text(stringResource(R.string.name)) },
                 supportingText = {
                     Row(
@@ -69,7 +65,7 @@ fun CreateProductForm(
                 },
                 trailingIcon = {
                     if (state.value.name.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.updateName("") }) {
+                        IconButton(onClick = { onNameChange("") }) {
                             Icon(Icons.Rounded.Clear, contentDescription = null)
                         }
                     }
@@ -84,7 +80,7 @@ fun CreateProductForm(
                 isError = state.value.priceErrors.isNotEmpty(),
                 singleLine = true,
                 value = state.value.price,
-                onValueChange = { viewModel.updatePrice(it) },
+                onValueChange = onPriceChange,
                 label = { Text(stringResource(R.string.price)) },
                 supportingText = {
                     Row(
@@ -101,7 +97,7 @@ fun CreateProductForm(
                 },
                 trailingIcon = {
                     if (state.value.price.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.updatePrice("") }) {
+                        IconButton(onClick = { onPriceChange("") }) {
                             Icon(Icons.Rounded.Clear, contentDescription = null)
                         }
                     }
@@ -116,7 +112,7 @@ fun CreateProductForm(
                 isError = state.value.countErrors.isNotEmpty(),
                 singleLine = true,
                 value = state.value.count,
-                onValueChange = { viewModel.updateCount(it) },
+                onValueChange = onCountChange,
                 label = { Text(stringResource(R.string.amount)) },
                 supportingText = {
                     Row(
@@ -133,7 +129,7 @@ fun CreateProductForm(
                 },
                 trailingIcon = {
                     if (state.value.count.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.updateCount("") }) {
+                        IconButton(onClick = { onCountChange("") }) {
                             Icon(Icons.Rounded.Clear, contentDescription = null)
                         }
                     }
