@@ -1,23 +1,17 @@
 package com.example.project_shelf.ui.components.dialog
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -26,14 +20,18 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.view_model.CreateProductViewModel
+import com.example.project_shelf.adapter.view_model.ProductUiState
 import com.example.project_shelf.ui.components.form.CreateProductForm
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateProductDialog(
     viewModel: CreateProductViewModel = hiltViewModel(),
-    onDismissRequest: () -> Unit = {},
+    onDismissRequest: () -> Unit,
+    onCreated: (product: ProductUiState) -> Unit,
 ) {
+    val validationState = viewModel.validationState.collectAsState()
+
     Dialog(
         properties = DialogProperties(usePlatformDefaultWidth = false),
         onDismissRequest = onDismissRequest,
@@ -49,7 +47,10 @@ fun CreateProductDialog(
                     },
                     title = { Text(stringResource(R.string.product_create)) },
                     actions = {
-                        Button(onClick = {}) {
+                        Button(
+                            enabled = validationState.value?.isValid == true,
+                            onClick = { viewModel.create(onCreated) },
+                        ) {
                             Text(stringResource(R.string.save))
                         }
                     },

@@ -40,10 +40,10 @@ fun ProductList(
         }
 
         items(count = lazyPagingItems.itemCount) { index ->
+            HorizontalDivider()
             lazyPagingItems[index]?.let {
                 ProductListItem(it, onItemClicked = onProductClicked)
             }
-            HorizontalDivider()
         }
 
         if (lazyPagingItems.loadState.append == LoadState.Loading) {

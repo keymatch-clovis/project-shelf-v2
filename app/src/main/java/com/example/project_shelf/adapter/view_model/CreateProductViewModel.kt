@@ -15,10 +15,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import javax.inject.Inject
-
-import com.example.project_shelf.R
-import com.example.project_shelf.adapter.handler.ProductHandler
 import java.io.Serializable
+import com.example.project_shelf.R
+import com.example.project_shelf.adapter.repository.ProductRepository
 
 data class CreateProductUiState(
     val name: String = "",
@@ -34,14 +33,11 @@ data class CreateProductUiState(
 @HiltViewModel
 class CreateProductViewModel @Inject constructor(
     private val savedState: SavedStateHandle,
-    private val productHandler: ProductHandler,
+    private val productRepository: ProductRepository,
 ) : ViewModel() {
-    private val _uiState: MutableStateFlow<CreateProductUiState> =
-        savedState.getMutableStateFlow<CreateProductUiState>(
-            "uiState",
-            CreateProductUiState(),
-        )
-
+    private val _uiState: MutableStateFlow<CreateProductUiState> = MutableStateFlow(
+        CreateProductUiState()
+    )
     private var _validationState: MutableStateFlow<ValidationResult<CreateProductUiState>?> =
         MutableStateFlow(null)
 
@@ -86,10 +82,21 @@ class CreateProductViewModel @Inject constructor(
         }
     }
 
-    fun create() {
+    fun create(onCreated: suspend (product: ProductUiState) -> Unit) {
         assert(_validationState.value?.isValid == true)
+
         viewModelScope.launch {
-            productHandler.create(_uiState.value.name, _uiState.value.price, _uiState.value.count)
+            val product = ProductUiState(
+                // NOTE: Don't forget to always trim!
+                name = _uiState.value.name.trim(),
+                price = _uiState.value.price.trim(),
+                count = _uiState.value.count.trim(),
+            )
+            productRepository.createProduct(product)
+            onCreated(product)
+
+            // NOTE: Clear view model after creation.
+            _uiState.update { CreateProductUiState() }
         }
     }
 }

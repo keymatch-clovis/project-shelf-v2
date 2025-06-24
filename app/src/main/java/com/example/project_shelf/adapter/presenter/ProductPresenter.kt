@@ -1,5 +1,6 @@
 package com.example.project_shelf.adapter.presenter
 
+import android.util.Log
 import androidx.paging.PagingData
 import androidx.paging.map
 import com.example.project_shelf.adapter.repository.ProductRepository
@@ -33,12 +34,12 @@ class ProductPresenter @Inject constructor(
     }
 
     override suspend fun createProduct(product: ProductUiState) {
+        Log.d("PRODUCT-PRESENTER", "Creating product with: $product")
+
         return createProductUseCase.exec(
-            Product(
-                name = product.name,
-                price = BigInteger.ZERO,
-                count = product.count.toInt(),
-            )
+            name = product.name,
+            price = product.price,
+            count = product.count,
         )
     }
 }

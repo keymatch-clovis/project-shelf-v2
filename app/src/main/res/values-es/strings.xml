@@ -18,4 +18,7 @@
     <string name="add">Añadir</string>
     <string name="save">Guardar</string>
     <string name="product_edit">Editar producto</string>
+    <string name="product_creating">Creando producto</string>
+    <string name="loading_message">Un momento, por favor</string>
+    <string name="product_created">Producto %1$s creado</string>
 </resources>

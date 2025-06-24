@@ -26,6 +26,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopSearchBar
 import androidx.compose.material3.rememberSearchBarState
@@ -41,6 +43,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -60,13 +63,15 @@ import com.example.project_shelf.ui.components.dialog.EditProductDialog
 fun ProductsScreen(
     viewModel: ProductsViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val state = viewModel.uiState.collectAsState()
     val lazyPagingItems = viewModel.products.collectAsLazyPagingItems()
 
+    val snackbarHostState = remember { SnackbarHostState() }
     val isVisible = rememberSaveable { mutableStateOf(true) }
     val searchBarState = rememberSearchBarState()
     val textFieldState = rememberTextFieldState()
-    val scope = rememberCoroutineScope()
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
@@ -95,7 +100,19 @@ fun ProductsScreen(
 
     if (state.value.isShowingCreateProductDialog) {
         CreateProductDialog(
-            onDismissRequest = { viewModel.closeCreateProductDialog() })
+            onDismissRequest = { viewModel.closeCreateProductDialog() },
+            onCreated = {
+                viewModel.closeCreateProductDialog()
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        context.getString(
+                            R.string.product_created,
+                            it.name
+                        )
+                    )
+                }
+            }
+        )
     }
 
     if (state.value.isShowingEditProductDialog) {
@@ -106,6 +123,7 @@ fun ProductsScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         modifier = Modifier.nestedScroll(nestedScrollConnection),
         topBar = {
             AnimatedVisibility(

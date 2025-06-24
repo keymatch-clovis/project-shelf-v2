@@ -18,4 +18,7 @@
     <string name="add">Add</string>
     <string name="save">Save</string>
     <string name="product_edit">Edit product</string>
+    <string name="product_creating">Creating product</string>
+    <string name="loading_message">This should take a second</string>
+    <string name="product_created">Product %1$s created</string>
 </resources>

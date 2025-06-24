@@ -1,9 +1,7 @@
 package com.example.project_shelf.adapter.view_model
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.konform.validation.Validation
 import io.konform.validation.ValidationResult
@@ -13,14 +11,12 @@ import io.konform.validation.messagesAtPath
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import javax.inject.Inject
+import java.io.Serializable
 
 import com.example.project_shelf.R
-import com.example.project_shelf.adapter.handler.ProductHandler
 import kotlinx.coroutines.flow.StateFlow
-import java.io.Serializable
 
 data class EditProductUiState(
     val name: String,

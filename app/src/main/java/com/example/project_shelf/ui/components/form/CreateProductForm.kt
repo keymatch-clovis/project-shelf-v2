@@ -40,8 +40,9 @@ fun CreateProductForm(
 
     Box(modifier = Modifier.padding(innerPadding)) {
         Column(
+            // https://m3.material.io/components/dialogs/specs#2b93ced7-9b0d-4a59-9bc4-8ff59dcd24c1
             modifier = Modifier.padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             /// Name
             OutlinedTextField(
