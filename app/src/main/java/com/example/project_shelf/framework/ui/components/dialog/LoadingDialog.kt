@@ -1,4 +1,4 @@
-package com.example.project_shelf.ui.components.dialog
+package com.example.project_shelf.framework.ui.components.dialog
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer

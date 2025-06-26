@@ -1,4 +1,4 @@
-package com.example.project_shelf.ui
+package com.example.project_shelf.framework.ui
 
 enum class Destination(
     val path: String,

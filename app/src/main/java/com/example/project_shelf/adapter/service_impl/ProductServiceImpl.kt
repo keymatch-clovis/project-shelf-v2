@@ -1,5 +1,6 @@
 package com.example.project_shelf.adapter.service_impl
 
+import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -27,6 +28,7 @@ class ProductServiceImpl @Inject constructor(private val dao: ProductDao) : Prod
         ) { dao.select() }.flow.map {
             it.map { dto ->
                 Product(
+                    uuid = dto.uuid,
                     name = dto.name,
                     price = BigInteger(dto.price),
                     count = dto.count,
@@ -38,11 +40,25 @@ class ProductServiceImpl @Inject constructor(private val dao: ProductDao) : Prod
     override suspend fun createProduct(product: Product) {
         dao.insert(
             ProductDto(
+                uuid = product.uuid,
                 name = product.name,
                 price = product.price.toString(),
                 count = product.count,
             )
         )
+    }
+
+    override suspend fun removeAll() {
+        Log.d("PRODUCT-SERVICE", "Removing all products")
+        dao.delete()
+    }
+
+    override suspend fun remove(product: Product) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun update(product: Product) {
+        TODO("Not yet implemented")
     }
 }
 

@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "product")
 data class ProductDto(
     @PrimaryKey(autoGenerate = true) val uid: Int = 0,
+    @ColumnInfo(name = "uuid") val uuid: String,
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "price") val price: String,
     @ColumnInfo(name = "stock") val count: Int,

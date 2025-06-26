@@ -1,4 +1,4 @@
-package com.example.project_shelf.ui.screen
+package com.example.project_shelf.framework.ui.screen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

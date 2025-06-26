@@ -1,4 +1,4 @@
-package com.example.project_shelf.ui.components
+package com.example.project_shelf.framework.ui.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.imePadding

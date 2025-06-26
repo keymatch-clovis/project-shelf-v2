@@ -21,4 +21,6 @@
     <string name="product_creating">Creando producto</string>
     <string name="loading_message">Un momento, por favor</string>
     <string name="product_created">Producto %1$s creado</string>
+    <string name="configuration">Configuración</string>
+    <string name="err_invalid_value">El valor es inválido</string>
 </resources>

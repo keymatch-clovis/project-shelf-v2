@@ -4,8 +4,11 @@ import com.example.project_shelf.app.entity.Product
 import com.example.project_shelf.app.service.ProductService
 import java.math.BigDecimal
 import javax.inject.Inject
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 class CreateProductUseCase @Inject constructor(private val productService: ProductService) {
+    @OptIn(ExperimentalUuidApi::class)
     suspend fun exec(
         name: String,
         price: String,
@@ -20,6 +23,7 @@ class CreateProductUseCase @Inject constructor(private val productService: Produ
 
         return productService.createProduct(
             Product(
+                uuid = Uuid.random().toString(),
                 name = name,
                 // We are here converting from any value to COP. So, if we need later to change this to
                 // any other currency, we can do it here.

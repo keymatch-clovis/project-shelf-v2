@@ -7,4 +7,5 @@ import kotlinx.coroutines.flow.Flow
 interface ProductRepository {
     fun getProducts(): Flow<PagingData<ProductUiState>>
     suspend fun createProduct(product: ProductUiState)
+    suspend fun removeAll()
 }

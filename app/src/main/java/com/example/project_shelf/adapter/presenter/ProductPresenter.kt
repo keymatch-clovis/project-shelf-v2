@@ -8,6 +8,7 @@ import com.example.project_shelf.adapter.view_model.ProductUiState
 import com.example.project_shelf.app.entity.Product
 import com.example.project_shelf.app.use_case.CreateProductUseCase
 import com.example.project_shelf.app.use_case.GetProductsUseCase
+import com.example.project_shelf.app.use_case.RemoveAllProductsUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -20,6 +21,7 @@ import javax.inject.Inject
 class ProductPresenter @Inject constructor(
     private val getProductsUseCase: GetProductsUseCase,
     private val createProductUseCase: CreateProductUseCase,
+    private val removeAllProductsUseCase: RemoveAllProductsUseCase,
 ) : ProductRepository {
     override fun getProducts(): Flow<PagingData<ProductUiState>> {
         return getProductsUseCase.exec().map {
@@ -41,6 +43,11 @@ class ProductPresenter @Inject constructor(
             price = product.price,
             count = product.count,
         )
+    }
+
+    override suspend fun removeAll() {
+        Log.d("PRODUCT-PRESENTER", "Removing all products")
+        removeAllProductsUseCase.exec()
     }
 }
 

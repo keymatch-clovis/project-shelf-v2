@@ -1,4 +1,4 @@
-package com.example.project_shelf.ui.components.dialog
+package com.example.project_shelf.framework.ui.components.dialog
 
 import android.util.Log
 import androidx.compose.foundation.layout.padding
@@ -22,7 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.view_model.EditProductViewModel
 import com.example.project_shelf.adapter.view_model.ProductUiState
-import com.example.project_shelf.ui.components.form.EditProductForm
+import com.example.project_shelf.framework.ui.components.form.EditProductForm
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

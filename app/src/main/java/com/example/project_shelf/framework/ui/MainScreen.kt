@@ -1,14 +1,13 @@
-package com.example.project_shelf.ui
+package com.example.project_shelf.framework.ui
 
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Category
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.rounded.Category
 import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.Receipt
-import androidx.compose.material3.BottomAppBarDefaults
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -74,6 +73,7 @@ fun MainScreen() {
                     },
                     icon = { Icon(Icons.Rounded.Groups, contentDescription = null) },
                     label = { Text(stringResource(R.string.clients)) })
+
                 NavigationBarItem(
                     selected = selectedDestination == Destination.INVOICE.ordinal,
                     onClick = {
@@ -82,6 +82,28 @@ fun MainScreen() {
                     },
                     icon = { Icon(Icons.Rounded.Receipt, contentDescription = null) },
                     label = { Text(stringResource(R.string.invoices)) })
+
+                NavigationBarItem(
+                    selected = selectedDestination == Destination.CONFIG.ordinal,
+                    onClick = {
+                        if (selectedDestination != Destination.CONFIG.ordinal) {
+                            navController.navigate(route = Destination.CONFIG.path) {
+                                // Avoid multiple copies of the same destination when re-selecting the
+                                // same item.
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                            selectedDestination = Destination.CONFIG.ordinal
+                        }
+                    },
+                    icon = {
+                        if (selectedDestination == Destination.CONFIG.ordinal) {
+                            Icon(Icons.Rounded.Settings, contentDescription = null)
+                        } else {
+                            Icon(Icons.Outlined.Settings, contentDescription = null)
+                        }
+                    },
+                    label = { Text(stringResource(R.string.configuration)) })
             }
         }) { contentPadding ->
         AppNavHost(

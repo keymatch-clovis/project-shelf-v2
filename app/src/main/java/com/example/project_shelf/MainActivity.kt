@@ -4,8 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.example.project_shelf.ui.MainScreen
-import com.example.project_shelf.ui.components.KeyboardAware
+import com.example.project_shelf.framework.ui.MainScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

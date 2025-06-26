@@ -1,89 +1,78 @@
 package com.example.project_shelf.adapter.view_model
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.konform.validation.Validation
-import io.konform.validation.ValidationResult
-import io.konform.validation.constraints.notBlank
-import io.konform.validation.ifPresent
-import io.konform.validation.messagesAtPath
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.math.BigDecimal
 import javax.inject.Inject
 import java.io.Serializable
-import com.example.project_shelf.R
 import com.example.project_shelf.adapter.repository.ProductRepository
+import com.example.project_shelf.app.validator.validateProductCount
+import com.example.project_shelf.app.validator.validateProductName
+import com.example.project_shelf.app.validator.validateProductPrice
 
 data class CreateProductUiState(
     val name: String = "",
-    val nameErrors: List<Int> = listOf(),
-
     val price: String = "",
-    val priceErrors: List<Int> = listOf(),
-
     val count: String = "",
-    val countErrors: List<Int> = listOf(),
+    val isValid: Boolean = false,
+
+    val errors: MutableMap<String, Throwable?> = mutableMapOf<String, Throwable?>(
+        "name" to null,
+        "price" to null,
+        "count" to null,
+    )
 ) : Serializable
 
 @HiltViewModel
 class CreateProductViewModel @Inject constructor(
-    private val savedState: SavedStateHandle,
     private val productRepository: ProductRepository,
 ) : ViewModel() {
-    private val _uiState: MutableStateFlow<CreateProductUiState> = MutableStateFlow(
-        CreateProductUiState()
-    )
-    private var _validationState: MutableStateFlow<ValidationResult<CreateProductUiState>?> =
-        MutableStateFlow(null)
-
+    private val _uiState = MutableStateFlow(CreateProductUiState())
     val uiState = _uiState.asStateFlow()
-    val validationState = _validationState.asStateFlow()
 
     fun updateName(value: String) {
-        // Update the UI regardless of validation result.
-        _uiState.update { it.copy(name = value) }
-        _validationState.update { validateState(_uiState.value) }
-        // Update errors with the validation result
         _uiState.update {
-            it.copy(
-                nameErrors = validationState.value!!.errors.messagesAtPath(CreateProductUiState::name)
-                    .map { it.toInt() })
+            // FIXME: This is not the correct way of doing this. Or at least it feels like so.
+            it.errors["name"] = validateProductName(value).exceptionOrNull()
+            it.copy(errors = it.errors)
         }
-        // Save the state.
-        savedState["uiState"] = _uiState.value
+
+        // Update the UI regardless of validation result.
+        _uiState.update { it.copy(name = value, isValid = isValid()) }
     }
 
     fun updatePrice(value: String) {
-        // Update the UI regardless of validation result.
-        _uiState.update { it.copy(price = value) }
-        _validationState.update { validateState(_uiState.value) }
-        // Update errors with the validation result
-        _uiState.update {
-            it.copy(
-                priceErrors = validationState.value!!.errors.messagesAtPath(CreateProductUiState::price)
-                    .map { it.toInt() })
+        validateProductPrice(value).onFailure { throwable ->
+            _uiState.update {
+                // FIXME: This is not the correct way of doing this. Or at least it feels like so.
+                it.errors["price"] = throwable
+                it.copy(errors = it.errors)
+            }
         }
+
+        // Update the UI regardless of validation result.
+        _uiState.update { it.copy(price = value, isValid = isValid()) }
     }
 
     fun updateCount(value: String) {
-        // Update the UI regardless of validation result.
-        _uiState.update { it.copy(count = value) }
-        _validationState.update { validateState(_uiState.value) }
-        // Update errors with the validation result
-        _uiState.update {
-            it.copy(
-                countErrors = validationState.value!!.errors.messagesAtPath(CreateProductUiState::count)
-                    .map { it.toInt() })
+        validateProductCount(value).onFailure { throwable ->
+            _uiState.update {
+                // FIXME: This is not the correct way of doing this. Or at least it feels like so.
+                it.errors["count"] = throwable
+                it.copy(errors = it.errors)
+            }
         }
+
+        // Update the UI regardless of validation result.
+        _uiState.update { it.copy(count = value, isValid = isValid()) }
     }
 
     fun create(onCreated: suspend (product: ProductUiState) -> Unit) {
-        assert(_validationState.value?.isValid == true)
+        assert(isValid())
 
         viewModelScope.launch {
             val product = ProductUiState(
@@ -99,32 +88,8 @@ class CreateProductViewModel @Inject constructor(
             _uiState.update { CreateProductUiState() }
         }
     }
-}
 
-private val validateState = Validation<CreateProductUiState> {
-    CreateProductUiState::name {
-        notBlank() hint R.string.err_value_required.toString()
-    }
-
-    validate(
-        CreateProductUiState::price,
-        // If the price is empty, treat it as zero, if it's not, check the value is correct.
-        { if (it.price.trim().isNotEmpty()) it.price.toBigDecimalOrNull() else BigDecimal.ZERO },
-    ) {
-        constrain(R.string.err_decimal_required.toString()) { it != null }
-        ifPresent {
-            constrain(R.string.err_negative_value.toString()) { it >= BigDecimal.ZERO }
-        }
-    }
-
-    validate(
-        CreateProductUiState::count,
-        // If the count is empty, treat it as zero, if it's not, check the value is correct.
-        { if (it.count.trim().isNotEmpty()) it.count.toIntOrNull() else 0 },
-    ) {
-        constrain(R.string.err_integer_required.toString()) { it != null }
-        ifPresent {
-            constrain(R.string.err_negative_value.toString()) { it >= 0 }
-        }
+    private fun isValid(): Boolean {
+        return _uiState.value.errors.filterValues { it != null }.isEmpty()
     }
 }

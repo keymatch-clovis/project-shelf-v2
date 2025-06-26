@@ -1,4 +1,4 @@
-package com.example.project_shelf.ui.screen.product
+package com.example.project_shelf.framework.ui.screen.product
 
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
@@ -49,13 +49,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.example.project_shelf.ui.components.ProductList
 import kotlinx.coroutines.launch
 import com.example.project_shelf.R
-import com.example.project_shelf.adapter.view_model.EditProductViewModel
 import com.example.project_shelf.adapter.view_model.ProductsViewModel
-import com.example.project_shelf.ui.components.dialog.CreateProductDialog
-import com.example.project_shelf.ui.components.dialog.EditProductDialog
+import com.example.project_shelf.framework.ui.components.ProductList
+import com.example.project_shelf.framework.ui.components.dialog.CreateProductDialog
+import com.example.project_shelf.framework.ui.components.dialog.EditProductDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview

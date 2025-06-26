@@ -1,4 +1,4 @@
-package com.example.project_shelf.ui.components.dialog
+package com.example.project_shelf.framework.ui.components.dialog
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -21,7 +21,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.view_model.CreateProductViewModel
 import com.example.project_shelf.adapter.view_model.ProductUiState
-import com.example.project_shelf.ui.components.form.CreateProductForm
+import com.example.project_shelf.framework.ui.components.form.CreateProductForm
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,7 +30,7 @@ fun CreateProductDialog(
     onDismissRequest: () -> Unit,
     onCreated: (product: ProductUiState) -> Unit,
 ) {
-    val validationState = viewModel.validationState.collectAsState()
+    val state = viewModel.uiState.collectAsState()
 
     Dialog(
         properties = DialogProperties(usePlatformDefaultWidth = false),
@@ -48,7 +48,7 @@ fun CreateProductDialog(
                     title = { Text(stringResource(R.string.product_create)) },
                     actions = {
                         Button(
-                            enabled = validationState.value?.isValid == true,
+                            enabled = state.value.isValid,
                             onClick = { viewModel.create(onCreated) },
                         ) {
                             Text(stringResource(R.string.save))
