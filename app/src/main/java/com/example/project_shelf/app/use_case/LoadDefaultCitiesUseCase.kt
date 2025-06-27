@@ -4,8 +4,9 @@ import android.util.Log
 import com.example.project_shelf.app.entity.City
 import com.example.project_shelf.app.service.CityService
 import java.io.InputStream
+import javax.inject.Inject
 
-class LoadDefaultCitiesUseCase(private val cityService: CityService) {
+class LoadDefaultCitiesUseCase @Inject constructor(private val cityService: CityService) {
     suspend fun exec(stream: InputStream) {
         // First, get a reader for the stream.
         val reader = stream.bufferedReader()

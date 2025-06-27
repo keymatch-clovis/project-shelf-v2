@@ -1,4 +1,4 @@
-package com.example.project_shelf.framework.ui
+package com.example.project_shelf.framework.ui.screen
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -24,6 +24,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.example.project_shelf.R
+import com.example.project_shelf.framework.ui.AppNavHost
+import com.example.project_shelf.framework.ui.Destination
+import com.example.project_shelf.framework.ui.MainNavHost
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview()
@@ -106,8 +109,9 @@ fun MainScreen() {
                     label = { Text(stringResource(R.string.configuration)) })
             }
         }) { contentPadding ->
-        AppNavHost(
-            navController, startDestination,
+        MainNavHost(
+            navController,
+            startDestination,
             Modifier.padding(contentPadding),
         )
     }
