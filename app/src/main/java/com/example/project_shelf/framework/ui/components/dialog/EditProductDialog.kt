@@ -36,7 +36,6 @@ fun EditProductDialog(
     viewModel.setProduct(product)
 
     val state = viewModel.uiState.collectAsState()
-    val validationState = viewModel.validationState.collectAsState()
 
     Dialog(
         properties = DialogProperties(usePlatformDefaultWidth = false),
@@ -54,7 +53,7 @@ fun EditProductDialog(
                     title = { Text(stringResource(R.string.product_edit)) },
                     actions = {
                         Button(
-                            enabled = validationState.value?.isValid == true,
+                            enabled = state.value.isValid,
                             onClick = {}
                         ) {
                             Text(stringResource(R.string.save))

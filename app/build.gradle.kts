@@ -68,6 +68,9 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.paging)
 
+    /// Data Store
+    implementation(libs.androidx.datastore)
+
     /// Compose
     implementation(platform(libs.androidx.compose))
     androidTestImplementation(platform(libs.androidx.compose))
@@ -92,9 +95,6 @@ dependencies {
     implementation(libs.androidx.hilt)
     implementation(libs.hilt)
     ksp(libs.hilt.compiler)
-
-    /// Konform
-    implementation(libs.konform)
 
     /// Faker
     testImplementation(libs.faker)

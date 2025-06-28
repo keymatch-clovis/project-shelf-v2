@@ -1,28 +1,50 @@
 package com.example.project_shelf
 
-import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.compose.rememberNavController
+import com.example.project_shelf.adapter.view_model.MainActivityViewModel
+import com.example.project_shelf.framework.datastore.dataStore
 import com.example.project_shelf.framework.ui.AppNavHost
 import com.example.project_shelf.framework.ui.Destination
 import dagger.hilt.android.AndroidEntryPoint
 
-val Context.dataStore = null
-
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val viewModel by viewModels<MainActivityViewModel>(factoryProducer = {
+        viewModelFactory {
+            initializer {
+                MainActivityViewModel(applicationContext.dataStore)
+            }
+        }
+    })
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val splashScreen = installSplashScreen()
+
+        splashScreen.setKeepOnScreenCondition {
+            !viewModel.uiState.value.isReady
+        }
 
         setContent {
-            val navController = rememberNavController()
+            val state = viewModel.uiState.collectAsState()
 
-            AppNavHost(
-                navController = navController,
-                startDestination = Destination.LOADING,
-            )
+            if (state.value.isReady) {
+                val navController = rememberNavController()
+
+                AppNavHost(
+                    navController = navController,
+                    startDestination = if (state.value.isFirstLaunch) Destination.LOADING else Destination.MAIN
+                )
+            }
         }
     }
 }

@@ -45,7 +45,7 @@ fun EditProductForm(
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Characters, imeAction = ImeAction.Next
                 ),
-                isError = state.value.nameErrors.isNotEmpty(),
+                isError = state.value.errors["name"] != null,
                 singleLine = true,
                 value = state.value.name,
                 onValueChange = onNameChange,
@@ -58,8 +58,7 @@ fun EditProductForm(
                             modifier = Modifier.weight(1f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            text = state.value.nameErrors.map { stringResource(it) }.firstOrNull()
-                                ?: ""
+                            text = ""
                         )
                     }
                 },
@@ -77,7 +76,7 @@ fun EditProductForm(
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next, keyboardType = KeyboardType.Decimal,
                 ),
-                isError = state.value.priceErrors.isNotEmpty(),
+                isError = state.value.errors["price"] != null,
                 singleLine = true,
                 value = state.value.price,
                 onValueChange = onPriceChange,
@@ -90,8 +89,7 @@ fun EditProductForm(
                             modifier = Modifier.weight(1f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            text = state.value.priceErrors.map { stringResource(it) }.firstOrNull()
-                                ?: ""
+                            text = ""
                         )
                     }
                 },
@@ -109,7 +107,7 @@ fun EditProductForm(
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Done, keyboardType = KeyboardType.Decimal,
                 ),
-                isError = state.value.countErrors.isNotEmpty(),
+                isError = state.value.errors["count"] != null,
                 singleLine = true,
                 value = state.value.count,
                 onValueChange = onCountChange,
@@ -122,8 +120,7 @@ fun EditProductForm(
                             modifier = Modifier.weight(1f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            text = state.value.countErrors.map { stringResource(it) }.firstOrNull()
-                                ?: ""
+                            text = ""
                         )
                     }
                 },
