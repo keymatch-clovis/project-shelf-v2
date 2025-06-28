@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.project_shelf.framework.datastore.Settings
+import com.example.project_shelf.framework.ui.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +20,7 @@ import javax.inject.Inject
 
 data class MainActivityUiState(
     val isReady: Boolean = false,
-    val isFirstLaunch: Boolean = false,
+    val startDestination: Destination = Destination.MAIN,
 ) : Serializable
 
 @HiltViewModel
@@ -32,12 +33,16 @@ class MainActivityViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             Log.d("MAIN-ACTIVITY-VIEW-MODEL", "Loading data store")
+
             val isFirstLaunch = dataStore.data.map {
                 it[Settings.IS_FIRST_TIME_OPEN_KEY] != false
             }.first()
 
             _uiState.update {
-                it.copy(isReady = true, isFirstLaunch)
+                it.copy(
+                    isReady = true,
+                    startDestination = if (isFirstLaunch) Destination.LOADING else Destination.MAIN
+                )
             }
         }
     }

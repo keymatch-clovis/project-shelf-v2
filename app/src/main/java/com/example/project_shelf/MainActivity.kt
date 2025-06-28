@@ -36,13 +36,12 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val state = viewModel.uiState.collectAsState()
+            val navController = rememberNavController()
 
             if (state.value.isReady) {
-                val navController = rememberNavController()
-
                 AppNavHost(
                     navController = navController,
-                    startDestination = if (state.value.isFirstLaunch) Destination.LOADING else Destination.MAIN
+                    startDestination = state.value.startDestination,
                 )
             }
         }
