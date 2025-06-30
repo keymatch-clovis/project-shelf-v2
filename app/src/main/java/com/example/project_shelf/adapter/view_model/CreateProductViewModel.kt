@@ -46,12 +46,10 @@ class CreateProductViewModel @Inject constructor(
     }
 
     fun updatePrice(value: String) {
-        validateProductPrice(value).onFailure { throwable ->
-            _uiState.update {
-                // FIXME: This is not the correct way of doing this. Or at least it feels like so.
-                it.errors["price"] = throwable
-                it.copy(errors = it.errors)
-            }
+        _uiState.update {
+            // FIXME: This is not the correct way of doing this. Or at least it feels like so.
+            it.errors["price"] = validateProductPrice(value.ifBlank { "0" }).exceptionOrNull()
+            it.copy(errors = it.errors)
         }
 
         // Update the UI regardless of validation result.
@@ -59,12 +57,10 @@ class CreateProductViewModel @Inject constructor(
     }
 
     fun updateCount(value: String) {
-        validateProductCount(value).onFailure { throwable ->
-            _uiState.update {
-                // FIXME: This is not the correct way of doing this. Or at least it feels like so.
-                it.errors["count"] = throwable
-                it.copy(errors = it.errors)
-            }
+        _uiState.update {
+            // FIXME: This is not the correct way of doing this. Or at least it feels like so.
+            it.errors["count"] = validateProductCount(value.ifBlank { "0" }).exceptionOrNull()
+            it.copy(errors = it.errors)
         }
 
         // Update the UI regardless of validation result.
@@ -72,7 +68,10 @@ class CreateProductViewModel @Inject constructor(
     }
 
     fun create(onCreated: suspend (product: ProductUiState) -> Unit) {
-        assert(isValid())
+        // NOTE: We should only call this method when all input data has been validated.
+        assert(validateProductName(_uiState.value.name).isSuccess)
+        assert(validateProductPrice(_uiState.value.price.ifBlank { "0" }).isSuccess)
+        assert(validateProductCount(_uiState.value.count.ifBlank { "0" }).isSuccess)
 
         viewModelScope.launch {
             val product = ProductUiState(

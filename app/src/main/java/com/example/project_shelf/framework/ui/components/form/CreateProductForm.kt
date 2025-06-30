@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
@@ -15,29 +14,35 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.example.project_shelf.adapter.view_model.CreateProductViewModel
 import com.example.project_shelf.R
-import com.example.project_shelf.adapter.view_model.EditProductViewModel
+import com.example.project_shelf.adapter.view_model.CreateProductUiState
 import com.example.project_shelf.common.BlankValueException
 
 @Composable
 fun CreateProductForm(
-    viewModel: CreateProductViewModel,
+    state: State<CreateProductUiState>,
     innerPadding: PaddingValues = PaddingValues(0.dp),
+    onUpdateName: (value: String) -> Unit,
+    onUpdatePrice: (value: String) -> Unit,
+    onUpdateCount: (value: String) -> Unit,
 ) {
-    val state = viewModel.uiState.collectAsState()
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
 
     Box(modifier = Modifier.padding(innerPadding)) {
         Column(
@@ -47,14 +52,16 @@ fun CreateProductForm(
         ) {
             /// Name
             OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester),
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Characters, imeAction = ImeAction.Next
                 ),
                 isError = state.value.errors["name"] != null,
                 singleLine = true,
                 value = state.value.name,
-                onValueChange = { viewModel.updateName(it) },
+                onValueChange = onUpdateName,
                 label = { Text(stringResource(R.string.name)) },
                 supportingText = {
                     Row(
@@ -74,7 +81,7 @@ fun CreateProductForm(
                 },
                 trailingIcon = {
                     if (state.value.name.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.updateName("") }) {
+                        IconButton(onClick = { onUpdateName("") }) {
                             Icon(Icons.Rounded.Clear, contentDescription = null)
                         }
                     }
@@ -89,7 +96,7 @@ fun CreateProductForm(
                 isError = state.value.errors["price"] != null,
                 singleLine = true,
                 value = state.value.price,
-                onValueChange = { viewModel.updatePrice(it) },
+                onValueChange = onUpdatePrice,
                 label = { Text(stringResource(R.string.price)) },
                 supportingText = {
                     Row(
@@ -109,7 +116,7 @@ fun CreateProductForm(
                 },
                 trailingIcon = {
                     if (state.value.price.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.updatePrice("") }) {
+                        IconButton(onClick = { onUpdatePrice("") }) {
                             Icon(Icons.Rounded.Clear, contentDescription = null)
                         }
                     }
@@ -124,7 +131,7 @@ fun CreateProductForm(
                 isError = state.value.errors["count"] != null,
                 singleLine = true,
                 value = state.value.count,
-                onValueChange = { viewModel.updateCount(it) },
+                onValueChange = onUpdateCount,
                 label = { Text(stringResource(R.string.amount)) },
                 supportingText = {
                     Row(
@@ -144,7 +151,7 @@ fun CreateProductForm(
                 },
                 trailingIcon = {
                     if (state.value.count.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.updateCount("") }) {
+                        IconButton(onClick = { onUpdateCount("") }) {
                             Icon(Icons.Rounded.Clear, contentDescription = null)
                         }
                     }

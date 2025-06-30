@@ -14,6 +14,8 @@ enum class Destination(
 
     // Product Category
     PRODUCT("main.product"),
+    CREATE_PRODUCT("main.product.create"),
+    EDIT_PRODUCT("main.product.edit"),
 
     // Invoice Category
     INVOICE("main.invoice"),

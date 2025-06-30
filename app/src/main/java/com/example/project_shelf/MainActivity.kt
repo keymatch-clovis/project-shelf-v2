@@ -1,7 +1,6 @@
 package com.example.project_shelf
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -13,7 +12,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.project_shelf.adapter.view_model.MainActivityViewModel
 import com.example.project_shelf.framework.datastore.dataStore
 import com.example.project_shelf.framework.ui.AppNavHost
-import com.example.project_shelf.framework.ui.Destination
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
