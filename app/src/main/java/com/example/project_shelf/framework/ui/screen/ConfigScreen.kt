@@ -49,6 +49,17 @@ fun ConfigScreen(
                     },
                     headlineContent = { Text("[DEBUG] Remove all data") },
                 )
+                ListItem(
+                    modifier = Modifier.clickable(onClick = {
+                        viewModel.loadTestProducts {
+                            snackbarHostState.showSnackbar("[DEBUG] Test Products Loaded")
+                        }
+                    }),
+                    leadingContent = {
+                        Icon(Icons.Rounded.DeveloperMode, contentDescription = null)
+                    },
+                    headlineContent = { Text("[DEBUG] Load Test Products") },
+                )
             }
         }
     }

@@ -3,8 +3,8 @@ package com.example.project_shelf.app.entity
 import java.math.BigInteger
 
 data class Product(
-    val uuid: String,
+    val id: Long,
     val name: String,
-    val price: BigInteger = BigInteger.ZERO,
-    val count: Int = 0,
+    val price: BigInteger,
+    val count: Int,
 )

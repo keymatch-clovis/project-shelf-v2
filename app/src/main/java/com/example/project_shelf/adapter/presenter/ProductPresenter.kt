@@ -4,9 +4,11 @@ import android.util.Log
 import androidx.paging.PagingData
 import androidx.paging.map
 import com.example.project_shelf.adapter.repository.ProductRepository
+import com.example.project_shelf.adapter.view_model.ProductSearchResultUiState
 import com.example.project_shelf.adapter.view_model.ProductUiState
 import com.example.project_shelf.app.entity.Product
 import com.example.project_shelf.app.use_case.CreateProductUseCase
+import com.example.project_shelf.app.use_case.FindProductsUseCase
 import com.example.project_shelf.app.use_case.GetProductsUseCase
 import com.example.project_shelf.app.use_case.RemoveAllProductsUseCase
 import dagger.Binds
@@ -14,6 +16,7 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import java.math.BigInteger
 import javax.inject.Inject
@@ -22,6 +25,7 @@ class ProductPresenter @Inject constructor(
     private val getProductsUseCase: GetProductsUseCase,
     private val createProductUseCase: CreateProductUseCase,
     private val removeAllProductsUseCase: RemoveAllProductsUseCase,
+    private val findProductsUseCase: FindProductsUseCase,
 ) : ProductRepository {
     override fun getProducts(): Flow<PagingData<ProductUiState>> {
         return getProductsUseCase.exec().map {
@@ -30,6 +34,17 @@ class ProductPresenter @Inject constructor(
                     name = product.name,
                     price = product.price.toString(),
                     count = product.count.toString()
+                )
+            }
+        }
+    }
+
+    override fun getProducts(name: String): Flow<PagingData<ProductSearchResultUiState>> {
+        Log.d("USE-CASE", "Getting products with: $name")
+        return findProductsUseCase.exec(name).map {
+            it.map { product ->
+                ProductSearchResultUiState(
+                    name = product.name
                 )
             }
         }

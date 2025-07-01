@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -33,7 +32,6 @@ class ProductParameterProvider : PreviewParameterProvider<ProductUiState> {
     )
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Preview
 @Composable
 fun ProductListItem(
@@ -46,7 +44,7 @@ fun ProductListItem(
             .clickable { onItemClicked(product) },
         headlineContent = {
             Text(
-                style = MaterialTheme.typography.titleLargeEmphasized,
+                style = MaterialTheme.typography.titleLarge,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
                 text = product.name,

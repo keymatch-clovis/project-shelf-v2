@@ -2,31 +2,26 @@ package com.example.project_shelf.framework.room
 
 import android.content.Context
 import androidx.room.Room
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 const val DATABASE_NAME = "shelf"
 const val VERSION = 1
 
-// Companion Singleton Class to encapsulate the SQLite Database.
-class ShelfDatabase private constructor(val database: SqliteDatabase) {
-    companion object {
-        @Volatile
-        private var instance: ShelfDatabase? = null
-
-        fun getInstance(context: Context): ShelfDatabase {
-            if (instance == null) {
-                synchronized(this) {
-                    if (instance == null) {
-                        instance = ShelfDatabase(
-                            Room.databaseBuilder(
-                                context,
-                                SqliteDatabase::class.java,
-                                DATABASE_NAME
-                            ).build()
-                        )
-                    }
-                }
-            }
-            return instance!!
-        }
+@Module
+@InstallIn(SingletonComponent::class)
+object ShelfDatabaseModule {
+    @Singleton
+    @Provides
+    fun provideShelfDatabase(@ApplicationContext context: Context): SqliteDatabase {
+        return Room.databaseBuilder(
+            context,
+            SqliteDatabase::class.java,
+            DATABASE_NAME,
+        ).build()
     }
 }

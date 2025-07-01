@@ -19,9 +19,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import com.example.project_shelf.adapter.view_model.ProductUiState
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -45,7 +47,7 @@ fun ProductList(
                 Icon(
                     modifier = Modifier.size(96.dp),
                     tint = MaterialTheme.colorScheme.surfaceDim,
-                    imageVector = Icons.Outlined.Circle,
+                    imageVector = ImageVector.vectorResource(R.drawable.box_open),
                     contentDescription = null,
                 )
                 Text(

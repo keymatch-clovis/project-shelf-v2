@@ -22,14 +22,11 @@ class CreateProductUseCase @Inject constructor(private val productService: Produ
         val realCount = if (count.isBlank()) 0 else count.toInt()
 
         return productService.createProduct(
-            Product(
-                uuid = Uuid.random().toString(),
-                name = name,
-                // We are here converting from any value to COP. So, if we need later to change this to
-                // any other currency, we can do it here.
-                price = realPrice.toBigInteger(),
-                count = realCount,
-            )
+            name = name,
+            // We are here converting from any value to COP. So, if we need later to change this to
+            // any other currency, we can do it here.
+            price = realPrice.toBigInteger(),
+            count = realCount,
         )
     }
 }
