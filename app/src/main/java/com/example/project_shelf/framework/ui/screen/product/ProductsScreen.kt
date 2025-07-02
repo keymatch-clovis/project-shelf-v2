@@ -1,7 +1,11 @@
 package com.example.project_shelf.framework.ui.screen.product
 
 import android.util.Log
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
@@ -43,10 +47,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -66,9 +72,10 @@ import com.example.project_shelf.adapter.view_model.ProductsViewModel
 import com.example.project_shelf.framework.ui.components.ProductList
 import com.example.project_shelf.R
 import com.example.project_shelf.framework.ui.components.CustomSearchBar
+import com.example.project_shelf.framework.ui.components.SearchTopBar
 import kotlinx.coroutines.flow.update
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun ProductsScreen(
     viewModel: ProductsViewModel = hiltViewModel(),
@@ -85,55 +92,84 @@ fun ProductsScreen(
     val isVisible = rememberSaveable { mutableStateOf(true) }
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Surface(
-                        shape = RoundedCornerShape(100),
-                        onClick = {},
+    var showSearchBar by remember { mutableStateOf(false) }
+
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (available.y < -1) {
+                    isVisible.value = false
+                }
+                if (available.y > 1) {
+                    isVisible.value = true
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
+    SharedTransitionLayout {
+        Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            topBar = {
+                SearchTopBar(
+                    onClick = {
+                        showSearchBar = true
+                    },
+                    scrollBehavior = scrollBehavior,
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                )
+            },
+            floatingActionButton = {
+                AnimatedVisibility(
+                    visible = isVisible.value,
+                ) {
+                    FloatingActionButton(
                         modifier = Modifier
-                            .fillMaxWidth()
                             .height(56.dp)
+                            .nestedScroll(scrollBehavior.nestedScrollConnection),
+                        onClick = onProductCreate,
+                        shape = MaterialTheme.shapes.small,
                     ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.CenterStart,
-                        ) {
-                            Text("test")
-                        }
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            contentDescription = null,
+                            imageVector = Icons.Filled.Add,
+                        )
+                    }
+                }
+            },
+        ) { innerPadding ->
+            ProductList(
+                innerPadding,
+                lazyPagingItems,
+                lazyListState = viewModel.lazyListState,
+                onProductClicked = onProductEdit,
+                nestedScrollConnection = nestedScrollConnection,
+            )
+        }
+
+        if (showSearchBar) {
+            CustomSearchBar<ProductSearchResultUiState>(
+                query = query.value,
+                onQueryChange = { searchViewModel.updateQuery(it) },
+                expanded = showSearchBar,
+                onExpandedChange = {
+                    if (!it) {
+                        searchViewModel.updateQuery("")
+                        showSearchBar = false
                     }
                 },
-                scrollBehavior = scrollBehavior,
-            )
-        },
-        floatingActionButton = {
-            AnimatedVisibility(
-                visible = isVisible.value,
-                enter = slideInHorizontally(initialOffsetX = { it * 2 }),
-                exit = slideOutHorizontally(targetOffsetX = { it * 2 }),
+                onSearch = {
+                    searchViewModel.updateQuery("")
+                    showSearchBar = false
+                },
+                lazyPagingItems = lazyPagingSearchItems,
+                sharedTransitionScope = this@SharedTransitionLayout,
             ) {
-                FloatingActionButton(
-                    modifier = Modifier.height(56.dp),
-                    onClick = onProductCreate,
-                    shape = MaterialTheme.shapes.small,
-                ) {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        contentDescription = null,
-                        imageVector = Icons.Filled.Add,
-                    )
-                }
+                Text(it.name)
             }
-        },
-    ) { innerPadding ->
-        ProductList(
-            innerPadding,
-            lazyPagingItems,
-            lazyListState = viewModel.lazyListState,
-            onProductClicked = onProductEdit,
-        )
+        }
     }
 }

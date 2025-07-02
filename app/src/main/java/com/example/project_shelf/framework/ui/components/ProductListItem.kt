@@ -1,6 +1,5 @@
 package com.example.project_shelf.framework.ui.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,6 +10,7 @@ import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,36 +38,38 @@ fun ProductListItem(
     @PreviewParameter(ProductParameterProvider::class) product: ProductUiState,
     onItemClicked: (item: ProductUiState) -> Unit = {},
 ) {
-    ListItem(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onItemClicked(product) },
-        headlineContent = {
-            Text(
-                style = MaterialTheme.typography.titleLarge,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-                text = product.name,
-            )
-        },
-        supportingContent = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Icon(
-                    Icons.Outlined.Inventory2,
-                    contentDescription = "",
-                    modifier = Modifier.width(20.dp)
-                )
+    Surface(
+        onClick = { onItemClicked(product) },
+    ) {
+        ListItem(
+            modifier = Modifier.fillMaxWidth(),
+            headlineContent = {
                 Text(
-                    style = MaterialTheme.typography.bodyMedium,
-                    text = product.price,
+                    style = MaterialTheme.typography.titleLarge,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    text = product.name,
                 )
-            }
-        },
-        trailingContent = {
-            Icon(Icons.Rounded.ChevronRight, contentDescription = null)
-        }
-    )
+            },
+            supportingContent = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        Icons.Outlined.Inventory2,
+                        contentDescription = "",
+                        modifier = Modifier.width(20.dp)
+                    )
+                    Text(
+                        style = MaterialTheme.typography.bodyMedium,
+                        text = product.price,
+                    )
+                }
+            },
+            trailingContent = {
+                Icon(Icons.Rounded.ChevronRight, contentDescription = null)
+            },
+        )
+    }
 }

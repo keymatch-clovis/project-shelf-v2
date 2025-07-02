@@ -36,6 +36,7 @@ fun ProductList(
     lazyPagingItems: LazyPagingItems<ProductUiState>,
     lazyListState: LazyListState,
     onProductClicked: (product: ProductUiState) -> Unit,
+    nestedScrollConnection: NestedScrollConnection,
 ) {
     if (lazyPagingItems.loadState.isIdle && lazyPagingItems.itemCount == 0) {
         Box(
@@ -60,7 +61,9 @@ fun ProductList(
     LazyColumn(
         state = lazyListState,
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .nestedScroll(nestedScrollConnection)
+        ,
         contentPadding = contentPadding,
     ) {
         if (lazyPagingItems.loadState.refresh == LoadState.Loading) {
