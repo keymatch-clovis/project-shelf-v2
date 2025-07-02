@@ -24,4 +24,9 @@
     <string name="configuration">Configuration</string>
     <string name="err_invalid_value">The value is invalid</string>
     <string name="products_none">No products</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="accept">Accept</string>
+    <string name="product_delete_alert">Delete product?</string>
+    <string name="product_delete_alert_text">Are you sure? This action can\'t be undone.</string>
 </resources>

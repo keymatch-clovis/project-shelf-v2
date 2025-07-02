@@ -24,4 +24,9 @@
     <string name="configuration">Configuración</string>
     <string name="err_invalid_value">El valor es inválido</string>
     <string name="products_none">Sin productos</string>
+    <string name="cancel">Cancelar</string>
+    <string name="delete">Eliminar</string>
+    <string name="accept">Aceptar</string>
+    <string name="product_delete_alert">Eliminar producto?</string>
+    <string name="product_delete_alert_text">¿Estás seguro? Esta acción no se puede deshacer.</string>
 </resources>

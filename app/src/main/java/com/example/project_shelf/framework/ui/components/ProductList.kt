@@ -33,7 +33,6 @@ import com.example.project_shelf.R
 @Composable
 fun ProductList(
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    nestedScrollConnection: NestedScrollConnection,
     lazyPagingItems: LazyPagingItems<ProductUiState>,
     lazyListState: LazyListState,
     onProductClicked: (product: ProductUiState) -> Unit,
@@ -47,7 +46,7 @@ fun ProductList(
                 Icon(
                     modifier = Modifier.size(96.dp),
                     tint = MaterialTheme.colorScheme.surfaceDim,
-                    imageVector = ImageVector.vectorResource(R.drawable.box_open),
+                    imageVector = ImageVector.vectorResource(R.drawable.box_open_solid),
                     contentDescription = null,
                 )
                 Text(
@@ -61,7 +60,6 @@ fun ProductList(
     LazyColumn(
         state = lazyListState,
         modifier = Modifier
-            .nestedScroll(nestedScrollConnection)
             .fillMaxWidth(),
         contentPadding = contentPadding,
     ) {

@@ -1,6 +1,7 @@
 package com.example.project_shelf.adapter.view_model
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -8,10 +9,15 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.io.Serializable
 
 data class EditProductUiState(
-    val name: String, val price: String, val count: String, val isValid: Boolean = false,
+    val name: String,
+    val price: String,
+    val count: String,
+    val isValid: Boolean = false,
+    val isShowingConfirmDeletionDialog: Boolean = false,
 
     val errors: MutableMap<String, Throwable?> = mutableMapOf<String, Throwable?>(
         "name" to null,
@@ -39,6 +45,20 @@ class EditProductViewModel @AssistedInject constructor(
         )
     )
     var uiState = _uiState.asStateFlow()
+
+    fun delete(onDelete: () -> Unit) {
+        viewModelScope.launch {
+            onDelete()
+        }
+    }
+
+    fun openConfirmDeletionDialog() {
+        _uiState.update { it.copy(isShowingConfirmDeletionDialog = true) }
+    }
+
+    fun closeConfirmDeletionDialog() {
+        _uiState.update { it.copy(isShowingConfirmDeletionDialog = false) }
+    }
 
     fun updateName(value: String) {
         // Update the UI regardless of validation result.

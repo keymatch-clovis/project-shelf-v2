@@ -6,6 +6,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -26,6 +28,8 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +39,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -67,47 +72,12 @@ fun ProductsScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
     val isVisible = rememberSaveable { mutableStateOf(true) }
-    val nestedScrollConnection = remember {
-        object : NestedScrollConnection {
-            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                if (available.y < -1) {
-                    isVisible.value = false
-                }
-
-                if (available.y > 1) {
-                    isVisible.value = true
-                }
-
-                return super.onPreScroll(available, source)
-            }
-        }
-    }
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        modifier = Modifier.nestedScroll(nestedScrollConnection),
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            AnimatedVisibility(
-                visible = isVisible.value,
-                enter = slideInVertically(initialOffsetY = { -it * 2 }),
-                exit = slideOutVertically(targetOffsetY = { -it * 2 }),
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                ) {
-                    CustomSearchBar<ProductSearchResultUiState>(
-                        query = query.value,
-                        onQueryChange = { searchViewModel.updateQuery(it) },
-                        expanded = searchState.value.isSearchBarExpanded,
-                        onExpandedChange = { searchViewModel.updateIsSearchBarExpanded(it) },
-                        onSearch = { Log.d("SCREEN", it) },
-                        lazyPagingItems = lazyPagingSearchItems,
-                    ) {
-                        ListItem(headlineContent = { Text(it.name) })
-                    }
-                }
-            }
         },
         floatingActionButton = {
             AnimatedVisibility(
@@ -131,7 +101,6 @@ fun ProductsScreen(
     ) { innerPadding ->
         ProductList(
             innerPadding,
-            nestedScrollConnection,
             lazyPagingItems,
             lazyListState = viewModel.lazyListState,
             onProductClicked = onProductEdit,
