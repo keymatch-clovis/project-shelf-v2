@@ -39,6 +39,7 @@ fun <T : Any> CustomSearchBar(
     onExpandedChange: (Boolean) -> Unit,
     onSearch: (String) -> Unit,
     lazyPagingItems: LazyPagingItems<T>,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     sharedTransitionScope: SharedTransitionScope,
     renderer: @Composable (T) -> Unit,
 ) {
@@ -52,10 +53,20 @@ fun <T : Any> CustomSearchBar(
             modifier = Modifier.fillMaxSize()
         ) {
             SearchBar(
-                modifier = Modifier.align(Alignment.TopCenter),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .sharedBounds(
+                        rememberSharedContentState(key = "search-top-bar"),
+                        animatedVisibilityScope = animatedVisibilityScope,
+                    ),
                 inputField = {
                     SearchBarDefaults.InputField(
-                        modifier = Modifier.focusRequester(focusRequester),
+                        modifier = Modifier
+                            .sharedElement(
+                                rememberSharedContentState(key = "search-top-bar-input"),
+                                animatedVisibilityScope = animatedVisibilityScope,
+                            )
+                            .focusRequester(focusRequester),
                         expanded = expanded,
                         onExpandedChange = onExpandedChange,
                         placeholder = { Text(stringResource(R.string.search)) },

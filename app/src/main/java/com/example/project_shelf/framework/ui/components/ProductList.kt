@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,7 +34,6 @@ import com.example.project_shelf.R
 
 @Composable
 fun ProductList(
-    contentPadding: PaddingValues = PaddingValues(0.dp),
     lazyPagingItems: LazyPagingItems<ProductUiState>,
     lazyListState: LazyListState,
     onProductClicked: (product: ProductUiState) -> Unit,
@@ -62,9 +63,7 @@ fun ProductList(
         state = lazyListState,
         modifier = Modifier
             .fillMaxWidth()
-            .nestedScroll(nestedScrollConnection)
-        ,
-        contentPadding = contentPadding,
+            .nestedScroll(nestedScrollConnection),
     ) {
         if (lazyPagingItems.loadState.refresh == LoadState.Loading) {
             item {
