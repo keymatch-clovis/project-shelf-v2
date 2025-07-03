@@ -3,7 +3,6 @@ package com.example.project_shelf.framework.ui.screen.product
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -62,7 +61,7 @@ fun EditProductScreen(
             )
         },
     ) { innerPadding ->
-        if (state.value.isShowingConfirmDeletionDialog) {
+        if (state.value.showConfirmDeletionDialog) {
             AlertDialog(
                 onDismissRequest = { viewModel.closeConfirmDeletionDialog() },
                 onAcceptRequest = {

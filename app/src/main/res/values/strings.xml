@@ -29,4 +29,5 @@
     <string name="accept">Accept</string>
     <string name="product_delete_alert">Delete product?</string>
     <string name="product_delete_alert_text">Are you sure? This action can\'t be undone.</string>
+    <string name="default_price">Default price</string>
 </resources>

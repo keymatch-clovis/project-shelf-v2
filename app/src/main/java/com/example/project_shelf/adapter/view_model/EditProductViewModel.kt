@@ -2,6 +2,8 @@ package com.example.project_shelf.adapter.view_model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.project_shelf.adapter.ViewModelError
+import com.example.project_shelf.adapter.dto.ui.ProductDto
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -13,38 +15,46 @@ import kotlinx.coroutines.launch
 import java.io.Serializable
 
 data class EditProductUiState(
-    val name: String,
-    val price: String,
-    val count: String,
-    val isValid: Boolean = false,
-    val isShowingConfirmDeletionDialog: Boolean = false,
+    val rawName: String = "",
+    val rawNameErrors: List<ViewModelError> = emptyList(),
 
-    val errors: MutableMap<String, Throwable?> = mutableMapOf<String, Throwable?>(
-        "name" to null,
-        "price" to null,
-        "count" to null,
-    )
+    val rawDefaultPrice: String = "",
+    val rawPriceErrors: List<ViewModelError> = emptyList(),
+
+    val rawStock: String = "",
+    val rawStockErrors: List<ViewModelError> = emptyList(),
+
+    val isValid: Boolean = false,
+
+    val showConfirmDeletionDialog: Boolean = false,
 ) : Serializable
 
 @HiltViewModel(assistedFactory = EditProductViewModel.Factory::class)
 class EditProductViewModel @AssistedInject constructor(
-    @Assisted val product: ProductUiState,
+    @Assisted val product: ProductDto,
 ) : ViewModel() {
 
     @AssistedFactory
     interface Factory {
-        fun create(product: ProductUiState): EditProductViewModel
+        fun create(product: ProductDto): EditProductViewModel
     }
 
     private var _uiState = MutableStateFlow(
         EditProductUiState(
-            name = product.name,
+            rawName = product.name,
             // Don't fill the input with zeros. It looks ugly in my opinion.
-            price = if (product.price == "0") "" else product.price,
-            count = if (product.count == "0") "" else product.count,
+            rawDefaultPrice = product.realDefaultPrice,
+            rawStock = product.stock,
         )
     )
     var uiState = _uiState.asStateFlow()
+
+    val isValid: Boolean
+        get() = listOf(
+            _uiState.value.rawNameErrors,
+            _uiState.value.rawPriceErrors,
+            _uiState.value.rawStockErrors,
+        ).all { it.isEmpty() }
 
     fun delete(onDelete: () -> Unit) {
         viewModelScope.launch {
@@ -53,33 +63,47 @@ class EditProductViewModel @AssistedInject constructor(
     }
 
     fun openConfirmDeletionDialog() {
-        _uiState.update { it.copy(isShowingConfirmDeletionDialog = true) }
+        _uiState.update { it.copy(showConfirmDeletionDialog = true) }
     }
 
     fun closeConfirmDeletionDialog() {
-        _uiState.update { it.copy(isShowingConfirmDeletionDialog = false) }
+        _uiState.update { it.copy(showConfirmDeletionDialog = false) }
     }
 
     fun updateName(value: String) {
-        // Update the UI regardless of validation result.
-        _uiState.update { it.copy(name = value) }
+        val errors = mutableListOf<ViewModelError>()
+        if (value.isBlank()) {
+            errors.add(ViewModelError.BLANK_VALUE)
+        }
+
+        _uiState.update { it.copy(rawName = value, rawNameErrors = errors.toList()) }
     }
 
     fun updatePrice(value: String) {
-        // Update the UI regardless of validation result.
-        _uiState.update { it.copy(price = value) }
+        val errors = mutableListOf<ViewModelError>()
+        if (value.isBlank()) {
+            errors.add(ViewModelError.BLANK_VALUE)
+        }
+        if (value.toBigDecimalOrNull() == null) {
+            errors.add(ViewModelError.INVALID_DECIMAL_VALUE)
+        }
+
+        _uiState.update { it.copy(rawDefaultPrice = value, rawPriceErrors = errors.toList()) }
     }
 
     fun updateCount(value: String) {
-        // Update the UI regardless of validation result.
-        _uiState.update { it.copy(count = value) }
+        val errors = mutableListOf<ViewModelError>()
+        if (value.isBlank()) {
+            errors.add(ViewModelError.BLANK_VALUE)
+        }
+        if (value.toIntOrNull() == null) {
+            errors.add(ViewModelError.INVALID_INTEGER_VALUE)
+        }
+
+        _uiState.update { it.copy(rawStock = value, rawStockErrors = errors.toList()) }
     }
 
     fun create() {
-        assert(isValid())
-    }
-
-    private fun isValid(): Boolean {
-        return _uiState.value.errors.filterValues { it != null }.isEmpty()
+        assert(isValid)
     }
 }

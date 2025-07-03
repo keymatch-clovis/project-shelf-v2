@@ -6,7 +6,9 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "city")
 data class CityDto(
-    @PrimaryKey(autoGenerate = true) val uid: Int,
+    /// Primary key
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "rowid") val rowId: Long = 0,
+    /// Required fields
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "department") val department: String,
 )

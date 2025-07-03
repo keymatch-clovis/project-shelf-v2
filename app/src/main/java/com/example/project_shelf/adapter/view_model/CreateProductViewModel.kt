@@ -2,30 +2,28 @@ package com.example.project_shelf.adapter.view_model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.project_shelf.adapter.ViewModelError
+import com.example.project_shelf.adapter.dto.ui.ProductDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import java.io.Serializable
 import com.example.project_shelf.adapter.repository.ProductRepository
-import com.example.project_shelf.app.validator.validateProductCount
-import com.example.project_shelf.app.validator.validateProductName
-import com.example.project_shelf.app.validator.validateProductPrice
 
 data class CreateProductUiState(
-    val name: String = "",
-    val price: String = "",
-    val count: String = "",
-    val isValid: Boolean = false,
+    val rawName: String = "",
+    val rawNameErrors: List<ViewModelError> = emptyList(),
 
-    val errors: MutableMap<String, Throwable?> = mutableMapOf<String, Throwable?>(
-        "name" to null,
-        "price" to null,
-        "count" to null,
-    )
-) : Serializable
+    val rawDefaultPrice: String = "",
+    val rawPriceErrors: List<ViewModelError> = emptyList(),
+
+    val rawStock: String = "",
+    val rawStockErrors: List<ViewModelError> = emptyList(),
+
+    val isValid: Boolean = false,
+)
 
 @HiltViewModel
 class CreateProductViewModel @Inject constructor(
@@ -35,60 +33,83 @@ class CreateProductViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     fun updateName(value: String) {
-        _uiState.update {
-            // FIXME: This is not the correct way of doing this. Or at least it feels like so.
-            it.errors["name"] = validateProductName(value).exceptionOrNull()
-            it.copy(errors = it.errors)
-        }
-
-        // Update the UI regardless of validation result.
-        _uiState.update { it.copy(name = value, isValid = isValid()) }
+        _uiState.update { it.copy(rawName = value) }
+        validateState()
     }
 
     fun updatePrice(value: String) {
-        _uiState.update {
-            // FIXME: This is not the correct way of doing this. Or at least it feels like so.
-            it.errors["price"] = validateProductPrice(value.ifBlank { "0" }).exceptionOrNull()
-            it.copy(errors = it.errors)
-        }
-
-        // Update the UI regardless of validation result.
-        _uiState.update { it.copy(price = value, isValid = isValid()) }
+        _uiState.update { it.copy(rawDefaultPrice = value) }
+        validateState()
     }
 
     fun updateCount(value: String) {
-        _uiState.update {
-            // FIXME: This is not the correct way of doing this. Or at least it feels like so.
-            it.errors["count"] = validateProductCount(value.ifBlank { "0" }).exceptionOrNull()
-            it.copy(errors = it.errors)
-        }
-
-        // Update the UI regardless of validation result.
-        _uiState.update { it.copy(count = value, isValid = isValid()) }
+        _uiState.update { it.copy(rawStock = value) }
+        validateState()
     }
 
-    fun create(onCreated: suspend (product: ProductUiState) -> Unit) {
+    fun create(onCreated: suspend (product: ProductDto) -> Unit) {
         // NOTE: We should only call this method when all input data has been validated.
-        assert(validateProductName(_uiState.value.name).isSuccess)
-        assert(validateProductPrice(_uiState.value.price.ifBlank { "0" }).isSuccess)
-        assert(validateProductCount(_uiState.value.count.ifBlank { "0" }).isSuccess)
+        assert(_uiState.value.isValid)
 
         viewModelScope.launch {
-            val product = ProductUiState(
-                // NOTE: Don't forget to always trim!
-                name = _uiState.value.name.trim(),
-                price = _uiState.value.price.trim(),
-                count = _uiState.value.count.trim(),
+            val product = productRepository.createProduct(
+                name = _uiState.value.rawName.trim(),
+                price = _uiState.value.rawDefaultPrice.ifBlank { "0" }.toBigDecimal(),
+                stock = _uiState.value.rawStock.ifBlank { "0" }.toInt(),
             )
-            productRepository.createProduct(product)
-            onCreated(product)
 
+            onCreated(product)
             // NOTE: Clear view model after creation.
             _uiState.update { CreateProductUiState() }
         }
     }
 
-    private fun isValid(): Boolean {
-        return _uiState.value.errors.filterValues { it != null }.isEmpty()
+    private fun validateState() {
+        val rawNameErrors = validateName()
+        val rawPriceErrors = validatePrice()
+        val rawStockErrors = validateStock()
+
+        _uiState.update {
+            it.copy(
+                rawNameErrors = rawNameErrors,
+                rawPriceErrors = rawPriceErrors,
+                rawStockErrors = rawStockErrors,
+                isValid = listOf(
+                    rawNameErrors,
+                    rawPriceErrors,
+                    rawStockErrors,
+                ).all {
+                    it.isEmpty()
+                },
+            )
+        }
+    }
+
+    private fun validateName(): List<ViewModelError> {
+        return mutableListOf<ViewModelError>().apply {
+            if (_uiState.value.rawName.isBlank()) {
+                this.add(ViewModelError.BLANK_VALUE)
+            }
+        }
+    }
+
+    private fun validatePrice(): List<ViewModelError> {
+        return mutableListOf<ViewModelError>().apply {
+            if (_uiState.value.rawDefaultPrice.isNotBlank()) {
+                if (_uiState.value.rawDefaultPrice.toBigDecimalOrNull() == null) {
+                    this.add(ViewModelError.INVALID_DECIMAL_VALUE)
+                }
+            }
+        }
+    }
+
+    private fun validateStock(): List<ViewModelError> {
+        return mutableListOf<ViewModelError>().apply {
+            if (_uiState.value.rawStock.isNotBlank()) {
+                if (_uiState.value.rawStock.toIntOrNull() == null) {
+                    this.add(ViewModelError.INVALID_INTEGER_VALUE)
+                }
+            }
+        }
     }
 }

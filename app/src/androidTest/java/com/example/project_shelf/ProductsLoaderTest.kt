@@ -16,7 +16,7 @@ class ProductsLoaderTest {
         val room = ShelfDatabase.getInstance(appContext)
 
         room.database.productDao().insert(
-            ProductDto(name = "Test", uid = 0, price = "1234", count = 1)
+            ProductDto(name = "Test", uid = 0, defaultPrice = "1234", count = 1)
         )
     }
 }

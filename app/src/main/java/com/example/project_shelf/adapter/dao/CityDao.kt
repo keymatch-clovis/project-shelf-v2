@@ -1,14 +1,11 @@
 package com.example.project_shelf.adapter.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.example.project_shelf.adapter.dto.room.CityDto
-import com.example.project_shelf.framework.room.SqliteDatabase
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
+import com.example.project_shelf.adapter.dto.room.CityFtsDto
 
 @Dao
 interface CityDao {
@@ -16,14 +13,14 @@ interface CityDao {
     suspend fun count(): Int
 
     @Insert
-    suspend fun insert(dto: CityDto)
+    suspend fun insert(dto: CityDto): Long
 }
 
-@Module
-@InstallIn(SingletonComponent::class)
-object CityModule {
-    @Provides
-    fun provideCityDao(database: SqliteDatabase): CityDao {
-        return database.cityDao()
-    }
+@Dao
+interface CityFtsDao {
+    @Insert
+    suspend fun insert(dto: CityFtsDto)
+
+    @Query("SELECT * FROM city_fts WHERE city_fts MATCH :value")
+    fun match(value: String): PagingSource<Int, CityFtsDto>
 }

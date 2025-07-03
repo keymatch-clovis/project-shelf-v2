@@ -1,12 +1,10 @@
 package com.example.project_shelf.adapter.view_model
 
-import android.util.Log
-import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.example.project_shelf.adapter.dto.ui.ProductFilterDto
 import com.example.project_shelf.adapter.repository.ProductRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -17,14 +15,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-data class ProductSearchResultUiState(
-    var name: String
-)
 
 data class ProductSearchUiState(
     var isSearchBarExpanded: Boolean = false,
@@ -38,7 +31,7 @@ class ProductSearchViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ProductSearchUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val _result: MutableStateFlow<PagingData<ProductSearchResultUiState>> =
+    private val _result: MutableStateFlow<PagingData<ProductFilterDto>> =
         MutableStateFlow(PagingData.empty())
     val result = _result.asStateFlow()
 

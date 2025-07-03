@@ -2,14 +2,15 @@ package com.example.project_shelf.app.service
 
 import androidx.paging.PagingData
 import com.example.project_shelf.app.entity.Product
-import com.example.project_shelf.app.entity.ProductSearch
+import com.example.project_shelf.app.entity.ProductFilter
 import kotlinx.coroutines.flow.Flow
-import java.math.BigInteger
+import java.math.BigDecimal
 
 interface ProductService {
     fun getProducts(): Flow<PagingData<Product>>
-    fun getProducts(name: String): Flow<PagingData<ProductSearch>>
-    suspend fun createProduct(name: String, price: BigInteger = BigInteger.ZERO, count: Int = 0)
+    fun getProducts(name: String): Flow<PagingData<ProductFilter>>
+
+    suspend fun create(name: String, defaultPrice: BigDecimal, stock: Int): Product
     suspend fun removeAll()
     suspend fun remove(product: Product)
     suspend fun update(product: Product)

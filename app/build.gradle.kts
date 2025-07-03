@@ -104,4 +104,7 @@ dependencies {
     /// Paging
     implementation(libs.androidx.paging)
     implementation(libs.androidx.paging.compose)
+
+    /// Joda Money
+    implementation(libs.jodamoney)
 }

@@ -17,29 +17,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.example.project_shelf.adapter.view_model.ProductUiState
+import com.example.project_shelf.adapter.dto.ui.ProductDto
 
-class ProductParameterProvider : PreviewParameterProvider<ProductUiState> {
-    override val values = sequenceOf(
-        ProductUiState(
-            name = "Testing",
-            price = "1234.56",
-            count = "4321",
-        )
-    )
-}
-
-@Preview
 @Composable
 fun ProductListItem(
-    @PreviewParameter(ProductParameterProvider::class) product: ProductUiState,
-    onItemClicked: (item: ProductUiState) -> Unit = {},
+    dto: ProductDto,
+    onItemClicked: (ProductDto) -> Unit = {},
 ) {
     Surface(
-        onClick = { onItemClicked(product) },
+        onClick = { onItemClicked(dto) },
     ) {
         ListItem(
             modifier = Modifier.fillMaxWidth(),
@@ -48,7 +34,7 @@ fun ProductListItem(
                     style = MaterialTheme.typography.titleLarge,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
-                    text = product.name,
+                    text = dto.name,
                 )
             },
             supportingContent = {
@@ -63,7 +49,7 @@ fun ProductListItem(
                     )
                     Text(
                         style = MaterialTheme.typography.bodyMedium,
-                        text = product.price,
+                        text = dto.stock,
                     )
                 }
             },

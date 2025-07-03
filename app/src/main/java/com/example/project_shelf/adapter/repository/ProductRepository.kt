@@ -1,13 +1,14 @@
 package com.example.project_shelf.adapter.repository
 
 import androidx.paging.PagingData
-import com.example.project_shelf.adapter.view_model.ProductSearchResultUiState
-import com.example.project_shelf.adapter.view_model.ProductUiState
+import com.example.project_shelf.adapter.dto.ui.ProductDto
+import com.example.project_shelf.adapter.dto.ui.ProductFilterDto
 import kotlinx.coroutines.flow.Flow
+import java.math.BigDecimal
 
 interface ProductRepository {
-    fun getProducts(): Flow<PagingData<ProductUiState>>
-    fun getProducts(name: String): Flow<PagingData<ProductSearchResultUiState>>
-    suspend fun createProduct(product: ProductUiState)
+    fun getProducts(): Flow<PagingData<ProductDto>>
+    fun getProducts(name: String): Flow<PagingData<ProductFilterDto>>
+    suspend fun createProduct(name: String, price: BigDecimal, stock: Int): ProductDto
     suspend fun removeAll()
 }

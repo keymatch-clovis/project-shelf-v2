@@ -29,4 +29,5 @@
     <string name="accept">Aceptar</string>
     <string name="product_delete_alert">Eliminar producto?</string>
     <string name="product_delete_alert_text">¿Estás seguro? Esta acción no se puede deshacer.</string>
+    <string name="default_price">Precio estándar</string>
 </resources>

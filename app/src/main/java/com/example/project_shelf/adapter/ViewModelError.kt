@@ -1,0 +1,7 @@
+package com.example.project_shelf.adapter
+
+enum class ViewModelError {
+    BLANK_VALUE,
+    INVALID_DECIMAL_VALUE,
+    INVALID_INTEGER_VALUE,
+}

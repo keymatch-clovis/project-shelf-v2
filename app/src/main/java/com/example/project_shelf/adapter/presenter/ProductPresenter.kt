@@ -1,12 +1,13 @@
 package com.example.project_shelf.adapter.presenter
 
+import android.icu.util.Currency
 import android.util.Log
 import androidx.paging.PagingData
 import androidx.paging.map
+import com.example.project_shelf.adapter.dto.ui.ProductDto
+import com.example.project_shelf.adapter.dto.ui.ProductFilterDto
+import com.example.project_shelf.adapter.dto.ui.toDto
 import com.example.project_shelf.adapter.repository.ProductRepository
-import com.example.project_shelf.adapter.view_model.ProductSearchResultUiState
-import com.example.project_shelf.adapter.view_model.ProductUiState
-import com.example.project_shelf.app.entity.Product
 import com.example.project_shelf.app.use_case.CreateProductUseCase
 import com.example.project_shelf.app.use_case.FindProductsUseCase
 import com.example.project_shelf.app.use_case.GetProductsUseCase
@@ -16,9 +17,8 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import java.math.BigInteger
+import java.math.BigDecimal
 import javax.inject.Inject
 
 class ProductPresenter @Inject constructor(
@@ -27,37 +27,32 @@ class ProductPresenter @Inject constructor(
     private val removeAllProductsUseCase: RemoveAllProductsUseCase,
     private val findProductsUseCase: FindProductsUseCase,
 ) : ProductRepository {
-    override fun getProducts(): Flow<PagingData<ProductUiState>> {
+    override fun getProducts(): Flow<PagingData<ProductDto>> {
         return getProductsUseCase.exec().map {
-            it.map { product ->
-                ProductUiState(
-                    name = product.name,
-                    price = product.price.toString(),
-                    count = product.count.toString()
-                )
-            }
+            // TODO: We can get the currency from a configuration option or something, but for now we'll
+            // leave it hard coded.
+            it.map { product -> product.toDto(Currency.getInstance("COP")) }
         }
     }
 
-    override fun getProducts(name: String): Flow<PagingData<ProductSearchResultUiState>> {
+    override fun getProducts(name: String): Flow<PagingData<ProductFilterDto>> {
         Log.d("USE-CASE", "Getting products with: $name")
         return findProductsUseCase.exec(name).map {
-            it.map { product ->
-                ProductSearchResultUiState(
-                    name = product.name
-                )
-            }
+            it.map { filter -> ProductFilterDto(name = filter.name) }
         }
     }
 
-    override suspend fun createProduct(product: ProductUiState) {
-        Log.d("PRODUCT-PRESENTER", "Creating product with: $product")
+    override suspend fun createProduct(name: String, price: BigDecimal, stock: Int): ProductDto {
+        Log.d("PRODUCT-PRESENTER", "Creating product with: $name, $price, $stock")
 
         return createProductUseCase.exec(
-            name = product.name,
-            price = product.price,
-            count = product.count,
+            name = name,
+            price = price,
+            stock = stock,
         )
+            // TODO: We can get the currency from a configuration option or something, but for now we'll
+            // leave it hard coded.
+            .toDto(Currency.getInstance("COP"))
     }
 
     override suspend fun removeAll() {

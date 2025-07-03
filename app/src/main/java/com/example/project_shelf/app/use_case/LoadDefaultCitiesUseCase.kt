@@ -1,7 +1,6 @@
 package com.example.project_shelf.app.use_case
 
 import android.util.Log
-import com.example.project_shelf.app.entity.City
 import com.example.project_shelf.app.service.CityService
 import java.io.InputStream
 import javax.inject.Inject
@@ -18,7 +17,7 @@ class LoadDefaultCitiesUseCase @Inject constructor(private val cityService: City
             // Insert the data into the database using room.
             .forEach { (city, department) ->
                 Log.d("USE_CASE", "Inserting: $city, $department")
-                cityService.create(City(name = city, department = department))
+                cityService.create(name = city, department = department)
             }
     }
 }

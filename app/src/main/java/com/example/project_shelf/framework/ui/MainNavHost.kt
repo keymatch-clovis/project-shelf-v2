@@ -9,8 +9,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.toRoute
+import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.view_model.EditProductViewModel
-import com.example.project_shelf.adapter.view_model.ProductUiState
 import com.example.project_shelf.framework.ui.screen.ClientsScreen
 import com.example.project_shelf.framework.ui.screen.ConfigScreen
 import com.example.project_shelf.framework.ui.screen.InvoicesScreen
@@ -56,10 +56,11 @@ fun MainNavHost(
             })
         }
 
-        dialog<ProductUiState>(
+        dialog<ProductDto>(
             dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
         ) {
-            val product: ProductUiState = it.toRoute()
+            val product: ProductDto = it.toRoute()
+
             EditProductScreen(
                 viewModel = hiltViewModel<EditProductViewModel, EditProductViewModel.Factory> {
                     it.create(product)

@@ -25,13 +25,11 @@ class ConfigViewModel @Inject constructor(
     @OptIn(ExperimentalUuidApi::class)
     fun loadTestProducts(onLoaded: suspend () -> Unit) {
         viewModelScope.launch {
-            for (i in 0..1000) {
+            repeat(500) {
                 productRepository.createProduct(
-                    ProductUiState(
-                        name = Uuid.random().toString(),
-                        price = Random.nextInt(100).toString(),
-                        count = Random.nextInt(100).toString(),
-                    )
+                    name = Uuid.random().toString(),
+                    price = Random.nextDouble(1000.0).toBigDecimal(),
+                    stock = Random.nextInt(100),
                 )
             }
             onLoaded()

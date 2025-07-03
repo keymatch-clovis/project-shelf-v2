@@ -8,11 +8,6 @@ import androidx.room.Query
 import androidx.room.Update
 import com.example.project_shelf.adapter.dto.room.ProductDto
 import com.example.project_shelf.adapter.dto.room.ProductFtsDto
-import com.example.project_shelf.framework.room.SqliteDatabase
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 
 @Dao
 interface ProductDao {
@@ -39,13 +34,4 @@ interface ProductFtsDao {
 
     @Query("SELECT * FROM product_fts WHERE product_fts MATCH :value")
     fun match(value: String): PagingSource<Int, ProductFtsDto>
-}
-
-@Module
-@InstallIn(SingletonComponent::class)
-object ProductModule {
-    @Provides
-    fun provideProductDao(database: SqliteDatabase): ProductDao {
-        return database.productDao()
-    }
 }

@@ -1,10 +1,10 @@
 package com.example.project_shelf.app.entity
 
-import java.math.BigInteger
+import java.math.BigDecimal
 
 data class Product(
     val id: Long,
     val name: String,
-    val price: BigInteger,
-    val count: Int,
+    val defaultPrice: BigDecimal,
+    val stock: Int,
 )

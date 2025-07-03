@@ -56,9 +56,9 @@ fun CreateProductScreen(
         CreateProductForm(
             innerPadding = innerPadding,
             state = state,
-            onUpdateName = { viewModel.updateName(it) },
-            onUpdatePrice = { viewModel.updatePrice(it) },
-            onUpdateCount = { viewModel.updateCount(it) },
+            onNameChange = { viewModel.updateName(it) },
+            onPriceChange = { viewModel.updatePrice(it) },
+            onCountChange = { viewModel.updateCount(it) },
         )
     }
 }
