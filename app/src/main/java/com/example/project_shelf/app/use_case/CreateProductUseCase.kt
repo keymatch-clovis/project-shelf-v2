@@ -21,7 +21,7 @@ class CreateProductUseCase @Inject constructor(private val productService: Produ
         // leave it hard coded.
         val money = Money.of(CurrencyUnit.of("COP"), price)
         return productService.create(
-            name = name,
+            name = name.uppercase(),
             defaultPrice = money.amountMinor,
             stock = stock
         )

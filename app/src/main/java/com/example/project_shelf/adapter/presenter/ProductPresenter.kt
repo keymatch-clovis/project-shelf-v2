@@ -4,11 +4,13 @@ import android.icu.util.Currency
 import android.util.Log
 import androidx.paging.PagingData
 import androidx.paging.map
+import com.example.project_shelf.adapter.dto.room.toDto
 import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.dto.ui.ProductFilterDto
 import com.example.project_shelf.adapter.dto.ui.toDto
 import com.example.project_shelf.adapter.repository.ProductRepository
 import com.example.project_shelf.app.use_case.CreateProductUseCase
+import com.example.project_shelf.app.use_case.FindProductUseCase
 import com.example.project_shelf.app.use_case.FindProductsUseCase
 import com.example.project_shelf.app.use_case.GetProductsUseCase
 import com.example.project_shelf.app.use_case.RemoveAllProductsUseCase
@@ -26,6 +28,7 @@ class ProductPresenter @Inject constructor(
     private val createProductUseCase: CreateProductUseCase,
     private val removeAllProductsUseCase: RemoveAllProductsUseCase,
     private val findProductsUseCase: FindProductsUseCase,
+    private val findProductUseCase: FindProductUseCase,
 ) : ProductRepository {
     override fun getProducts(): Flow<PagingData<ProductDto>> {
         return getProductsUseCase.exec().map {
@@ -40,6 +43,22 @@ class ProductPresenter @Inject constructor(
         return findProductsUseCase.exec(name).map {
             it.map { filter -> ProductFilterDto(name = filter.name) }
         }
+    }
+
+    override suspend fun getProduct(name: String): ProductDto? {
+        Log.d("USE-CASE", "Getting product with: $name")
+        // TODO: We can get the currency from a configuration option or something, but for now we'll
+        // leave it hard coded.
+        return findProductUseCase.exec(name)?.toDto(Currency.getInstance("COP"))
+    }
+
+    override suspend fun updateProduct(
+        id: Long,
+        name: String,
+        price: BigDecimal,
+        stock: Int
+    ): ProductDto {
+        TODO("Not yet implemented")
     }
 
     override suspend fun createProduct(name: String, price: BigDecimal, stock: Int): ProductDto {

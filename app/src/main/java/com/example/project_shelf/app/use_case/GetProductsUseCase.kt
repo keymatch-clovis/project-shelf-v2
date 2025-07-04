@@ -1,7 +1,6 @@
 package com.example.project_shelf.app.use_case
 
 import androidx.paging.PagingData
-import androidx.paging.PagingSource
 import com.example.project_shelf.app.entity.Product
 import com.example.project_shelf.app.service.ProductService
 import kotlinx.coroutines.flow.Flow

@@ -7,6 +7,7 @@ import java.math.BigDecimal
 
 @Serializable
 data class ProductDto(
+    val id: Long,
     val name: String,
     val realDefaultPrice: String,
     val formattedDefaultPrice: String,
@@ -21,6 +22,7 @@ fun Product.toDto(currency: Currency): ProductDto {
         this.defaultPrice / BigDecimal.TEN.pow(currency.defaultFractionDigits)
 
     return ProductDto(
+        id = this.id,
         name = this.name,
         realDefaultPrice = realDefaultPrice.toString(),
         formattedDefaultPrice = "${currency.symbol} $realDefaultPrice",

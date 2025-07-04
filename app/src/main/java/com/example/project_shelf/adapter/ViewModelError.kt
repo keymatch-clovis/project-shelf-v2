@@ -4,4 +4,5 @@ enum class ViewModelError {
     BLANK_VALUE,
     INVALID_DECIMAL_VALUE,
     INVALID_INTEGER_VALUE,
+    PRODUCT_NAME_TAKEN,
 }

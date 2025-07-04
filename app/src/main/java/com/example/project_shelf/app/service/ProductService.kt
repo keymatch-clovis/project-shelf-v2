@@ -9,6 +9,7 @@ import java.math.BigDecimal
 interface ProductService {
     fun getProducts(): Flow<PagingData<Product>>
     fun getProducts(name: String): Flow<PagingData<ProductFilter>>
+    suspend fun getProduct(name: String): Product?
 
     suspend fun create(name: String, defaultPrice: BigDecimal, stock: Int): Product
     suspend fun removeAll()

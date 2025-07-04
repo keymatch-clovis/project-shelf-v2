@@ -45,7 +45,6 @@ fun EditProductForm(
                 value = state.value.rawName,
                 onValueChange = onNameChange,
                 label = R.string.name,
-                errors = state.value.rawNameErrors,
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Characters, imeAction = ImeAction.Next
                 ),
@@ -55,7 +54,6 @@ fun EditProductForm(
                 value = state.value.rawDefaultPrice,
                 onValueChange = onPriceChange,
                 label = R.string.default_price,
-                errors = state.value.rawPriceErrors,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next
                 ),
@@ -65,7 +63,6 @@ fun EditProductForm(
                 value = state.value.rawStock,
                 onValueChange = onCountChange,
                 label = R.string.amount,
-                errors = state.value.rawStockErrors,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done
                 ),

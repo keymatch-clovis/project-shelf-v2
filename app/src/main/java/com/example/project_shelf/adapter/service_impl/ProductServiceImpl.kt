@@ -9,7 +9,7 @@ import androidx.room.withTransaction
 import com.example.project_shelf.adapter.dto.room.ProductDto
 import com.example.project_shelf.adapter.dto.room.ProductFtsDto
 import com.example.project_shelf.adapter.dto.room.toDto
-import com.example.project_shelf.adapter.dto.room.toProduct
+import com.example.project_shelf.adapter.dto.room.toEntity
 import com.example.project_shelf.adapter.dto.room.toProductFilter
 import com.example.project_shelf.app.entity.Product
 import com.example.project_shelf.app.entity.ProductFilter
@@ -34,7 +34,7 @@ class ProductServiceImpl @Inject constructor(
         return Pager(
             config = PagingConfig(pageSize = PAGE_SIZE)
         ) { database.productDao().select() }.flow.map {
-            it.map { dto -> dto.toProduct() }
+            it.map { dto -> dto.toEntity() }
         }
     }
 
@@ -48,6 +48,11 @@ class ProductServiceImpl @Inject constructor(
         }.flow.map {
             it.map { dto -> dto.toProductFilter() }
         }
+    }
+
+    override suspend fun getProduct(name: String): Product? {
+        Log.d("SERVICE-IMPL", "Getting product with: $name")
+        return database.productDao().select(name)?.toEntity()
     }
 
     override suspend fun create(

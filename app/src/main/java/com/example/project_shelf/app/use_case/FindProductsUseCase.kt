@@ -9,6 +9,6 @@ import javax.inject.Inject
 class FindProductsUseCase @Inject constructor(private val productService: ProductService) {
     fun exec(name: String): Flow<PagingData<ProductFilter>> {
         // NOTE: We are not doing anything with the getting of the products. Just returning them.
-        return productService.getProducts(name)
+        return productService.getProducts(name.uppercase())
     }
 }

@@ -23,8 +23,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.project_shelf.R
-import com.example.project_shelf.adapter.ViewModelError
-import com.example.project_shelf.framework.ui.getStringResource
 
 @Composable
 fun CustomTextField(
@@ -34,20 +32,15 @@ fun CustomTextField(
     modifier: Modifier = Modifier,
     required: Boolean = false,
     singleLine: Boolean = true,
-    errors: List<ViewModelError> = emptyList(),
     keyboardOptions: KeyboardOptions = KeyboardOptions(),
+    errors: List<Int> = emptyList()
 ) {
-    var isDirty by remember { mutableStateOf(false) }
-
     OutlinedTextField(
         modifier = modifier.fillMaxWidth(),
         value = value,
-        onValueChange = {
-            isDirty = true
-            onValueChange(it)
-        },
+        onValueChange = onValueChange,
         keyboardOptions = keyboardOptions,
-        isError = isDirty && errors.isNotEmpty(),
+        isError = errors.isNotEmpty(),
         singleLine = singleLine,
         label = {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -66,15 +59,14 @@ fun CustomTextField(
             Row(
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                if (isDirty) {
-                    errors.firstOrNull()?.let {
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            text = stringResource(it.getStringResource())
-                        )
-                    }
+                // TODO: We are just showing the first error, maybe this is not wanted later.
+                errors.firstOrNull()?.let {
+                    Text(
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        text = stringResource(it)
+                    )
                 }
             }
         },

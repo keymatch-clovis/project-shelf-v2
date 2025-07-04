@@ -14,6 +14,9 @@ interface ProductDao {
     @Query("SELECT * FROM product")
     fun select(): PagingSource<Int, ProductDto>
 
+    @Query("SELECT * FROM PRODUCT WHERE name = :name")
+    suspend fun select(name: String): ProductDto?
+
     @Query("DELETE FROM product")
     suspend fun delete()
 

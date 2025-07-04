@@ -11,6 +11,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -19,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.view_model.CreateProductViewModel
 import com.example.project_shelf.framework.ui.components.form.CreateProductForm
+import com.example.project_shelf.framework.ui.getStringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,7 +28,18 @@ fun CreateProductScreen(
     viewModel: CreateProductViewModel = hiltViewModel(),
     onDismissRequest: () -> Unit,
 ) {
-    val state = viewModel.uiState.collectAsState()
+    val nameInputValueState = viewModel.nameInputValue.collectAsState()
+    val inputState = viewModel.inputState.collectAsState()
+    val validationState = viewModel.validationState.collectAsState()
+    val isValid = viewModel.isValid.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.eventFlow.collect {
+            when (it) {
+                is CreateProductViewModel.Event.ProductCreated -> onDismissRequest()
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -40,11 +53,9 @@ fun CreateProductScreen(
                 },
                 actions = {
                     Button(
-                        enabled = state.value.isValid,
+                        enabled = isValid.value,
                         onClick = {
-                            viewModel.create {
-                                onDismissRequest()
-                            }
+                            viewModel.create()
                         },
                     ) {
                         Text(stringResource(R.string.save))
@@ -55,10 +66,18 @@ fun CreateProductScreen(
     ) { innerPadding ->
         CreateProductForm(
             innerPadding = innerPadding,
-            state = state,
-            onNameChange = { viewModel.updateName(it) },
-            onPriceChange = { viewModel.updatePrice(it) },
-            onCountChange = { viewModel.updateCount(it) },
+
+            nameInputValue = nameInputValueState.value,
+            nameErrors = validationState.value.nameErrors.map { it.getStringResource() },
+            onNameChange = { viewModel.updateNameInputValue(it) },
+
+            defaultPriceInputValue = inputState.value.defaultPriceInputValue,
+            defaultPriceErrors = validationState.value.defaultPriceErrors.map { it.getStringResource() },
+            onPriceChange = { viewModel.updateDefaultPriceInputValue(it) },
+
+            stockInputValue = inputState.value.stockInputValue,
+            stockErrors = validationState.value.stockErrors.map { it.getStringResource() },
+            onStockChange = { viewModel.updateStockInputValue(it) },
         )
     }
 }
