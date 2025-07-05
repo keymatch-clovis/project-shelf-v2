@@ -31,4 +31,7 @@
     <string name="product_delete_alert_text">¿Estás seguro? Esta acción no se puede deshacer.</string>
     <string name="default_price">Precio estándar</string>
     <string name="err_product_name_taken">Este nombre ya se encuentra en uso</string>
+    <string name="product_updated">Producto actualizado</string>
+    <string name="product_deleted">Product deleted</string>
+    <string name="undo">Deshacer</string>
 </resources>

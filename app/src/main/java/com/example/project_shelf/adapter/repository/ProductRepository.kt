@@ -12,5 +12,6 @@ interface ProductRepository {
     suspend fun getProduct(name: String): ProductDto?
     suspend fun updateProduct(id: Long, name: String, price: BigDecimal, stock: Int): ProductDto
     suspend fun createProduct(name: String, price: BigDecimal, stock: Int): ProductDto
-    suspend fun removeAll()
+    suspend fun deleteProduct(id: Long)
+    suspend fun deleteAll()
 }

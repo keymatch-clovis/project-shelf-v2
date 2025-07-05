@@ -6,10 +6,8 @@ import org.joda.money.CurrencyUnit
 import org.joda.money.Money
 import java.math.BigDecimal
 import javax.inject.Inject
-import kotlin.uuid.ExperimentalUuidApi
 
 class CreateProductUseCase @Inject constructor(private val productService: ProductService) {
-    @OptIn(ExperimentalUuidApi::class)
     suspend fun exec(
         name: String,
         price: BigDecimal,
@@ -22,8 +20,8 @@ class CreateProductUseCase @Inject constructor(private val productService: Produ
         val money = Money.of(CurrencyUnit.of("COP"), price)
         return productService.create(
             name = name.uppercase(),
-            defaultPrice = money.amountMinor,
-            stock = stock
+            price = money.amountMinor,
+            stock = stock,
         )
     }
 }

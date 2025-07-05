@@ -31,4 +31,7 @@
     <string name="product_delete_alert_text">Are you sure? This action can\'t be undone.</string>
     <string name="default_price">Default price</string>
     <string name="err_product_name_taken">This name is already taken</string>
+    <string name="product_updated">Product updated</string>
+    <string name="product_deleted">Product deleted</string>
+    <string name="undo">Undo</string>
 </resources>

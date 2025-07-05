@@ -5,6 +5,6 @@ import javax.inject.Inject
 
 class RemoveAllProductsUseCase @Inject constructor(private val productService: ProductService) {
     suspend fun exec() {
-        productService.removeAll()
+        productService.deleteAll()
     }
 }

@@ -10,10 +10,12 @@ import com.example.project_shelf.adapter.dto.ui.ProductFilterDto
 import com.example.project_shelf.adapter.dto.ui.toDto
 import com.example.project_shelf.adapter.repository.ProductRepository
 import com.example.project_shelf.app.use_case.CreateProductUseCase
+import com.example.project_shelf.app.use_case.DeleteProductUseCase
 import com.example.project_shelf.app.use_case.FindProductUseCase
 import com.example.project_shelf.app.use_case.FindProductsUseCase
 import com.example.project_shelf.app.use_case.GetProductsUseCase
 import com.example.project_shelf.app.use_case.RemoveAllProductsUseCase
+import com.example.project_shelf.app.use_case.UpdateProductUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -26,6 +28,8 @@ import javax.inject.Inject
 class ProductPresenter @Inject constructor(
     private val getProductsUseCase: GetProductsUseCase,
     private val createProductUseCase: CreateProductUseCase,
+    private val updateProductUseCase: UpdateProductUseCase,
+    private val deleteProductUseCase: DeleteProductUseCase,
     private val removeAllProductsUseCase: RemoveAllProductsUseCase,
     private val findProductsUseCase: FindProductsUseCase,
     private val findProductUseCase: FindProductUseCase,
@@ -39,30 +43,35 @@ class ProductPresenter @Inject constructor(
     }
 
     override fun getProducts(name: String): Flow<PagingData<ProductFilterDto>> {
-        Log.d("USE-CASE", "Getting products with: $name")
+        Log.d("PRESENTER", "Getting products with: $name")
         return findProductsUseCase.exec(name).map {
             it.map { filter -> ProductFilterDto(name = filter.name) }
         }
     }
 
     override suspend fun getProduct(name: String): ProductDto? {
-        Log.d("USE-CASE", "Getting product with: $name")
-        // TODO: We can get the currency from a configuration option or something, but for now we'll
-        // leave it hard coded.
-        return findProductUseCase.exec(name)?.toDto(Currency.getInstance("COP"))
+        Log.d("PRESENTER", "Getting product with: $name")
+        return findProductUseCase.exec(name)
+            // TODO: We can get the currency from a configuration option or something, but for now we'll
+            // leave it hard coded.
+            ?.toDto(Currency.getInstance("COP"))
     }
 
     override suspend fun updateProduct(
         id: Long,
         name: String,
         price: BigDecimal,
-        stock: Int
+        stock: Int,
     ): ProductDto {
-        TODO("Not yet implemented")
+        Log.d("PRESENTER", "Creating product with: $name, $price, $stock")
+        return updateProductUseCase.exec(id, name, price, stock)
+            // TODO: We can get the currency from a configuration option or something, but for now we'll
+            // leave it hard coded.
+            .toDto(Currency.getInstance("COP"))
     }
 
     override suspend fun createProduct(name: String, price: BigDecimal, stock: Int): ProductDto {
-        Log.d("PRODUCT-PRESENTER", "Creating product with: $name, $price, $stock")
+        Log.d("PRESENTER", "Creating product with: $name, $price, $stock")
 
         return createProductUseCase.exec(
             name = name,
@@ -74,7 +83,12 @@ class ProductPresenter @Inject constructor(
             .toDto(Currency.getInstance("COP"))
     }
 
-    override suspend fun removeAll() {
+    override suspend fun deleteProduct(id: Long) {
+        Log.d("PRODUCT-PRESENTER", "Deleting product: $id")
+        deleteProductUseCase.exec(id)
+    }
+
+    override suspend fun deleteAll() {
         Log.d("PRODUCT-PRESENTER", "Removing all products")
         removeAllProductsUseCase.exec()
     }

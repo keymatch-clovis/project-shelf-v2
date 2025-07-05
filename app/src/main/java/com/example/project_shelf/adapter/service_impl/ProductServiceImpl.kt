@@ -57,16 +57,16 @@ class ProductServiceImpl @Inject constructor(
 
     override suspend fun create(
         name: String,
-        defaultPrice: BigDecimal,
+        price: BigDecimal,
         stock: Int,
     ): Product {
-        Log.d("SERVICE-IMPL", "Creating product with: $name, $defaultPrice, $stock")
+        Log.d("SERVICE-IMPL", "Creating product with: $name, $price, $stock")
         return database.withTransaction {
             // First, create the product.
             val productId = database.productDao().insert(
                 ProductDto(
                     name = name,
-                    defaultPrice = defaultPrice.toString(),
+                    defaultPrice = price.toString(),
                     stock = stock,
                 )
             )
@@ -82,25 +82,42 @@ class ProductServiceImpl @Inject constructor(
             Product(
                 id = productId,
                 name = name,
-                defaultPrice = defaultPrice,
+                defaultPrice = price,
                 stock = stock,
             )
         }
     }
 
-    override suspend fun removeAll() {
-        Log.d("PRODUCT-SERVICE", "Removing all products")
+    override suspend fun deleteAll() {
+        Log.d("SERVICE-IMPL", "Deleting all products")
         database.productDao().delete()
     }
 
-    override suspend fun remove(product: Product) {
-        Log.d("PRODUCT-SERVICE", "Removing product: $product")
-        database.productDao().delete(product.toDto())
+    override suspend fun delete(id: Long) {
+        database.withTransaction {
+            Log.d("SERVICE-IMPL", "Deleting product: $id")
+            database.productDao().delete(id)
+
+            Log.d("SERVICE-IMPL", "Deleting product FTS: $id")
+            database.productFtsDao().delete(id)
+        }
     }
 
-    override suspend fun update(product: Product) {
-        Log.d("PRODUCT-SERVICE", "Updating product: $product")
-        database.productDao().update(product.toDto())
+    override suspend fun update(
+        id: Long,
+        name: String,
+        price: BigDecimal,
+        stock: Int,
+    ): Product {
+        Log.d("SERVICE-IMPL", "Updating product with: $id, $name, $price, $stock")
+        val dto = ProductDto(
+            rowId = id,
+            name = name,
+            defaultPrice = price.toString(),
+            stock = stock,
+        )
+        database.productDao().update(dto)
+        return dto.toEntity()
     }
 }
 
@@ -108,5 +125,5 @@ class ProductServiceImpl @Inject constructor(
 @InstallIn(SingletonComponent::class)
 abstract class ProductModule {
     @Binds
-    abstract fun bindRepository(impl: ProductServiceImpl): ProductService
+    abstract fun bindService(impl: ProductServiceImpl): ProductService
 }

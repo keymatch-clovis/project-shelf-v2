@@ -9,8 +9,8 @@ import java.math.BigDecimal
 data class ProductDto(
     val id: Long,
     val name: String,
-    val realDefaultPrice: String,
-    val formattedDefaultPrice: String,
+    val price: String,
+    val formattedPrice: String,
     val stock: String,
 )
 
@@ -24,8 +24,9 @@ fun Product.toDto(currency: Currency): ProductDto {
     return ProductDto(
         id = this.id,
         name = this.name,
-        realDefaultPrice = realDefaultPrice.toString(),
-        formattedDefaultPrice = "${currency.symbol} $realDefaultPrice",
-        stock = this.stock.toString(),
+        formattedPrice = "${currency.symbol} $realDefaultPrice",
+        // NOTE: I feel this looks better, than to see the 0 value.
+        price = if (realDefaultPrice == BigDecimal.ZERO) "" else realDefaultPrice.toString(),
+        stock = if (this.stock == 0) "" else this.stock.toString(),
     )
 }

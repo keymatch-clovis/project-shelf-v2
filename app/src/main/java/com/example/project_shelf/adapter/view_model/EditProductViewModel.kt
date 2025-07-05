@@ -1,5 +1,6 @@
 package com.example.project_shelf.adapter.view_model
 
+import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.project_shelf.adapter.ViewModelError
@@ -9,25 +10,31 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class EditProductUiState(
-    val rawName: String = "",
-    val rawNameErrors: List<ViewModelError> = emptyList(),
+sealed class EditProductViewModelState {
+    data class UiState(
+        val showConfirmDeletionDialog: Boolean = false,
+    )
 
-    val rawDefaultPrice: String = "",
-    val rawPriceErrors: List<ViewModelError> = emptyList(),
+    data class InputState(
+        val price: String,
+        val stock: String,
+    )
 
-    val rawStock: String = "",
-    val rawStockErrors: List<ViewModelError> = emptyList(),
-
-    val isValid: Boolean = false,
-
-    val showConfirmDeletionDialog: Boolean = false,
-)
+    data class ValidationState(
+        val nameErrors: List<ViewModelError> = emptyList(),
+        val priceErrors: List<ViewModelError> = emptyList(),
+        val stockErrors: List<ViewModelError> = emptyList(),
+    )
+}
 
 @HiltViewModel(assistedFactory = EditProductViewModel.Factory::class)
 class EditProductViewModel @AssistedInject constructor(
@@ -40,20 +47,95 @@ class EditProductViewModel @AssistedInject constructor(
         fun create(product: ProductDto): EditProductViewModel
     }
 
-    private var _uiState = MutableStateFlow(
-        EditProductUiState(
-            rawName = product.name,
-            // Don't fill the input with zeros. It looks ugly in my opinion.
-            rawDefaultPrice = if (product.realDefaultPrice == "0") "" else product.realDefaultPrice,
-            rawStock = if (product.stock == "0") "" else product.realDefaultPrice,
+    sealed class Event {
+        data class ProductUpdated(val product: ProductDto) : Event()
+        data class ProductDeleted(val product: ProductDto) : Event()
+    }
+
+    private val _eventFlow = MutableSharedFlow<Event>()
+    val eventFlow: SharedFlow<Event> = _eventFlow
+
+    private val _uiState = MutableStateFlow(EditProductViewModelState.UiState())
+    val uiState = _uiState.asStateFlow()
+
+    private val _inputState = MutableStateFlow(
+        EditProductViewModelState.InputState(
+            price = product.price,
+            stock = product.stock,
         )
     )
-    var uiState = _uiState.asStateFlow()
+    val inputState = _inputState.asStateFlow()
 
-    fun delete(onDelete: () -> Unit) {
+    private val _validationState = MutableStateFlow(EditProductViewModelState.ValidationState())
+    val validationState = _validationState.asStateFlow()
+
+    // We ned this one outside the UI State, as it takes a more important responsibility than the
+    // other input elements.
+    private val _name = MutableStateFlow(product.name)
+    val name = _name.asStateFlow()
+
+    private val _isValid = MutableStateFlow(false)
+    val isValid = _isValid.asStateFlow()
+
+    private var deletionJob: Job? = null
+
+    init {
+        // When the name changes, we need to check if another product has this name.
         viewModelScope.launch {
-            onDelete()
+            _name
+                // We need to debounce this one, as we are looking up the database.
+                .collect {
+                    val errors = it.validateString(true).toMutableList()
+                    // If we have no errors, we can check the product name.
+                    if (errors.isEmpty()) {
+                        productRepository.getProduct(it)?.let {
+                            // If the product found is different to the one we are editing, then the
+                            // name is already taken.
+                            if (it != product) {
+                                errors.add(ViewModelError.PRODUCT_NAME_TAKEN)
+                            }
+                        }
+                    }
+                    _validationState.update { it.copy(nameErrors = errors) }
+                }
         }
+
+        // When all of the other UI inputs change, do the default checks.
+        viewModelScope.launch {
+            _inputState.collect { state ->
+                _validationState.update {
+                    it.copy(
+                        priceErrors = state.price.validateBigDecimal(),
+                        stockErrors = state.stock.validateInt(),
+                    )
+                }
+            }
+        }
+
+        // When the validation state changes, check if the view model is valid.
+        viewModelScope.launch {
+            _validationState.collect { state ->
+                _isValid.update {
+                    listOf(
+                        state.nameErrors,
+                        state.priceErrors,
+                        state.stockErrors,
+                    ).all { it.isEmpty() }
+                }
+            }
+        }
+    }
+
+    fun updateName(value: String) {
+        _name.update { value }
+    }
+
+    fun updatePrice(value: String) {
+        _inputState.update { it.copy(price = value) }
+    }
+
+    fun updateStock(value: String) {
+        _inputState.update { it.copy(stock = value) }
     }
 
     fun openConfirmDeletionDialog() {
@@ -64,94 +146,26 @@ class EditProductViewModel @AssistedInject constructor(
         _uiState.update { it.copy(showConfirmDeletionDialog = false) }
     }
 
-    fun updateName(value: String) {
-        _uiState.update { it.copy(rawName = value) }
-        validateState()
+    fun delete() {
+        deletionJob = viewModelScope.launch {
+            delay(5000L)
+            productRepository.deleteProduct(product.id)
+            _eventFlow.emit(Event.ProductDeleted(product))
+        }
     }
 
-    fun updatePrice(value: String) {
-        val errors = mutableListOf<ViewModelError>()
-        if (value.isBlank()) {
-            errors.add(ViewModelError.BLANK_VALUE)
-        }
-        if (value.toBigDecimalOrNull() == null) {
-            errors.add(ViewModelError.INVALID_DECIMAL_VALUE)
-        }
-
-        _uiState.update { it.copy(rawDefaultPrice = value, rawPriceErrors = errors.toList()) }
-    }
-
-    fun updateCount(value: String) {
-        val errors = mutableListOf<ViewModelError>()
-        if (value.isBlank()) {
-            errors.add(ViewModelError.BLANK_VALUE)
-        }
-        if (value.toIntOrNull() == null) {
-            errors.add(ViewModelError.INVALID_INTEGER_VALUE)
-        }
-
-        _uiState.update { it.copy(rawStock = value, rawStockErrors = errors.toList()) }
-    }
-
-    fun update() {
-        assert(_uiState.value.isValid)
+    fun edit() {
+        // NOTE: We should only call this method when all input data has been validated.
+        assert(isValid.value)
 
         viewModelScope.launch {
             val product = productRepository.updateProduct(
                 id = product.id,
-                name = _uiState.value.rawName.trim(),
-                price = _uiState.value.rawDefaultPrice.ifBlank { "0" }.toBigDecimal(),
-                stock = _uiState.value.rawStock.ifBlank { "0" }.toInt(),
+                name = _name.value.trim(),
+                price = _inputState.value.price.toBigDecimalOrZero(),
+                stock = _inputState.value.stock.toIntOrZero(),
             )
-        }
-    }
-
-    private fun validateState() {
-        val rawNameErrors = validateName()
-        val rawPriceErrors = validatePrice()
-        val rawStockErrors = validateStock()
-
-        _uiState.update {
-            it.copy(
-                rawNameErrors = rawNameErrors,
-                rawPriceErrors = rawPriceErrors,
-                rawStockErrors = rawStockErrors,
-                isValid = listOf(
-                    rawNameErrors,
-                    rawPriceErrors,
-                    rawStockErrors,
-                ).all {
-                    it.isEmpty()
-                },
-            )
-        }
-    }
-
-    private fun validateName(): List<ViewModelError> {
-        return mutableListOf<ViewModelError>().apply {
-            if (_uiState.value.rawName.isBlank()) {
-                this.add(ViewModelError.BLANK_VALUE)
-            }
-        }
-    }
-
-    private fun validatePrice(): List<ViewModelError> {
-        return mutableListOf<ViewModelError>().apply {
-            if (_uiState.value.rawDefaultPrice.isNotBlank()) {
-                if (_uiState.value.rawDefaultPrice.toBigDecimalOrNull() == null) {
-                    this.add(ViewModelError.INVALID_DECIMAL_VALUE)
-                }
-            }
-        }
-    }
-
-    private fun validateStock(): List<ViewModelError> {
-        return mutableListOf<ViewModelError>().apply {
-            if (_uiState.value.rawStock.isNotBlank()) {
-                if (_uiState.value.rawStock.toIntOrNull() == null) {
-                    this.add(ViewModelError.INVALID_INTEGER_VALUE)
-                }
-            }
+            _eventFlow.emit(Event.ProductUpdated(product))
         }
     }
 }

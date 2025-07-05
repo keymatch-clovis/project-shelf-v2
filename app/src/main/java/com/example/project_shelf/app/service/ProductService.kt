@@ -11,8 +11,8 @@ interface ProductService {
     fun getProducts(name: String): Flow<PagingData<ProductFilter>>
     suspend fun getProduct(name: String): Product?
 
-    suspend fun create(name: String, defaultPrice: BigDecimal, stock: Int): Product
-    suspend fun removeAll()
-    suspend fun remove(product: Product)
-    suspend fun update(product: Product)
+    suspend fun create(name: String, price: BigDecimal, stock: Int): Product
+    suspend fun update(id: Long, name: String, price: BigDecimal, stock: Int): Product
+    suspend fun delete(id: Long)
+    suspend fun deleteAll()
 }

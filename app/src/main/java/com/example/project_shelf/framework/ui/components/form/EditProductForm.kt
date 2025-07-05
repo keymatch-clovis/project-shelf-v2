@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -18,16 +17,20 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.project_shelf.R
-import com.example.project_shelf.adapter.view_model.EditProductUiState
 import com.example.project_shelf.framework.ui.components.CustomTextField
 
 @Composable
 fun EditProductForm(
-    state: State<EditProductUiState>,
-    innerPadding: PaddingValues = PaddingValues(0.dp),
+    name: String,
+    price: String,
+    stock: String,
+    nameErrors: List<Int>,
+    priceErrors: List<Int>,
+    stockErrors: List<Int>,
     onNameChange: (value: String) -> Unit,
     onPriceChange: (value: String) -> Unit,
-    onCountChange: (value: String) -> Unit,
+    onStockChange: (value: String) -> Unit,
+    innerPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {
@@ -42,7 +45,8 @@ fun EditProductForm(
             /// Name
             CustomTextField(
                 modifier = Modifier.focusRequester(focusRequester),
-                value = state.value.rawName,
+                value = name,
+                errors = nameErrors,
                 onValueChange = onNameChange,
                 label = R.string.name,
                 keyboardOptions = KeyboardOptions(
@@ -51,17 +55,19 @@ fun EditProductForm(
             )
             /// Default price
             CustomTextField(
-                value = state.value.rawDefaultPrice,
+                value = price,
+                errors = priceErrors,
                 onValueChange = onPriceChange,
                 label = R.string.default_price,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next
                 ),
             )
-            /// Count
+            /// Stock
             CustomTextField(
-                value = state.value.rawStock,
-                onValueChange = onCountChange,
+                value = stock,
+                errors = stockErrors,
+                onValueChange = onStockChange,
                 label = R.string.amount,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done

@@ -7,7 +7,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.random.Random
-import kotlin.random.nextInt
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -17,7 +16,7 @@ class ConfigViewModel @Inject constructor(
 ) : ViewModel() {
     fun removeAllData(onRemoved: suspend () -> Unit) {
         viewModelScope.launch {
-            productRepository.removeAll()
+            productRepository.deleteAll()
             onRemoved()
         }
     }

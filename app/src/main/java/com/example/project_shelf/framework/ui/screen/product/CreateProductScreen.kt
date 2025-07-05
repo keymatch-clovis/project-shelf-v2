@@ -28,7 +28,7 @@ fun CreateProductScreen(
     viewModel: CreateProductViewModel = hiltViewModel(),
     onDismissRequest: () -> Unit,
 ) {
-    val nameInputValueState = viewModel.nameInputValue.collectAsState()
+    val nameState = viewModel.name.collectAsState()
     val inputState = viewModel.inputState.collectAsState()
     val validationState = viewModel.validationState.collectAsState()
     val isValid = viewModel.isValid.collectAsState()
@@ -67,17 +67,17 @@ fun CreateProductScreen(
         CreateProductForm(
             innerPadding = innerPadding,
 
-            nameInputValue = nameInputValueState.value,
+            name = nameState.value,
             nameErrors = validationState.value.nameErrors.map { it.getStringResource() },
-            onNameChange = { viewModel.updateNameInputValue(it) },
+            onNameChange = { viewModel.updateName(it) },
 
-            defaultPriceInputValue = inputState.value.defaultPriceInputValue,
-            defaultPriceErrors = validationState.value.defaultPriceErrors.map { it.getStringResource() },
-            onPriceChange = { viewModel.updateDefaultPriceInputValue(it) },
+            price = inputState.value.price,
+            priceErrors = validationState.value.priceErrors.map { it.getStringResource() },
+            onPriceChange = { viewModel.updatePrice(it) },
 
-            stockInputValue = inputState.value.stockInputValue,
+            stock = inputState.value.stock,
             stockErrors = validationState.value.stockErrors.map { it.getStringResource() },
-            onStockChange = { viewModel.updateStockInputValue(it) },
+            onStockChange = { viewModel.updateStock(it) },
         )
     }
 }

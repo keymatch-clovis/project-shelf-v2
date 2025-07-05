@@ -21,11 +21,11 @@ import com.example.project_shelf.framework.ui.components.CustomTextField
 
 @Composable
 fun CreateProductForm(
-    nameInputValue: String,
-    defaultPriceInputValue: String,
-    stockInputValue: String,
+    name: String,
+    price: String,
+    stock: String,
     nameErrors: List<Int>,
-    defaultPriceErrors: List<Int>,
+    priceErrors: List<Int>,
     stockErrors: List<Int>,
     onNameChange: (value: String) -> Unit,
     onPriceChange: (value: String) -> Unit,
@@ -47,7 +47,7 @@ fun CreateProductForm(
             CustomTextField(
                 modifier = Modifier.focusRequester(focusRequester),
                 required = true,
-                value = nameInputValue,
+                value = name,
                 onValueChange = onNameChange,
                 label = R.string.name,
                 errors = nameErrors,
@@ -57,17 +57,17 @@ fun CreateProductForm(
             )
             /// Default price
             CustomTextField(
-                value = defaultPriceInputValue,
+                value = price,
                 onValueChange = onPriceChange,
                 label = R.string.default_price,
-                errors = defaultPriceErrors,
+                errors = priceErrors,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next
                 ),
             )
             /// Stock
             CustomTextField(
-                value = stockInputValue,
+                value = stock,
                 onValueChange = onStockChange,
                 label = R.string.amount,
                 errors = stockErrors,
