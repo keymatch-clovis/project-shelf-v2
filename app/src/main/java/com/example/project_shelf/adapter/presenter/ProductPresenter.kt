@@ -4,18 +4,19 @@ import android.icu.util.Currency
 import android.util.Log
 import androidx.paging.PagingData
 import androidx.paging.map
-import com.example.project_shelf.adapter.dto.room.toDto
 import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.dto.ui.ProductFilterDto
 import com.example.project_shelf.adapter.dto.ui.toDto
 import com.example.project_shelf.adapter.repository.ProductRepository
-import com.example.project_shelf.app.use_case.CreateProductUseCase
-import com.example.project_shelf.app.use_case.DeleteProductUseCase
-import com.example.project_shelf.app.use_case.FindProductUseCase
-import com.example.project_shelf.app.use_case.FindProductsUseCase
-import com.example.project_shelf.app.use_case.GetProductsUseCase
-import com.example.project_shelf.app.use_case.RemoveAllProductsUseCase
-import com.example.project_shelf.app.use_case.UpdateProductUseCase
+import com.example.project_shelf.app.use_case.product.CreateProductUseCase
+import com.example.project_shelf.app.use_case.product.DeleteProductUseCase
+import com.example.project_shelf.app.use_case.product.FindProductUseCase
+import com.example.project_shelf.app.use_case.product.FindProductsUseCase
+import com.example.project_shelf.app.use_case.product.GetProductsUseCase
+import com.example.project_shelf.app.use_case.product.MarkForDeletionUseCase
+import com.example.project_shelf.app.use_case.product.RemoveAllProductsUseCase
+import com.example.project_shelf.app.use_case.product.UnmarkForDeletionUseCase
+import com.example.project_shelf.app.use_case.product.UpdateProductUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -33,6 +34,8 @@ class ProductPresenter @Inject constructor(
     private val removeAllProductsUseCase: RemoveAllProductsUseCase,
     private val findProductsUseCase: FindProductsUseCase,
     private val findProductUseCase: FindProductUseCase,
+    private val markForDeletionUseCase: MarkForDeletionUseCase,
+    private val unmarkForDeletionUseCase: UnmarkForDeletionUseCase,
 ) : ProductRepository {
     override fun getProducts(): Flow<PagingData<ProductDto>> {
         return getProductsUseCase.exec().map {
@@ -81,6 +84,16 @@ class ProductPresenter @Inject constructor(
             // TODO: We can get the currency from a configuration option or something, but for now we'll
             // leave it hard coded.
             .toDto(Currency.getInstance("COP"))
+    }
+
+    override suspend fun unmarkForDeletion(id: Long) {
+        Log.d("PRESENTER", "Unmarking product for deletion: $id")
+        unmarkForDeletionUseCase.exec(id)
+    }
+
+    override suspend fun markForDeletion(id: Long) {
+        Log.d("PRESENTER", "Marking product for deletion: $id")
+        markForDeletionUseCase.exec(id)
     }
 
     override suspend fun deleteProduct(id: Long) {

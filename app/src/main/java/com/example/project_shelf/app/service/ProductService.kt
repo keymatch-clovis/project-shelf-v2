@@ -13,6 +13,8 @@ interface ProductService {
 
     suspend fun create(name: String, price: BigDecimal, stock: Int): Product
     suspend fun update(id: Long, name: String, price: BigDecimal, stock: Int): Product
+    suspend fun markForDeletion(id: Long)
+    suspend fun unmarkForDeletion(id: Long)
     suspend fun delete(id: Long)
     suspend fun deleteAll()
 }

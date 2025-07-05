@@ -11,15 +11,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -27,17 +22,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.example.project_shelf.R
+import com.example.project_shelf.adapter.view_model.DeletionViewModel
 import com.example.project_shelf.adapter.view_model.EditProductViewModel
 import com.example.project_shelf.framework.ui.components.dialog.AlertDialog
 import com.example.project_shelf.framework.ui.components.form.EditProductForm
 import com.example.project_shelf.framework.ui.getStringResource
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProductScreen(
     viewModel: EditProductViewModel,
     onDismissRequest: () -> Unit,
+    onDeleteRequest: () -> Unit,
 ) {
     val nameState = viewModel.name.collectAsState()
     val uiState = viewModel.uiState.collectAsState()
@@ -45,9 +41,6 @@ fun EditProductScreen(
     val validationState = viewModel.validationState.collectAsState()
     val isValid = viewModel.isValid.collectAsState()
     val context = LocalContext.current
-
-    val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.eventFlow.collect {
@@ -58,21 +51,12 @@ fun EditProductScreen(
                     Toast.LENGTH_SHORT,
                 ).show()
 
-                is EditProductViewModel.Event.ProductDeleted -> {
-                    scope.launch {
-                        snackbarHostState.showSnackbar(
-                            message = context.getText(R.string.product_deleted).toString(),
-                            actionLabel = context.getText(R.string.undo).toString(),
-                            duration = SnackbarDuration.Long,
-                        )
-                    }
-                }
+                is EditProductViewModel.Event.ProductMarkedForDeletion -> onDeleteRequest()
             }
         }
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             MediumTopAppBar(
                 modifier = Modifier.padding(horizontal = 4.dp),
@@ -105,7 +89,7 @@ fun EditProductScreen(
         if (uiState.value.showConfirmDeletionDialog) {
             AlertDialog(
                 onDismissRequest = { viewModel.closeConfirmDeletionDialog() },
-                onAcceptRequest = { viewModel.delete() },
+                onAcceptRequest = { viewModel.markForDeletion() },
             )
         }
 

@@ -1,4 +1,4 @@
-package com.example.project_shelf.app.use_case
+package com.example.project_shelf.app.use_case.product
 
 import androidx.paging.PagingData
 import com.example.project_shelf.app.entity.ProductFilter

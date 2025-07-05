@@ -1,4 +1,4 @@
-package com.example.project_shelf.app.use_case
+package com.example.project_shelf.app.use_case.product
 
 import com.example.project_shelf.app.service.CustomerService
 import javax.inject.Inject

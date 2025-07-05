@@ -1,18 +1,21 @@
 package com.example.project_shelf.adapter.dto.ui
 
 import android.icu.util.Currency
+import android.os.Parcelable
 import com.example.project_shelf.app.entity.Product
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import java.math.BigDecimal
 
 @Serializable
+@Parcelize
 data class ProductDto(
     val id: Long,
     val name: String,
     val price: String,
     val formattedPrice: String,
     val stock: String,
-)
+) : Parcelable
 
 fun Product.toDto(currency: Currency): ProductDto {
     // As we are storing our currencies as integers, we need to show the correct fraction digits on

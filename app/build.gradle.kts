@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     /// Serialization
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.parcelize)
 
     /// KSP Plugin
     alias(libs.plugins.ksp)
@@ -12,6 +13,7 @@ plugins {
 
     /// Hilt
     alias(libs.plugins.hilt)
+
 }
 
 android {

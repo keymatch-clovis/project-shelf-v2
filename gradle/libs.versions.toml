@@ -61,12 +61,13 @@ hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", v
 faker = { group = "io.github.serpro69", name = "kotlin-faker", version.ref = "kotlinFaker" }
 androidx-paging = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
 androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
-jodamoney = { group = "org.joda", name = "joda-money", version.ref= "jodamoney"}
+jodamoney = { group = "org.joda", name = "joda-money", version.ref = "jodamoney" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }

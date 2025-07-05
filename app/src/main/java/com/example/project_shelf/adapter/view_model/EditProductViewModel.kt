@@ -1,6 +1,6 @@
 package com.example.project_shelf.adapter.view_model
 
-import androidx.compose.material3.SnackbarDuration
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.project_shelf.adapter.ViewModelError
@@ -10,8 +10,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -48,8 +46,8 @@ class EditProductViewModel @AssistedInject constructor(
     }
 
     sealed class Event {
-        data class ProductUpdated(val product: ProductDto) : Event()
-        data class ProductDeleted(val product: ProductDto) : Event()
+        class ProductUpdated : Event()
+        class ProductMarkedForDeletion() : Event()
     }
 
     private val _eventFlow = MutableSharedFlow<Event>()
@@ -76,8 +74,6 @@ class EditProductViewModel @AssistedInject constructor(
 
     private val _isValid = MutableStateFlow(false)
     val isValid = _isValid.asStateFlow()
-
-    private var deletionJob: Job? = null
 
     init {
         // When the name changes, we need to check if another product has this name.
@@ -146,11 +142,10 @@ class EditProductViewModel @AssistedInject constructor(
         _uiState.update { it.copy(showConfirmDeletionDialog = false) }
     }
 
-    fun delete() {
-        deletionJob = viewModelScope.launch {
-            delay(5000L)
-            productRepository.deleteProduct(product.id)
-            _eventFlow.emit(Event.ProductDeleted(product))
+    fun markForDeletion() {
+        viewModelScope.launch {
+            productRepository.markForDeletion(product.id)
+            _eventFlow.emit(Event.ProductMarkedForDeletion())
         }
     }
 
@@ -159,13 +154,13 @@ class EditProductViewModel @AssistedInject constructor(
         assert(isValid.value)
 
         viewModelScope.launch {
-            val product = productRepository.updateProduct(
+            productRepository.updateProduct(
                 id = product.id,
                 name = _name.value.trim(),
                 price = _inputState.value.price.toBigDecimalOrZero(),
                 stock = _inputState.value.stock.toIntOrZero(),
             )
-            _eventFlow.emit(Event.ProductUpdated(product))
+            _eventFlow.emit(Event.ProductUpdated())
         }
     }
 }

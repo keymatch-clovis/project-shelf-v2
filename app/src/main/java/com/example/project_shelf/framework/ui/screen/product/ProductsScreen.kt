@@ -1,5 +1,6 @@
 package com.example.project_shelf.framework.ui.screen.product
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.animateDpAsState
@@ -22,14 +23,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +43,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
@@ -45,14 +52,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.dto.ui.ProductDto
+import com.example.project_shelf.adapter.view_model.DeletionViewModel
 import com.example.project_shelf.adapter.view_model.ProductSearchViewModel
 import com.example.project_shelf.adapter.view_model.ProductsViewModel
 import com.example.project_shelf.framework.ui.components.ProductList
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun ProductsScreen(
-    viewModel: ProductsViewModel = hiltViewModel(),
+    viewModel: ProductsViewModel,
+    deletionViewModel: DeletionViewModel,
     searchViewModel: ProductSearchViewModel = hiltViewModel(),
     onProductCreate: () -> Unit,
     onProductEdit: (product: ProductDto) -> Unit,
@@ -61,8 +71,11 @@ fun ProductsScreen(
     val searchState = searchViewModel.uiState.collectAsState()
     val lazyPagingSearchItems = searchViewModel.result.collectAsLazyPagingItems()
     val query = searchViewModel.query.collectAsState()
+    val productMarkedForDeletion = deletionViewModel.productMarkedForDeletion.collectAsState()
 
+    val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val localContext = LocalContext.current
     var showSearchBar by remember { mutableStateOf(false) }
 
     var showTools: Boolean by remember { mutableStateOf(true) }
@@ -88,6 +101,22 @@ fun ProductsScreen(
             0.dp
         }
     )
+
+    LaunchedEffect(productMarkedForDeletion.value) {
+        if (productMarkedForDeletion.value != null) {
+            scope.launch {
+                val result = snackbarHostState.showSnackbar(
+                    message = localContext.getString(R.string.product_deleted),
+                    actionLabel = localContext.getString(R.string.undo),
+                    duration = SnackbarDuration.Long,
+                )
+                when (result) {
+                    SnackbarResult.ActionPerformed -> deletionViewModel.unmarkProductForDeletion()
+                    SnackbarResult.Dismissed -> deletionViewModel.deleteProduct()
+                }
+            }
+        }
+    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },

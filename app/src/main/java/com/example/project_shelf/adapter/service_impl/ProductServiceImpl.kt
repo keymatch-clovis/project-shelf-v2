@@ -8,7 +8,6 @@ import androidx.paging.map
 import androidx.room.withTransaction
 import com.example.project_shelf.adapter.dto.room.ProductDto
 import com.example.project_shelf.adapter.dto.room.ProductFtsDto
-import com.example.project_shelf.adapter.dto.room.toDto
 import com.example.project_shelf.adapter.dto.room.toEntity
 import com.example.project_shelf.adapter.dto.room.toProductFilter
 import com.example.project_shelf.app.entity.Product
@@ -118,6 +117,16 @@ class ProductServiceImpl @Inject constructor(
         )
         database.productDao().update(dto)
         return dto.toEntity()
+    }
+
+    override suspend fun markForDeletion(id: Long) {
+        Log.d("SERVICE-IMPL", "Marking product for deletion: $id")
+        database.productDao().markForDeletion(id)
+    }
+
+    override suspend fun unmarkForDeletion(id: Long) {
+        Log.d("SERVICE-IMPL", "Unmarking product for deletion: $id")
+        database.productDao().unmarkForDeletion(id)
     }
 }
 

@@ -20,10 +20,11 @@ data class ProductsUiState(
     var productsFound: List<ProductDto> = listOf(),
 )
 
-@HiltViewModel
+@HiltViewModel()
 class ProductsViewModel @Inject constructor(
     private val repository: ProductRepository,
 ) : ViewModel() {
+
     private val _uiState = MutableStateFlow(ProductsUiState())
     val uiState = _uiState.asStateFlow()
 

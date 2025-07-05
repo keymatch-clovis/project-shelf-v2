@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
     /// Serialization
     alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.kotlin.parcelize) apply false
 
     // KSP Plugin
     alias(libs.plugins.ksp) apply false
