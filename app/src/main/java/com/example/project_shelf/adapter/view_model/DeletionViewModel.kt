@@ -16,16 +16,8 @@ import javax.inject.Inject
 class DeletionViewModel @Inject constructor(
     private val productRepository: ProductRepository,
 ) : ViewModel() {
-    sealed class Event {
-        class ProductDeleted : Event()
-    }
-
     private val _productMarkedForDeletion = MutableStateFlow<ProductDto?>(null)
     val productMarkedForDeletion = _productMarkedForDeletion.asStateFlow()
-
-    fun updateProductMarkedForDeletion(dto: ProductDto) {
-        _productMarkedForDeletion.update { dto }
-    }
 
     fun unmarkProductForDeletion() {
         val product = checkNotNull(productMarkedForDeletion.value) {
@@ -39,15 +31,16 @@ class DeletionViewModel @Inject constructor(
         }
     }
 
-    fun deleteProduct() {
-        val product = checkNotNull(productMarkedForDeletion.value) {
-            "No product marked for deletion, but tried to delete."
-        }
+    fun markProductForDeletion(dto: ProductDto) {
+        Log.d("VIEW-MODEL", "Marking product for deletion: $productMarkedForDeletion")
+        _productMarkedForDeletion.update { dto }
 
-        Log.d("VIEW-MODEL", "Deleting product: $productMarkedForDeletion")
         viewModelScope.launch {
-            productRepository.deleteProduct(product.id)
-            _productMarkedForDeletion.update { null }
+            productRepository.markForDeletion(dto.id)
         }
+    }
+
+    fun clearProductMarkedForDeletion() {
+        _productMarkedForDeletion.update { null }
     }
 }

@@ -102,6 +102,11 @@ class ProductServiceImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteMarkedForDeletion() {
+        Log.d("SERVICE-IMPL", "Deleting products marked for deletion.")
+        database.productDao().deleteMarkedForDeletion()
+    }
+
     override suspend fun update(
         id: Long,
         name: String,
@@ -132,7 +137,7 @@ class ProductServiceImpl @Inject constructor(
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class ProductModule {
+abstract class ProductServiceModule {
     @Binds
-    abstract fun bindService(impl: ProductServiceImpl): ProductService
+    abstract fun bind(impl: ProductServiceImpl): ProductService
 }

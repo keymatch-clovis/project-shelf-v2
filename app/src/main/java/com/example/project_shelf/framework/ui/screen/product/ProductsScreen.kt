@@ -103,16 +103,19 @@ fun ProductsScreen(
     )
 
     LaunchedEffect(productMarkedForDeletion.value) {
+        // If a product has been marked for deletion, show a snackbar to give he user the option to
+        // undo the deletion of the product.
         if (productMarkedForDeletion.value != null) {
             scope.launch {
                 val result = snackbarHostState.showSnackbar(
                     message = localContext.getString(R.string.product_deleted),
                     actionLabel = localContext.getString(R.string.undo),
                     duration = SnackbarDuration.Long,
+                    withDismissAction = true,
                 )
                 when (result) {
                     SnackbarResult.ActionPerformed -> deletionViewModel.unmarkProductForDeletion()
-                    SnackbarResult.Dismissed -> deletionViewModel.deleteProduct()
+                    SnackbarResult.Dismissed -> deletionViewModel.clearProductMarkedForDeletion()
                 }
             }
         }

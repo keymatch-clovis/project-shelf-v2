@@ -16,7 +16,7 @@ data class ProductDto(
     @ColumnInfo(name = "default_price") val defaultPrice: String,
     @ColumnInfo(name = "stock") val stock: Int,
     /// Functional properties
-    @ColumnInfo(name = "for_deletion") val forDeletion: Boolean = false,
+    @ColumnInfo(name = "marked_for_deletion") val markedForDeletion: Boolean = false,
 )
 
 fun ProductDto.toEntity(): Product {

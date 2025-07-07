@@ -4,10 +4,15 @@ import android.icu.util.Currency
 import android.util.Log
 import androidx.paging.PagingData
 import androidx.paging.map
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.dto.ui.ProductFilterDto
 import com.example.project_shelf.adapter.dto.ui.toDto
 import com.example.project_shelf.adapter.repository.ProductRepository
+import com.example.project_shelf.adapter.worker.DeleteProductsMarkedForDeletionWorker
+import com.example.project_shelf.adapter.worker.Tag
 import com.example.project_shelf.app.use_case.product.CreateProductUseCase
 import com.example.project_shelf.app.use_case.product.DeleteProductUseCase
 import com.example.project_shelf.app.use_case.product.FindProductUseCase
@@ -20,10 +25,11 @@ import com.example.project_shelf.app.use_case.product.UpdateProductUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.math.BigDecimal
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class ProductPresenter @Inject constructor(
@@ -36,6 +42,7 @@ class ProductPresenter @Inject constructor(
     private val findProductUseCase: FindProductUseCase,
     private val markForDeletionUseCase: MarkForDeletionUseCase,
     private val unmarkForDeletionUseCase: UnmarkForDeletionUseCase,
+    private val workManager: WorkManager,
 ) : ProductRepository {
     override fun getProducts(): Flow<PagingData<ProductDto>> {
         return getProductsUseCase.exec().map {
@@ -92,13 +99,30 @@ class ProductPresenter @Inject constructor(
     }
 
     override suspend fun markForDeletion(id: Long) {
+        // NOTE: When we mark a product for deletion, we will execute the job for the deletion of
+        // marked products for deletion. This will give us some time to ask the user if they want to
+        // revert the mark applied to the product. This will not ensure the products are deleted
+        // when the user asks to, so we have to make business rules checks for that.
+        // This is the best way that I've thought about it, but I'm not completely sure this is ok.
+
+        // So, first, mark the product for deletion.
         Log.d("PRESENTER", "Marking product for deletion: $id")
         markForDeletionUseCase.exec(id)
-    }
 
-    override suspend fun deleteProduct(id: Long) {
-        Log.d("PRODUCT-PRESENTER", "Deleting product: $id")
-        deleteProductUseCase.exec(id)
+        // And then, enqueue the work to delete the products marked for deletion.
+        val workRequest = OneTimeWorkRequestBuilder<DeleteProductsMarkedForDeletionWorker>()
+            // NOTE: Ten seconds, because that's the time a Long Snackbar takes to be automatically
+            // dismissed. This I have seen directly in the code, so the documentation for this is
+            // a bit obscure.
+            .addTag(Tag.DELETE_PRODUCTS_MARKED_FOR_DELETION.name)
+            .setInitialDelay(10, TimeUnit.SECONDS)
+            .build()
+        Log.d("PRESENTER", "Enqueuing delete products marked for deletion work")
+        workManager.enqueueUniqueWork(
+            Tag.DELETE_PRODUCTS_MARKED_FOR_DELETION.name,
+            ExistingWorkPolicy.REPLACE,
+            workRequest
+        )
     }
 
     override suspend fun deleteAll() {
@@ -108,8 +132,8 @@ class ProductPresenter @Inject constructor(
 }
 
 @Module
-@InstallIn(ViewModelComponent::class)
-abstract class ProductModule {
+@InstallIn(SingletonComponent::class)
+abstract class ProductPresenterModule {
     @Binds
-    abstract fun bindProductService(presenter: ProductPresenter): ProductRepository
+    abstract fun bindRepository(presenter: ProductPresenter): ProductRepository
 }

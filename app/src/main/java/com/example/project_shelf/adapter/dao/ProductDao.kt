@@ -10,10 +10,10 @@ import com.example.project_shelf.adapter.dto.room.ProductFtsDto
 
 @Dao
 interface ProductDao {
-    @Query("SELECT * FROM product WHERE for_deletion = 0")
+    @Query("SELECT * FROM product WHERE marked_for_deletion = 0")
     fun select(): PagingSource<Int, ProductDto>
 
-    @Query("SELECT * FROM PRODUCT WHERE name = :name AND for_deletion = 0")
+    @Query("SELECT * FROM PRODUCT WHERE name = :name AND marked_for_deletion = 0")
     suspend fun select(name: String): ProductDto?
 
     @Query("DELETE FROM product")
@@ -22,10 +22,13 @@ interface ProductDao {
     @Query("DELETE FROM product WHERE rowid = :id")
     suspend fun delete(id: Long)
 
-    @Query("UPDATE product SET for_deletion = 1 WHERE rowid = :id")
+    @Query("DELETE FROM product WHERE marked_for_deletion = 1")
+    suspend fun deleteMarkedForDeletion()
+
+    @Query("UPDATE product SET marked_for_deletion = 1 WHERE rowid = :id")
     suspend fun markForDeletion(id: Long)
 
-    @Query("UPDATE product SET for_deletion = 0 WHERE rowid = :id")
+    @Query("UPDATE product SET marked_for_deletion = 0 WHERE rowid = :id")
     suspend fun unmarkForDeletion(id: Long)
 
     @Insert

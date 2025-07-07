@@ -13,7 +13,6 @@ plugins {
 
     /// Hilt
     alias(libs.plugins.hilt)
-
 }
 
 android {
@@ -109,4 +108,9 @@ dependencies {
 
     /// Joda Money
     implementation(libs.jodamoney)
+
+    /// Work Manager
+    implementation(libs.androidx.work)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
 }

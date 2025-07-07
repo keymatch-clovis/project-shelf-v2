@@ -16,5 +16,6 @@ interface ProductService {
     suspend fun markForDeletion(id: Long)
     suspend fun unmarkForDeletion(id: Long)
     suspend fun delete(id: Long)
+    suspend fun deleteMarkedForDeletion()
     suspend fun deleteAll()
 }

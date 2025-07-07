@@ -56,6 +56,7 @@ class CreateProductViewModel @Inject constructor(
     val isValid = _isValid.asStateFlow()
 
     init {
+        Log.d("VIEW-MODEL", "Create product")
         // When the name changes, we need to check if another product has this name.
         viewModelScope.launch {
             _name

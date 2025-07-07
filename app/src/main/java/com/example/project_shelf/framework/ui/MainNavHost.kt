@@ -78,7 +78,7 @@ fun MainNavHost(
                 },
                 onDismissRequest = { navController.popBackStack() },
                 onDeleteRequest = {
-                    deletionViewModel.updateProductMarkedForDeletion(product)
+                    deletionViewModel.markProductForDeletion(product)
                     navController.popBackStack()
                 },
             )
