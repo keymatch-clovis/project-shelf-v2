@@ -32,6 +32,7 @@ import com.example.project_shelf.framework.ui.getStringResource
 @Composable
 fun EditProductScreen(
     viewModel: EditProductViewModel,
+    deletionViewModel: DeletionViewModel,
     onDismissRequest: () -> Unit,
     onDeleteRequest: () -> Unit,
 ) {
@@ -89,7 +90,10 @@ fun EditProductScreen(
         if (uiState.value.showConfirmDeletionDialog) {
             AlertDialog(
                 onDismissRequest = { viewModel.closeConfirmDeletionDialog() },
-                onAcceptRequest = { viewModel.markForDeletion() },
+                onAcceptRequest = {
+                    deletionViewModel.markProductForDeletion(viewModel.product)
+                    onDeleteRequest()
+                },
             )
         }
 

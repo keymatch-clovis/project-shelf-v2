@@ -21,15 +21,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.example.project_shelf.R
-import com.example.project_shelf.framework.ui.AppNavHost
 import com.example.project_shelf.framework.ui.Destination
 import com.example.project_shelf.framework.ui.MainNavHost
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview()
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()

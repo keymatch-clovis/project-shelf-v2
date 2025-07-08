@@ -7,6 +7,6 @@ import javax.inject.Inject
 class DeleteMarkedForDeletionUseCase @Inject constructor(private val service: ProductService) {
     suspend fun exec() {
         Log.d("USE-CASE", "Deleting products marked for deletion.")
-        return service.deleteMarkedForDeletion()
+        return service.deletePendingForDeletion()
     }
 }

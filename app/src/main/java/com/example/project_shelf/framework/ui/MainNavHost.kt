@@ -39,9 +39,19 @@ fun MainNavHost(
                 viewModel = hiltViewModel(),
                 deletionViewModel = deletionViewModel,
                 onProductCreate = {
+                    // If the user wants to create a product, we want to clear the deletion view
+                    // model. This prevents the user from restoring a product that might clash with
+                    // the new one.
+                    deletionViewModel.clear()
+
                     navController.navigate(Destination.CREATE_PRODUCT.path)
                 },
                 onProductEdit = {
+                    // If the user wants to edit a product, we want to clear the deletion view
+                    // model. This prevents the user from restoring a product that might clash with
+                    // the edited one.
+                    deletionViewModel.clear()
+
                     navController.navigate(it)
                 },
             )
@@ -76,11 +86,9 @@ fun MainNavHost(
                 viewModel = hiltViewModel<EditProductViewModel, EditProductViewModel.Factory> {
                     it.create(product)
                 },
+                deletionViewModel = deletionViewModel,
                 onDismissRequest = { navController.popBackStack() },
-                onDeleteRequest = {
-                    deletionViewModel.markProductForDeletion(product)
-                    navController.popBackStack()
-                },
+                onDeleteRequest = { navController.popBackStack() },
             )
         }
     }

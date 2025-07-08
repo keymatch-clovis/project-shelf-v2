@@ -1,6 +1,7 @@
 package com.example.project_shelf.app.use_case.product
 
 import android.util.Log
+import com.example.project_shelf.app.entity.Product
 import com.example.project_shelf.app.service.ProductService
 import javax.inject.Inject
 

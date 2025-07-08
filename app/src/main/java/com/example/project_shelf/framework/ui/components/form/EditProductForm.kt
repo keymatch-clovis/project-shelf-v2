@@ -7,11 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -32,11 +28,6 @@ fun EditProductForm(
     onStockChange: (value: String) -> Unit,
     innerPadding: PaddingValues = PaddingValues(0.dp),
 ) {
-    val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
-
     Box(modifier = Modifier.padding(innerPadding)) {
         Column(
             modifier = Modifier.padding(24.dp),
@@ -44,7 +35,6 @@ fun EditProductForm(
         ) {
             /// Name
             CustomTextField(
-                modifier = Modifier.focusRequester(focusRequester),
                 value = name,
                 errors = nameErrors,
                 onValueChange = onNameChange,

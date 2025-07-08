@@ -1,13 +1,18 @@
 package com.example.project_shelf.framework.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -54,40 +59,53 @@ fun ProductList(
         }
     }
 
-    LazyColumn(
-        state = lazyListState,
-        modifier = Modifier
-            .fillMaxWidth()
-            .nestedScroll(nestedScrollConnection),
+    Box(
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        if (lazyPagingItems.loadState.refresh == LoadState.Loading) {
-            item {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
+        LazyColumn(
+            state = lazyListState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .nestedScroll(nestedScrollConnection),
+        ) {
+            items(count = lazyPagingItems.itemCount) { index ->
+                lazyPagingItems[index]?.let {
+                    ProductListItem(it, onItemClicked = onProductClicked)
+                }
+
+                if (index < lazyPagingItems.itemCount - 1) {
+                    HorizontalDivider()
+                }
+            }
+
+            if (lazyPagingItems.loadState.append == LoadState.Loading) {
+                item {
+                    CircularProgressIndicator(
+                        Modifier
+                            .fillMaxWidth()
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                    )
                 }
             }
         }
 
-        items(count = lazyPagingItems.itemCount) { index ->
-            lazyPagingItems[index]?.let {
-                ProductListItem(it, onItemClicked = onProductClicked)
-            }
-
-            if (index < lazyPagingItems.itemCount - 1) {
-                HorizontalDivider()
-            }
-        }
-
-        if (lazyPagingItems.loadState.append == LoadState.Loading) {
-            item {
-                CircularProgressIndicator(
-                    Modifier
-                        .fillMaxWidth()
-                        .wrapContentWidth(Alignment.CenterHorizontally)
-                )
+        // if (lazyPagingItems.loadState.refresh == LoadState.Loading) {
+        AnimatedVisibility(
+            visible = lazyPagingItems.loadState.refresh == LoadState.Loading,
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Card(
+                    shape = AbsoluteRoundedCornerShape(100),
+                    // https://m3.material.io/styles/elevation/tokens
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.padding(4.dp))
+                }
             }
         }
     }

@@ -99,30 +99,9 @@ class ProductPresenter @Inject constructor(
     }
 
     override suspend fun markForDeletion(id: Long) {
-        // NOTE: When we mark a product for deletion, we will execute the job for the deletion of
-        // marked products for deletion. This will give us some time to ask the user if they want to
-        // revert the mark applied to the product. This will not ensure the products are deleted
-        // when the user asks to, so we have to make business rules checks for that.
-        // This is the best way that I've thought about it, but I'm not completely sure this is ok.
-
-        // So, first, mark the product for deletion.
+        // Mark the product for deletion.
         Log.d("PRESENTER", "Marking product for deletion: $id")
         markForDeletionUseCase.exec(id)
-
-        // And then, enqueue the work to delete the products marked for deletion.
-        val workRequest = OneTimeWorkRequestBuilder<DeleteProductsMarkedForDeletionWorker>()
-            // NOTE: Ten seconds, because that's the time a Long Snackbar takes to be automatically
-            // dismissed. This I have seen directly in the code, so the documentation for this is
-            // a bit obscure.
-            .addTag(Tag.DELETE_PRODUCTS_MARKED_FOR_DELETION.name)
-            .setInitialDelay(10, TimeUnit.SECONDS)
-            .build()
-        Log.d("PRESENTER", "Enqueuing delete products marked for deletion work")
-        workManager.enqueueUniqueWork(
-            Tag.DELETE_PRODUCTS_MARKED_FOR_DELETION.name,
-            ExistingWorkPolicy.REPLACE,
-            workRequest
-        )
     }
 
     override suspend fun deleteAll() {

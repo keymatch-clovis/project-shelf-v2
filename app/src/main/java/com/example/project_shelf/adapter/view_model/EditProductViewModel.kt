@@ -1,6 +1,5 @@
 package com.example.project_shelf.adapter.view_model
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.project_shelf.adapter.ViewModelError
@@ -140,14 +139,6 @@ class EditProductViewModel @AssistedInject constructor(
 
     fun closeConfirmDeletionDialog() {
         _uiState.update { it.copy(showConfirmDeletionDialog = false) }
-    }
-
-    fun markForDeletion() {
-        viewModelScope.launch {
-            Log.d("VIEW-MODEL", "Marking product for deletion: $product")
-            productRepository.markForDeletion(product.id)
-            _eventFlow.emit(Event.ProductMarkedForDeletion())
-        }
     }
 
     fun edit() {

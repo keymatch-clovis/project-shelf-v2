@@ -2,21 +2,17 @@ package com.example.project_shelf.adapter.dto.room
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.example.project_shelf.app.entity.Product
 
-@Entity(
-    tableName = "product",
-    indices = [Index(value = ["name"], unique = true)],
-)
+@Entity(tableName = "product")
 data class ProductDto(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "rowid") val rowId: Long = 0,
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "default_price") val defaultPrice: String,
     @ColumnInfo(name = "stock") val stock: Int,
     /// Functional properties
-    @ColumnInfo(name = "marked_for_deletion") val markedForDeletion: Boolean = false,
+    @ColumnInfo(name = "pending_delete_until") val pendingDeleteUntil: Long? = null,
 )
 
 fun ProductDto.toEntity(): Product {

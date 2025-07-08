@@ -1,6 +1,5 @@
 package com.example.project_shelf.framework.ui.screen.product
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.animateDpAsState
@@ -31,7 +30,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,6 +54,9 @@ import com.example.project_shelf.adapter.view_model.DeletionViewModel
 import com.example.project_shelf.adapter.view_model.ProductSearchViewModel
 import com.example.project_shelf.adapter.view_model.ProductsViewModel
 import com.example.project_shelf.framework.ui.components.ProductList
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
@@ -71,14 +72,13 @@ fun ProductsScreen(
     val searchState = searchViewModel.uiState.collectAsState()
     val lazyPagingSearchItems = searchViewModel.result.collectAsLazyPagingItems()
     val query = searchViewModel.query.collectAsState()
-    val productMarkedForDeletion = deletionViewModel.productMarkedForDeletion.collectAsState()
 
     val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
     val localContext = LocalContext.current
     var showSearchBar by remember { mutableStateOf(false) }
 
     var showTools: Boolean by remember { mutableStateOf(true) }
+    val snackbarState = deletionViewModel.snackbarState.collectAsState()
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
@@ -102,27 +102,14 @@ fun ProductsScreen(
         }
     )
 
-    LaunchedEffect(productMarkedForDeletion.value) {
-        // If a product has been marked for deletion, show a snackbar to give he user the option to
-        // undo the deletion of the product.
-        if (productMarkedForDeletion.value != null) {
-            scope.launch {
-                val result = snackbarHostState.showSnackbar(
-                    message = localContext.getString(R.string.product_deleted),
-                    actionLabel = localContext.getString(R.string.undo),
-                    duration = SnackbarDuration.Long,
-                    withDismissAction = true,
-                )
-                when (result) {
-                    SnackbarResult.ActionPerformed -> deletionViewModel.unmarkProductForDeletion()
-                    SnackbarResult.Dismissed -> deletionViewModel.clearProductMarkedForDeletion()
-                }
-            }
-        }
+    // Start the undo deletion snackbar. The snackbar state might recreated, when the user wants to
+    // edit, or create a new product. As such, we have to be aware of this.
+    LaunchedEffect(snackbarState.value) {
+        deletionViewModel.startSnackbar("testing", "testu")
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        snackbarHost = { SnackbarHost(hostState = snackbarState.value) },
         floatingActionButton = {
             AnimatedVisibility(
                 visible = showTools && !showSearchBar,

@@ -1,7 +1,9 @@
 package com.example.project_shelf.framework.room
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Room
+import com.example.project_shelf.framework.room.index.ProductIndex
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,10 +20,13 @@ object ShelfDatabaseModule {
     @Singleton
     @Provides
     fun provideShelfDatabase(@ApplicationContext context: Context): SqliteDatabase {
+        Log.d("DATABASE", "Creating database")
         return Room.databaseBuilder(
             context,
             SqliteDatabase::class.java,
             DATABASE_NAME,
-        ).build()
+        )
+            .addCallback(ProductIndex())
+            .build()
     }
 }

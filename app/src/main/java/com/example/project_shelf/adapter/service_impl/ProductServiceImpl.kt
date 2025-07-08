@@ -102,9 +102,9 @@ class ProductServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteMarkedForDeletion() {
-        Log.d("SERVICE-IMPL", "Deleting products marked for deletion.")
-        database.productDao().deleteMarkedForDeletion()
+    override suspend fun deletePendingForDeletion() {
+        Log.d("SERVICE-IMPL", "Deleting products pending for deletion.")
+        database.productDao().deletePendingForDeletion()
     }
 
     override suspend fun update(
@@ -124,9 +124,9 @@ class ProductServiceImpl @Inject constructor(
         return dto.toEntity()
     }
 
-    override suspend fun markForDeletion(id: Long) {
+    override suspend fun markForDeletion(id: Long, until: Long) {
         Log.d("SERVICE-IMPL", "Marking product for deletion: $id")
-        database.productDao().markForDeletion(id)
+        database.productDao().markForDeletion(id, until)
     }
 
     override suspend fun unmarkForDeletion(id: Long) {
