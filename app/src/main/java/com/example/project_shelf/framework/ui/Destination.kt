@@ -10,7 +10,8 @@ enum class Destination(
     MAIN("main"),
 
     // Client Category
-    CLIENT("main.client"),
+    CUSTOMER("main.client"),
+    CREATE_CUSTOMER("main.client.create"),
 
     // Product Category
     PRODUCT("main.product"),

@@ -4,8 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.example.project_shelf.adapter.dto.ui.ProductFilterDto
-import com.example.project_shelf.adapter.repository.ProductRepository
+import com.example.project_shelf.adapter.repository.WithSearch
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -19,37 +18,27 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class ProductSearchUiState(
-    var isSearchBarExpanded: Boolean = false,
-)
-
-@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 @HiltViewModel
-class ProductSearchViewModel @Inject constructor(
-    private val repository: ProductRepository,
+class SearchViewModel<T : Any> @Inject constructor(
+    private val repository: WithSearch<T>,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(ProductSearchUiState())
-    val uiState = _uiState.asStateFlow()
-
-    private val _result: MutableStateFlow<PagingData<ProductFilterDto>> =
-        MutableStateFlow(PagingData.empty())
+    private val _result: MutableStateFlow<PagingData<T>> = MutableStateFlow(PagingData.empty())
     val result = _result.asStateFlow()
+
+    private val _isSearchBarExpanded = MutableStateFlow(false)
+    val isSearchBarExpanded = _isSearchBarExpanded.asStateFlow()
 
     private val _query = MutableStateFlow("")
     val query = _query.asStateFlow()
 
     init {
         viewModelScope.launch {
-            _query
-                .debounce(300)
-                .distinctUntilChanged()
-                .flatMapLatest {
-                    repository.search(it.toString())
-                }
-                .cachedIn(viewModelScope)
-                .collectLatest {
-                    _result.value = it
-                }
+            _query.debounce(300).distinctUntilChanged().flatMapLatest {
+                repository.search(it.toString())
+            }.cachedIn(viewModelScope).collectLatest {
+                _result.value = it
+            }
         }
     }
 
@@ -63,6 +52,6 @@ class ProductSearchViewModel @Inject constructor(
             updateQuery("")
         }
 
-        _uiState.update { it.copy(isSearchBarExpanded = value) }
+        _isSearchBarExpanded.update { value }
     }
 }

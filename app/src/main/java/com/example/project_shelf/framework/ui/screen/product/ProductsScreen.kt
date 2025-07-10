@@ -22,10 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,20 +47,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.dto.ui.ProductDto
-import com.example.project_shelf.adapter.view_model.DeletionViewModel
-import com.example.project_shelf.adapter.view_model.ProductSearchViewModel
-import com.example.project_shelf.adapter.view_model.ProductsViewModel
+import com.example.project_shelf.adapter.view_model.product.ProductDeletionViewModel
+import com.example.project_shelf.adapter.view_model.product.ProductSearchViewModel
+import com.example.project_shelf.adapter.view_model.product.ProductsViewModel
 import com.example.project_shelf.framework.ui.components.ProductList
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun ProductsScreen(
     viewModel: ProductsViewModel,
-    deletionViewModel: DeletionViewModel,
+    productDeletionViewModel: ProductDeletionViewModel,
     searchViewModel: ProductSearchViewModel = hiltViewModel(),
     onProductCreate: () -> Unit,
     onProductEdit: (product: ProductDto) -> Unit,
@@ -78,7 +71,7 @@ fun ProductsScreen(
     var showSearchBar by remember { mutableStateOf(false) }
 
     var showTools: Boolean by remember { mutableStateOf(true) }
-    val snackbarState = deletionViewModel.snackbarState.collectAsState()
+    val snackbarState = productDeletionViewModel.snackbarState.collectAsState()
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
@@ -102,10 +95,13 @@ fun ProductsScreen(
         }
     )
 
-    // Start the undo deletion snackbar. The snackbar state might recreated, when the user wants to
-    // edit, or create a new product. As such, we have to be aware of this.
+    // Start the undo deletion snackbar. The snackbar state might recreate, when the user wants to
+    // edit, or create an object. As such, we have to be aware of this.
     LaunchedEffect(snackbarState.value) {
-        deletionViewModel.startSnackbar("testing", "testu")
+        productDeletionViewModel.startSnackbar(
+            localContext.getString(R.string.product_deleted),
+            localContext.getString(R.string.undo),
+        )
     }
 
     Scaffold(

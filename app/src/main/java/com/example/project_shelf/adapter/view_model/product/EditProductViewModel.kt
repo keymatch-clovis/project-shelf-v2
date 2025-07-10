@@ -1,25 +1,34 @@
-package com.example.project_shelf.adapter.view_model
+package com.example.project_shelf.adapter.view_model.product
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.project_shelf.adapter.ViewModelError
 import com.example.project_shelf.adapter.dto.ui.ProductDto
+import com.example.project_shelf.adapter.repository.ProductRepository
+import com.example.project_shelf.adapter.view_model.toBigDecimalOrZero
+import com.example.project_shelf.adapter.view_model.toIntOrZero
+import com.example.project_shelf.adapter.view_model.validateBigDecimal
+import com.example.project_shelf.adapter.view_model.validateInt
+import com.example.project_shelf.adapter.view_model.validateString
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import com.example.project_shelf.adapter.repository.ProductRepository
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 
-sealed class CreateProductViewModelState {
+sealed class EditProductViewModelState {
+    data class UiState(
+        val showConfirmDeletionDialog: Boolean = false,
+    )
+
     data class InputState(
-        val price: String = "",
-        val stock: String = "",
+        val price: String,
+        val stock: String,
     )
 
     data class ValidationState(
@@ -29,34 +38,48 @@ sealed class CreateProductViewModelState {
     )
 }
 
-@OptIn(FlowPreview::class)
-@HiltViewModel
-class CreateProductViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = EditProductViewModel.Factory::class)
+class EditProductViewModel @AssistedInject constructor(
+    @Assisted val product: ProductDto,
     private val productRepository: ProductRepository,
 ) : ViewModel() {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(product: ProductDto): EditProductViewModel
+    }
+
     sealed class Event {
-        data class ProductCreated(val product: ProductDto) : Event()
+        class ProductUpdated : Event()
+        class ProductMarkedForDeletion : Event()
     }
 
     private val _eventFlow = MutableSharedFlow<Event>()
     val eventFlow: SharedFlow<Event> = _eventFlow
 
-    private val _inputState = MutableStateFlow(CreateProductViewModelState.InputState())
+    private val _uiState = MutableStateFlow(EditProductViewModelState.UiState())
+    val uiState = _uiState.asStateFlow()
+
+    private val _inputState = MutableStateFlow(
+        EditProductViewModelState.InputState(
+            price = product.price,
+            stock = product.stock,
+        )
+    )
     val inputState = _inputState.asStateFlow()
 
-    private val _validationState = MutableStateFlow(CreateProductViewModelState.ValidationState())
+    private val _validationState = MutableStateFlow(EditProductViewModelState.ValidationState())
     val validationState = _validationState.asStateFlow()
 
     // We ned this one outside the UI State, as it takes a more important responsibility than the
     // other input elements.
-    private val _name = MutableStateFlow("")
+    private val _name = MutableStateFlow(product.name)
     val name = _name.asStateFlow()
 
     private val _isValid = MutableStateFlow(false)
     val isValid = _isValid.asStateFlow()
 
     init {
-        Log.d("VIEW-MODEL", "Create product")
         // When the name changes, we need to check if another product has this name.
         viewModelScope.launch {
             _name
@@ -66,7 +89,11 @@ class CreateProductViewModel @Inject constructor(
                     // If we have no errors, we can check the product name.
                     if (errors.isEmpty()) {
                         productRepository.getProduct(it)?.let {
-                            errors.add(ViewModelError.PRODUCT_NAME_TAKEN)
+                            // If the product found is different to the one we are editing, then the
+                            // name is already taken.
+                            if (it != product) {
+                                errors.add(ViewModelError.PRODUCT_NAME_TAKEN)
+                            }
                         }
                     }
                     _validationState.update { it.copy(nameErrors = errors) }
@@ -111,17 +138,26 @@ class CreateProductViewModel @Inject constructor(
         _inputState.update { it.copy(stock = value) }
     }
 
-    fun create() {
+    fun openConfirmDeletionDialog() {
+        _uiState.update { it.copy(showConfirmDeletionDialog = true) }
+    }
+
+    fun closeConfirmDeletionDialog() {
+        _uiState.update { it.copy(showConfirmDeletionDialog = false) }
+    }
+
+    fun edit() {
         // NOTE: We should only call this method when all input data has been validated.
         assert(isValid.value)
 
         viewModelScope.launch {
-            val product = productRepository.createProduct(
+            productRepository.updateProduct(
+                id = product.id,
                 name = _name.value.trim(),
                 price = _inputState.value.price.toBigDecimalOrZero(),
                 stock = _inputState.value.stock.toIntOrZero(),
             )
-            _eventFlow.emit(Event.ProductCreated(product))
+            _eventFlow.emit(Event.ProductUpdated())
         }
     }
 }

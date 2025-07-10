@@ -5,13 +5,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navigation
-import com.example.project_shelf.framework.ui.screen.ClientsScreen
-import com.example.project_shelf.framework.ui.screen.ConfigScreen
-import com.example.project_shelf.framework.ui.screen.InvoicesScreen
 import com.example.project_shelf.framework.ui.screen.LoadingScreen
 import com.example.project_shelf.framework.ui.screen.MainScreen
-import com.example.project_shelf.framework.ui.screen.product.ProductsScreen
 
 @Composable
 fun AppNavHost(

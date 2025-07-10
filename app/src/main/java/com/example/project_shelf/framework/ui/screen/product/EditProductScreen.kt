@@ -22,8 +22,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.example.project_shelf.R
-import com.example.project_shelf.adapter.view_model.DeletionViewModel
-import com.example.project_shelf.adapter.view_model.EditProductViewModel
+import com.example.project_shelf.adapter.view_model.product.ProductDeletionViewModel
+import com.example.project_shelf.adapter.view_model.product.EditProductViewModel
 import com.example.project_shelf.framework.ui.components.dialog.AlertDialog
 import com.example.project_shelf.framework.ui.components.form.EditProductForm
 import com.example.project_shelf.framework.ui.getStringResource
@@ -32,7 +32,7 @@ import com.example.project_shelf.framework.ui.getStringResource
 @Composable
 fun EditProductScreen(
     viewModel: EditProductViewModel,
-    deletionViewModel: DeletionViewModel,
+    productDeletionViewModel: ProductDeletionViewModel,
     onDismissRequest: () -> Unit,
     onDeleteRequest: () -> Unit,
 ) {
@@ -91,7 +91,7 @@ fun EditProductScreen(
             AlertDialog(
                 onDismissRequest = { viewModel.closeConfirmDeletionDialog() },
                 onAcceptRequest = {
-                    deletionViewModel.markProductForDeletion(viewModel.product)
+                    productDeletionViewModel.markProductForDeletion(viewModel.product)
                     onDeleteRequest()
                 },
             )

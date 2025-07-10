@@ -88,13 +88,13 @@ class ProductPresenter @Inject constructor(
             .toDto(Currency.getInstance("COP"))
     }
 
-    override suspend fun markForDeletion(id: Long) {
+    override suspend fun setPendingForDeletion(id: Long) {
         // Mark the product for deletion.
         Log.d("PRESENTER", "Product[$id]: Marking for deletion")
         markForDeletionUseCase.exec(id)
     }
 
-    override suspend fun unmarkForDeletion(id: Long) {
+    override suspend fun unsetPendingForDeletion(id: Long) {
         Log.d("PRESENTER", "Product[$id]: Unmarking product for deletion")
         unmarkForDeletionUseCase.exec(id)
     }

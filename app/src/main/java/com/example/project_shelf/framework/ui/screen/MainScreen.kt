@@ -59,16 +59,16 @@ fun MainScreen() {
                     label = { Text(stringResource(R.string.products)) })
 
                 NavigationBarItem(
-                    selected = selectedDestination == Destination.CLIENT.ordinal,
+                    selected = selectedDestination == Destination.CUSTOMER.ordinal,
                     onClick = {
-                        if (selectedDestination != Destination.CLIENT.ordinal) {
-                            navController.navigate(route = Destination.CLIENT.path) {
+                        if (selectedDestination != Destination.CUSTOMER.ordinal) {
+                            navController.navigate(route = Destination.CUSTOMER.path) {
                                 // Avoid multiple copies of the same destination when re-selecting the
                                 // same item.
                                 launchSingleTop = true
                                 restoreState = true
                             }
-                            selectedDestination = Destination.CLIENT.ordinal
+                            selectedDestination = Destination.CUSTOMER.ordinal
                         }
                     },
                     icon = { Icon(Icons.Rounded.Groups, contentDescription = null) },

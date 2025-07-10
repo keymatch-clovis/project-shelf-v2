@@ -18,7 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.project_shelf.R
-import com.example.project_shelf.adapter.view_model.CreateProductViewModel
+import com.example.project_shelf.adapter.view_model.product.CreateProductViewModel
 import com.example.project_shelf.framework.ui.components.form.CreateProductForm
 import com.example.project_shelf.framework.ui.getStringResource
 
