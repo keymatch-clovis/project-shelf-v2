@@ -1,4 +1,4 @@
-package com.example.project_shelf.app.use_case.product
+package com.example.project_shelf.app.use_case.city
 
 import android.util.Log
 import com.example.project_shelf.app.service.CityService

@@ -44,7 +44,7 @@ class ProductSearchViewModel @Inject constructor(
                 .debounce(300)
                 .distinctUntilChanged()
                 .flatMapLatest {
-                    repository.getProducts(it.toString())
+                    repository.search(it.toString())
                 }
                 .cachedIn(viewModelScope)
                 .collectLatest {

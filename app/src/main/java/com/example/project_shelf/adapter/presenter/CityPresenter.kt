@@ -2,8 +2,8 @@ package com.example.project_shelf.adapter.presenter
 
 import android.util.Log
 import com.example.project_shelf.adapter.repository.CityRepository
-import com.example.project_shelf.app.use_case.product.CheckDefaultLoadedDataUseCase
-import com.example.project_shelf.app.use_case.product.LoadDefaultCitiesUseCase
+import com.example.project_shelf.app.use_case.city.CheckDefaultLoadedDataUseCase
+import com.example.project_shelf.app.use_case.city.LoadDefaultCitiesUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

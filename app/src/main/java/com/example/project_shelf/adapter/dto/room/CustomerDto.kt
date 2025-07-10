@@ -25,9 +25,11 @@ data class CustomerDto(
     @ColumnInfo(name = "business_name") val businessName: String?,
     /// Relationships
     @ColumnInfo(name = "city_id") val cityId: Long,
+    /// Functional properties
+    @ColumnInfo(name = "pending_delete_until") val pendingDeleteUntil: Long? = null,
 )
 
-fun CustomerDto.toCustomer(): Customer {
+fun CustomerDto.toEntity(): Customer {
     return Customer(
         id = this.rowId,
         cityId = this.cityId,

@@ -8,6 +8,7 @@ import androidx.paging.map
 import androidx.room.withTransaction
 import com.example.project_shelf.adapter.dto.room.ProductDto
 import com.example.project_shelf.adapter.dto.room.ProductFtsDto
+import com.example.project_shelf.adapter.dto.room.toDto
 import com.example.project_shelf.adapter.dto.room.toEntity
 import com.example.project_shelf.adapter.dto.room.toProductFilter
 import com.example.project_shelf.app.entity.Product
@@ -29,7 +30,8 @@ const val PAGE_SIZE = 100;
 class ProductServiceImpl @Inject constructor(
     private val database: SqliteDatabase,
 ) : ProductService {
-    override fun getProducts(): Flow<PagingData<Product>> {
+    override fun find(): Flow<PagingData<Product>> {
+        Log.d("SERVICE-IMPL", "Finding products")
         return Pager(
             config = PagingConfig(pageSize = PAGE_SIZE)
         ) { database.productDao().select() }.flow.map {
@@ -37,21 +39,17 @@ class ProductServiceImpl @Inject constructor(
         }
     }
 
-    override fun getProducts(name: String): Flow<PagingData<ProductFilter>> {
+    override fun search(value: String): Flow<PagingData<ProductFilter>> {
+        Log.d("SERVICE-IMPL", "Searching products with: $value")
         return Pager(
             config = PagingConfig(pageSize = PAGE_SIZE)
         ) {
             // Add a `*` at the end of the search to get a phrase query.
             // https://www.sqlite.org/fts3.html
-            database.productFtsDao().match("$name*")
+            database.productFtsDao().match("$value*")
         }.flow.map {
             it.map { dto -> dto.toProductFilter() }
         }
-    }
-
-    override suspend fun getProduct(name: String): Product? {
-        Log.d("SERVICE-IMPL", "Getting product with: $name")
-        return database.productDao().select(name)?.toEntity()
     }
 
     override suspend fun create(
@@ -87,26 +85,6 @@ class ProductServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteAll() {
-        Log.d("SERVICE-IMPL", "Deleting all products")
-        database.productDao().delete()
-    }
-
-    override suspend fun delete(id: Long) {
-        database.withTransaction {
-            Log.d("SERVICE-IMPL", "Deleting product: $id")
-            database.productDao().delete(id)
-
-            Log.d("SERVICE-IMPL", "Deleting product FTS: $id")
-            database.productFtsDao().delete(id)
-        }
-    }
-
-    override suspend fun deletePendingForDeletion() {
-        Log.d("SERVICE-IMPL", "Deleting products pending for deletion.")
-        database.productDao().deletePendingForDeletion()
-    }
-
     override suspend fun update(
         id: Long,
         name: String,
@@ -124,14 +102,45 @@ class ProductServiceImpl @Inject constructor(
         return dto.toEntity()
     }
 
-    override suspend fun markForDeletion(id: Long, until: Long) {
-        Log.d("SERVICE-IMPL", "Marking product for deletion: $id")
-        database.productDao().markForDeletion(id, until)
+    override suspend fun delete() {
+        database.withTransaction {
+            Log.d("SERVICE-IMPL", "Deleting all products")
+            database.productDao().delete()
+
+            Log.d("SERVICE-IMPL", "Deleting all products FTS")
+            database.productFtsDao().delete()
+        }
     }
 
-    override suspend fun unmarkForDeletion(id: Long) {
-        Log.d("SERVICE-IMPL", "Unmarking product for deletion: $id")
-        database.productDao().unmarkForDeletion(id)
+    override suspend fun delete(id: Long) {
+        database.withTransaction {
+            Log.d("SERVICE-IMPL", "Product[$id]: Deleting product")
+            database.productDao().delete(id)
+
+            Log.d("SERVICE-IMPL", "Product[$id]: Deleting product FTS")
+            database.productFtsDao().delete(id)
+        }
+    }
+
+    override suspend fun deletePendingForDeletion() {
+        Log.d("SERVICE-IMPL", "Deleting products pending for deletion.")
+        // As we need to remove more than just the entity, we have to first select the items.
+        // NOTE:
+        //  This might not be the best way of doing this, but we don't expect this to have more than
+        //  10 or 100 items at a time.
+        database.productDao().selectPendingForDeletion().forEach {
+            delete(it.rowId)
+        }
+    }
+
+    override suspend fun setPendingForDeletion(id: Long, until: Long) {
+        Log.d("SERVICE-IMPL", "Product[$id]: Setting product pending for deletion")
+        database.productDao().setPendingForDeletion(id, until)
+    }
+
+    override suspend fun unsetPendingForDeletion(id: Long) {
+        Log.d("SERVICE-IMPL", "Product[$id]: Unsetting product pending for deletion")
+        database.productDao().unsetPendingForDeletion(id)
     }
 }
 

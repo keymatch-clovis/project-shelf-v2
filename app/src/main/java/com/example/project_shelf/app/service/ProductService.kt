@@ -7,15 +7,18 @@ import kotlinx.coroutines.flow.Flow
 import java.math.BigDecimal
 
 interface ProductService {
-    fun getProducts(): Flow<PagingData<Product>>
-    fun getProducts(name: String): Flow<PagingData<ProductFilter>>
+    fun find(): Flow<PagingData<Product>>
 
-    suspend fun getProduct(name: String): Product?
+    fun search(value: String): Flow<PagingData<ProductFilter>>
+
     suspend fun create(name: String, price: BigDecimal, stock: Int): Product
+
     suspend fun update(id: Long, name: String, price: BigDecimal, stock: Int): Product
-    suspend fun markForDeletion(id: Long, until: Long)
-    suspend fun unmarkForDeletion(id: Long)
+
+    suspend fun delete()
     suspend fun delete(id: Long)
     suspend fun deletePendingForDeletion()
-    suspend fun deleteAll()
+
+    suspend fun setPendingForDeletion(id: Long, until: Long)
+    suspend fun unsetPendingForDeletion(id: Long)
 }

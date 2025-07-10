@@ -4,7 +4,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.project_shelf.adapter.service_impl.CityServiceImpl
 import com.example.project_shelf.framework.room.ShelfDatabase
-import com.example.project_shelf.app.use_case.product.LoadDefaultCitiesUseCase
+import com.example.project_shelf.app.use_case.city.LoadDefaultCitiesUseCase
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith

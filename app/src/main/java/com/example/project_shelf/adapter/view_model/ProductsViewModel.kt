@@ -28,6 +28,6 @@ class ProductsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ProductsUiState())
     val uiState = _uiState.asStateFlow()
 
-    var products: Flow<PagingData<ProductDto>> = repository.getProducts()
+    var products: Flow<PagingData<ProductDto>> = repository.find()
     var lazyListState: LazyListState by mutableStateOf(LazyListState(0, 0))
 }

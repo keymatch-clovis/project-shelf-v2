@@ -6,8 +6,9 @@ import com.example.project_shelf.app.entity.CustomerFilter
 import kotlinx.coroutines.flow.Flow
 
 interface CustomerService {
-    fun getCustomers(): Flow<PagingData<Customer>>
-    fun getCustomers(searchValue: String): Flow<PagingData<CustomerFilter>>
+    fun find(): Flow<PagingData<Customer>>
+
+    fun search(value: String): Flow<PagingData<CustomerFilter>>
 
     suspend fun create(
         name: String,
@@ -15,9 +16,14 @@ interface CustomerService {
         address: String,
         cityId: Long,
         businessName: String?,
-    )
+    ): Customer
 
-    suspend fun removeAll()
-    suspend fun remove(customer: Customer)
     suspend fun update(customer: Customer)
+
+    suspend fun delete()
+    suspend fun delete(id: Long)
+    suspend fun deletePendingForDeletion()
+
+    suspend fun setPendingForDeletion(id: Long, until: Long)
+    suspend fun unsetPendingForDeletion(id: Long)
 }

@@ -4,9 +4,9 @@ import android.util.Log
 import com.example.project_shelf.app.service.ProductService
 import javax.inject.Inject
 
-class DeleteMarkedForDeletionUseCase @Inject constructor(private val service: ProductService) {
+class DeletePendingForDeletionUseCase @Inject constructor(private val service: ProductService) {
     suspend fun exec() {
-        Log.d("USE-CASE", "Deleting products marked for deletion.")
+        Log.d("USE-CASE", "Deleting products pending for deletion")
         return service.deletePendingForDeletion()
     }
 }

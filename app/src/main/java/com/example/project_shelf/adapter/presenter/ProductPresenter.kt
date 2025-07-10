@@ -4,19 +4,15 @@ import android.icu.util.Currency
 import android.util.Log
 import androidx.paging.PagingData
 import androidx.paging.map
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.dto.ui.ProductFilterDto
 import com.example.project_shelf.adapter.dto.ui.toDto
 import com.example.project_shelf.adapter.repository.ProductRepository
-import com.example.project_shelf.adapter.worker.DeleteProductsMarkedForDeletionWorker
-import com.example.project_shelf.adapter.worker.Tag
 import com.example.project_shelf.app.use_case.product.CreateProductUseCase
 import com.example.project_shelf.app.use_case.product.DeleteProductUseCase
 import com.example.project_shelf.app.use_case.product.FindProductUseCase
-import com.example.project_shelf.app.use_case.product.FindProductsUseCase
+import com.example.project_shelf.app.use_case.product.FindUseCase
 import com.example.project_shelf.app.use_case.product.GetProductsUseCase
 import com.example.project_shelf.app.use_case.product.MarkForDeletionUseCase
 import com.example.project_shelf.app.use_case.product.RemoveAllProductsUseCase
@@ -29,7 +25,6 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.math.BigDecimal
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class ProductPresenter @Inject constructor(
@@ -38,13 +33,13 @@ class ProductPresenter @Inject constructor(
     private val updateProductUseCase: UpdateProductUseCase,
     private val deleteProductUseCase: DeleteProductUseCase,
     private val removeAllProductsUseCase: RemoveAllProductsUseCase,
-    private val findProductsUseCase: FindProductsUseCase,
+    private val findProductsUseCase: FindUseCase,
     private val findProductUseCase: FindProductUseCase,
     private val markForDeletionUseCase: MarkForDeletionUseCase,
     private val unmarkForDeletionUseCase: UnmarkForDeletionUseCase,
     private val workManager: WorkManager,
 ) : ProductRepository {
-    override fun getProducts(): Flow<PagingData<ProductDto>> {
+    override fun find(): Flow<PagingData<ProductDto>> {
         return getProductsUseCase.exec().map {
             // TODO: We can get the currency from a configuration option or something, but for now we'll
             // leave it hard coded.
@@ -52,7 +47,7 @@ class ProductPresenter @Inject constructor(
         }
     }
 
-    override fun getProducts(name: String): Flow<PagingData<ProductFilterDto>> {
+    override fun search(name: String): Flow<PagingData<ProductFilterDto>> {
         Log.d("PRESENTER", "Getting products with: $name")
         return findProductsUseCase.exec(name).map {
             it.map { filter -> ProductFilterDto(name = filter.name) }
@@ -93,19 +88,19 @@ class ProductPresenter @Inject constructor(
             .toDto(Currency.getInstance("COP"))
     }
 
-    override suspend fun unmarkForDeletion(id: Long) {
-        Log.d("PRESENTER", "Unmarking product for deletion: $id")
-        unmarkForDeletionUseCase.exec(id)
-    }
-
     override suspend fun markForDeletion(id: Long) {
         // Mark the product for deletion.
-        Log.d("PRESENTER", "Marking product for deletion: $id")
+        Log.d("PRESENTER", "Product[$id]: Marking for deletion")
         markForDeletionUseCase.exec(id)
     }
 
+    override suspend fun unmarkForDeletion(id: Long) {
+        Log.d("PRESENTER", "Product[$id]: Unmarking product for deletion")
+        unmarkForDeletionUseCase.exec(id)
+    }
+
     override suspend fun deleteAll() {
-        Log.d("PRODUCT-PRESENTER", "Removing all products")
+        Log.d("CT-PRESENTER", "Removing all products")
         removeAllProductsUseCase.exec()
     }
 }

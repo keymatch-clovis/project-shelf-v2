@@ -13,9 +13,9 @@ val PRODUCT_DELETION_TIMEOUT = 20.seconds
 
 class MarkForDeletionUseCase @Inject constructor(private val productService: ProductService) {
     suspend fun exec(id: Long) {
-        Log.d("USE-CASE", "Marking product for deletion: $id")
+        Log.d("USE-CASE", "Marking product with ID: $id for deletion")
         val timeout = Date().time + PRODUCT_DELETION_TIMEOUT.inWholeMilliseconds
 
-        productService.markForDeletion(id, timeout)
+        productService.setPendingForDeletion(id, timeout)
     }
 }

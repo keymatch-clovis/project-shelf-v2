@@ -8,6 +8,7 @@ import javax.inject.Inject
 class FindProductUseCase @Inject constructor(private val productService: ProductService) {
     suspend fun exec(name: String): Product? {
         Log.d("USE-CASE", "Finding product with: ${name.uppercase()}")
-        return productService.getProduct(name.uppercase())
+        // return productService.getProduct(name.uppercase())
+        return null
     }
 }

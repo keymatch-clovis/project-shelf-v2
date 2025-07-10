@@ -17,6 +17,7 @@ class CreateProductUseCase @Inject constructor(private val productService: Produ
         Log.d("USE-CASE", "Creating product with: $name, $price, $stock")
 
         // As we allow soft deletes in our little app, we need to handle those cases here.
+        // TODO: This is wrong.
         // Fortunately, the product entity does not meddle with other entities, so we just have to
         // clean that table before doing anything else. We could do a full database clean here, but
         // I think it is a bit unnecessary, as we can address the matters related to the product

@@ -9,9 +9,9 @@ import androidx.room.withTransaction
 import com.example.project_shelf.adapter.DEFAULT_PAGE_SIZE
 import com.example.project_shelf.adapter.dto.room.CustomerDto
 import com.example.project_shelf.adapter.dto.room.CustomerFtsDto
-import com.example.project_shelf.adapter.dto.room.toCustomer
 import com.example.project_shelf.adapter.dto.room.toCustomerFilter
 import com.example.project_shelf.adapter.dto.room.toDto
+import com.example.project_shelf.adapter.dto.room.toEntity
 import com.example.project_shelf.app.entity.Customer
 import com.example.project_shelf.app.entity.CustomerFilter
 import com.example.project_shelf.app.service.CustomerService
@@ -27,21 +27,23 @@ import javax.inject.Inject
 class CustomerServiceImpl @Inject constructor(
     private val database: SqliteDatabase,
 ) : CustomerService {
-    override fun getCustomers(): Flow<PagingData<Customer>> {
+    override fun find(): Flow<PagingData<Customer>> {
+        Log.d("SERVICE-IMPL", "Finding customers")
         return Pager(
             config = PagingConfig(DEFAULT_PAGE_SIZE)
         ) { database.customerDao().select() }.flow.map {
-            it.map { dto -> dto.toCustomer() }
+            it.map { dto -> dto.toEntity() }
         }
     }
 
-    override fun getCustomers(searchValue: String): Flow<PagingData<CustomerFilter>> {
+    override fun search(value: String): Flow<PagingData<CustomerFilter>> {
+        Log.d("SERVICE-IMPL", "Searching customers with: $value")
         return Pager(
             config = PagingConfig(DEFAULT_PAGE_SIZE)
         ) {
             // Add a `*` at the end of the search to get a phrase query.
             // https://www.sqlite.org/fts3.html
-            database.customerFtsDao().match("$searchValue*")
+            database.customerFtsDao().match("$value*")
         }.flow.map {
             it.map { dto -> dto.toCustomerFilter() }
         }
@@ -53,12 +55,12 @@ class CustomerServiceImpl @Inject constructor(
         address: String,
         cityId: Long,
         businessName: String?,
-    ) {
+    ): Customer {
         Log.d(
             "SERVICE-IMPL",
             "Creating customer with: $name, $phone, $address, $cityId, $businessName"
         )
-        database.withTransaction {
+        return database.withTransaction {
             // First, create the customer.
             var customerId = database.customerDao().insert(
                 CustomerDto(
@@ -78,22 +80,62 @@ class CustomerServiceImpl @Inject constructor(
                     businessName = businessName,
                 )
             )
+
+            Customer(
+                id = customerId,
+                cityId = cityId,
+                name = name,
+                phone = phone,
+                address = address,
+                businessName = businessName,
+            )
         }
-    }
-
-    override suspend fun removeAll() {
-        Log.d("SERVICE-IMPL", "Removing all customers")
-        database.customerDao().delete()
-    }
-
-    override suspend fun remove(customer: Customer) {
-        Log.d("SERVICE-IMPL", "Removing customer: $customer")
-        database.customerDao().delete(customer.toDto())
     }
 
     override suspend fun update(customer: Customer) {
         Log.d("SERVICE-IMPL", "Updating customer: $customer")
         database.customerDao().update(customer.toDto())
+    }
+
+    override suspend fun delete() {
+        database.withTransaction {
+            Log.d("SERVICE-IMPL", "Removing all customers")
+            database.customerDao().delete()
+
+            Log.d("SERVICE-IMPL", "Removing all customers FTS")
+            database.customerFtsDao().delete()
+        }
+    }
+
+    override suspend fun delete(id: Long) {
+        database.withTransaction {
+            Log.d("SERVICE-IMPL", "Customer[$id]: Removing customer")
+            database.customerDao().delete(id)
+
+            Log.d("SERVICE-IMPL", "Customer[$id]: Removing customer FTS")
+            database.customerFtsDao().delete(id)
+        }
+    }
+
+    override suspend fun deletePendingForDeletion() {
+        Log.d("SERVICE-IMPL", "Deleting customers pending for deletion.")
+        // As we need to remove more than just the entity, we have to first select the items.
+        // NOTE:
+        //  This might not be the best way of doing this, but we don't expect this to have more than
+        //  10 or 100 items at a time.
+        database.customerDao().selectPendingForDeletion().forEach {
+            delete(it.rowId)
+        }
+    }
+
+    override suspend fun setPendingForDeletion(id: Long, until: Long) {
+        Log.d("SERVICE-IMPL", "Customer[$id]: Setting customer pending for deletion")
+        database.customerDao().setPendingForDeletion(id, until)
+    }
+
+    override suspend fun unsetPendingForDeletion(id: Long) {
+        Log.d("SERVICE-IMPL", "Customer[$id]: Unsetting customer pending for deletion")
+        database.customerDao().unsetPendingForDeletion(id)
     }
 }
 
