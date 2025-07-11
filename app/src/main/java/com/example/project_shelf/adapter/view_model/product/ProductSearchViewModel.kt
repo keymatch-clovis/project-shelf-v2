@@ -19,21 +19,17 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class ProductSearchUiState(
-    var isSearchBarExpanded: Boolean = false,
-)
-
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @HiltViewModel
 class ProductSearchViewModel @Inject constructor(
     private val repository: ProductRepository,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(ProductSearchUiState())
-    val uiState = _uiState.asStateFlow()
-
     private val _result: MutableStateFlow<PagingData<ProductFilterDto>> =
         MutableStateFlow(PagingData.empty())
     val result = _result.asStateFlow()
+
+    private val _isSearchBarExpanded = MutableStateFlow(false)
+    val isSearchBarExpanded = _isSearchBarExpanded.asStateFlow()
 
     private val _query = MutableStateFlow("")
     val query = _query.asStateFlow()
@@ -63,6 +59,6 @@ class ProductSearchViewModel @Inject constructor(
             updateQuery("")
         }
 
-        _uiState.update { it.copy(isSearchBarExpanded = value) }
+        _isSearchBarExpanded.update { value }
     }
 }

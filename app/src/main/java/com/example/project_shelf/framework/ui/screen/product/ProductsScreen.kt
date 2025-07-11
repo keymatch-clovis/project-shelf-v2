@@ -62,7 +62,6 @@ fun ProductsScreen(
     onProductEdit: (product: ProductDto) -> Unit,
 ) {
     val lazyPagingItems = viewModel.products.collectAsLazyPagingItems()
-    val searchState = searchViewModel.uiState.collectAsState()
     val lazyPagingSearchItems = searchViewModel.result.collectAsLazyPagingItems()
     val query = searchViewModel.query.collectAsState()
 

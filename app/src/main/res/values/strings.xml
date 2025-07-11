@@ -34,4 +34,11 @@
     <string name="product_updated">Product updated</string>
     <string name="product_deleted">Product deleted</string>
     <string name="undo">Undo</string>
+    <string name="customers_none">No customers</string>
+    <string name="customer_deleted">Customer deleted</string>
+    <string name="customer_updated">Customer updated</string>
+    <string name="customer_create">Create customer</string>
+    <string name="phone">Phone</string>
+    <string name="address">Address</string>
+    <string name="business_name">Business name</string>
 </resources>

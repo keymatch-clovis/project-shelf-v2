@@ -31,13 +31,11 @@ class ProductPresenter @Inject constructor(
     private val getProductsUseCase: GetProductsUseCase,
     private val createProductUseCase: CreateProductUseCase,
     private val updateProductUseCase: UpdateProductUseCase,
-    private val deleteProductUseCase: DeleteProductUseCase,
     private val removeAllProductsUseCase: RemoveAllProductsUseCase,
     private val findProductsUseCase: FindUseCase,
     private val findProductUseCase: FindProductUseCase,
     private val markForDeletionUseCase: MarkForDeletionUseCase,
     private val unmarkForDeletionUseCase: UnmarkForDeletionUseCase,
-    private val workManager: WorkManager,
 ) : ProductRepository {
     override fun find(): Flow<PagingData<ProductDto>> {
         return getProductsUseCase.exec().map {
@@ -89,7 +87,6 @@ class ProductPresenter @Inject constructor(
     }
 
     override suspend fun setPendingForDeletion(id: Long) {
-        // Mark the product for deletion.
         Log.d("PRESENTER", "Product[$id]: Marking for deletion")
         markForDeletionUseCase.exec(id)
     }

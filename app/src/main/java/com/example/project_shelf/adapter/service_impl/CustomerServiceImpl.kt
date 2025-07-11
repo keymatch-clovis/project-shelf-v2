@@ -92,9 +92,23 @@ class CustomerServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun update(customer: Customer) {
-        Log.d("SERVICE-IMPL", "Updating customer: $customer")
-        database.customerDao().update(customer.toDto())
+    override suspend fun update(
+        id: Long, name: String, phone: String, address: String, cityId: Long, businessName: String?
+    ) {
+        Log.d(
+            "SERVICE-IMPL",
+            "Updating customer with: $id, $name, $phone, $address, $cityId, $businessName"
+        )
+        database.customerDao().update(
+            CustomerDto(
+                rowId = id,
+                name = name,
+                phone = phone,
+                address = address,
+                businessName = businessName,
+                cityId = cityId
+            )
+        )
     }
 
     override suspend fun delete() {

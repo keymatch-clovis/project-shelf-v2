@@ -10,9 +10,3 @@ data class Customer(
 
     val cityId: Long,
 )
-
-data class CustomerFilter(
-    val id: Long,
-    val name: String,
-    val businessName: String?,
-)

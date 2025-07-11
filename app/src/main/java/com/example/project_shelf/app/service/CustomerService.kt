@@ -18,7 +18,14 @@ interface CustomerService {
         businessName: String?,
     ): Customer
 
-    suspend fun update(customer: Customer)
+    suspend fun update(
+        id: Long,
+        name: String,
+        phone: String,
+        address: String,
+        cityId: Long,
+        businessName: String?,
+    )
 
     suspend fun delete()
     suspend fun delete(id: Long)

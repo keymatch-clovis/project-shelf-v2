@@ -6,8 +6,9 @@ import com.example.project_shelf.adapter.dto.ui.ProductFilterDto
 import kotlinx.coroutines.flow.Flow
 import java.math.BigDecimal
 
-interface ProductRepository : WithSearch<ProductFilterDto> {
+interface ProductRepository{
     fun find(): Flow<PagingData<ProductDto>>
+    fun search(value: String): Flow<PagingData<ProductFilterDto>>
     suspend fun getProduct(name: String): ProductDto?
     suspend fun updateProduct(id: Long, name: String, price: BigDecimal, stock: Int): ProductDto
     suspend fun createProduct(name: String, price: BigDecimal, stock: Int): ProductDto

@@ -33,8 +33,8 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.dto.ui.CustomerDto
 import com.example.project_shelf.adapter.dto.ui.CustomerFilterDto
-import com.example.project_shelf.adapter.view_model.SearchViewModel
 import com.example.project_shelf.adapter.view_model.customer.CustomerDeletionViewModel
+import com.example.project_shelf.adapter.view_model.customer.CustomerSearchViewModel
 import com.example.project_shelf.adapter.view_model.customer.CustomersViewModel
 import com.example.project_shelf.framework.ui.components.CustomList
 import com.example.project_shelf.framework.ui.components.CustomSearchBar
@@ -44,7 +44,7 @@ import com.example.project_shelf.framework.ui.util.customNestedScrollConnection
 fun CustomersScreen(
     viewModel: CustomersViewModel,
     deletionViewModel: CustomerDeletionViewModel,
-    searchViewModel: SearchViewModel<CustomerFilterDto>,
+    searchViewModel: CustomerSearchViewModel,
     onCreateRequest: () -> Unit,
     onEditRequest: (dto: CustomerDto) -> Unit,
 ) {
@@ -55,7 +55,7 @@ fun CustomersScreen(
     val snackbarState = deletionViewModel.snackbarState.collectAsState()
     LaunchedEffect(snackbarState.value) {
         deletionViewModel.startSnackbar(
-            localContext.getString(R.string.product_deleted),
+            localContext.getString(R.string.customer_deleted),
             localContext.getString(R.string.undo),
         )
     }
@@ -114,7 +114,7 @@ fun CustomersScreen(
                     lazyPagingItems = lazyPagingItems,
                     lazyListState = viewModel.lazyListState,
                     nestedScrollConnection = nestedScrollConnection,
-                    emptyMessage = stringResource(R.string.products_none),
+                    emptyMessage = stringResource(R.string.customers_none),
                 ) {
                     Text(it.name)
                 }
