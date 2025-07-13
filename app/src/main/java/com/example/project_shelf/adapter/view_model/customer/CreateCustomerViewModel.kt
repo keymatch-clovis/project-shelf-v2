@@ -1,13 +1,21 @@
 package com.example.project_shelf.adapter.view_model.customer
 
 import android.util.Log
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
 import com.example.project_shelf.adapter.ViewModelError
+import com.example.project_shelf.adapter.dto.ui.CityFilterDto
+import com.example.project_shelf.adapter.repository.CityRepository
 import com.example.project_shelf.adapter.repository.CustomerRepository
 import com.example.project_shelf.adapter.view_model.validateString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -35,7 +43,8 @@ sealed class CreateCustomerViewModelState {
 @OptIn(FlowPreview::class)
 @HiltViewModel
 class CreateCustomerViewModel @Inject constructor(
-    private val repository: CustomerRepository,
+    private val customerRepository: CustomerRepository,
+    private val cityRepository: CityRepository,
 ) : ViewModel() {
     sealed class Event {
         class Created : Event()
@@ -54,8 +63,8 @@ class CreateCustomerViewModel @Inject constructor(
     val isValid = _isValid.asStateFlow()
 
     init {
-        // When any of the UI inputs change, do the default checks.
         viewModelScope.launch {
+            // When any of the UI inputs change, do the default checks.
             _inputState.collect { state ->
                 _validationState.update {
                     it.copy(
@@ -65,15 +74,16 @@ class CreateCustomerViewModel @Inject constructor(
                         businessNameErrors = state.businessName.validateString(),
                     )
                 }
-            }
-            // Also update the view model valid state.
-            _isValid.update {
-                listOf(
-                    _validationState.value.nameErrors,
-                    _validationState.value.phoneErrors,
-                    _validationState.value.addressErrors,
-                    _validationState.value.businessNameErrors,
-                ).all { it.isEmpty() }
+
+                // Also update the view model valid state.
+                _isValid.update {
+                    listOf(
+                        _validationState.value.nameErrors,
+                        _validationState.value.phoneErrors,
+                        _validationState.value.addressErrors,
+                        _validationState.value.businessNameErrors,
+                    ).all { it.isEmpty() }
+                }
             }
         }
     }
@@ -83,8 +93,16 @@ class CreateCustomerViewModel @Inject constructor(
     fun updateAddress(value: String) = _inputState.update { it.copy(address = value) }
     fun updateBusinessName(value: String) = _inputState.update { it.copy(businessName = value) }
 
-    fun create() {
+    fun create() = viewModelScope.launch {
         Log.d("VIEW-MODEL", "Creating customer")
         assert(_isValid.value)
+
+        customerRepository.create(
+            name = _inputState.value.name.trim(),
+            phone = _inputState.value.phone.trim(),
+            address = _inputState.value.address.trim(),
+            cityId = TODO(),
+            businessName = TODO(),
+        )
     }
 }

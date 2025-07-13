@@ -1,6 +1,7 @@
 package com.example.project_shelf.framework.ui.screen.customer
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -16,7 +17,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.project_shelf.R
+import com.example.project_shelf.adapter.view_model.city.CitySearchViewModel
 import com.example.project_shelf.adapter.view_model.customer.CreateCustomerViewModel
 import com.example.project_shelf.framework.ui.components.form.CreateCustomerForm
 import com.example.project_shelf.framework.ui.getStringResource
@@ -25,11 +28,15 @@ import com.example.project_shelf.framework.ui.getStringResource
 @Composable
 fun CreateCustomerScreen(
     viewModel: CreateCustomerViewModel,
+    citySearchViewModel: CitySearchViewModel,
     onDismissRequest: () -> Unit,
 ) {
     val inputState = viewModel.inputState.collectAsState()
     val validationState = viewModel.validationState.collectAsState()
     val isValid = viewModel.isValid.collectAsState()
+
+    // We need the cities to create a customer.
+    val citiesLazyPagingItems = citySearchViewModel.result.collectAsLazyPagingItems()
 
     // Listen to ViewModel events.
     LaunchedEffect(Unit) {
@@ -48,7 +55,8 @@ fun CreateCustomerScreen(
                 navigationIcon = {
                     IconButton(onClick = onDismissRequest) {
                         Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.xmark_solid),
+                            modifier = Modifier.size(24.dp),
+                            imageVector = ImageVector.vectorResource(R.drawable.arrow_left_solid),
                             contentDescription = null
                         )
                     }
@@ -84,6 +92,9 @@ fun CreateCustomerScreen(
             businessName = inputState.value.businessName,
             businessNameErrors = validationState.value.businessNameErrors.map { it.getStringResource() },
             onBusinessNameChange = { viewModel.updateBusinessName(it) },
+
+            citiesLazyPagingItems = citiesLazyPagingItems,
+            onCitySearch = { citySearchViewModel.updateQuery(it) }
         )
     }
 }

@@ -117,6 +117,7 @@ fun MainNavHost(
         ) {
             CreateCustomerScreen(
                 viewModel = hiltViewModel(),
+                citySearchViewModel = hiltViewModel(),
                 onDismissRequest = { navController.popBackStack() },
             )
         }

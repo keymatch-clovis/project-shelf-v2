@@ -45,9 +45,9 @@ class ProductPresenter @Inject constructor(
         }
     }
 
-    override fun search(name: String): Flow<PagingData<ProductFilterDto>> {
-        Log.d("PRESENTER", "Getting products with: $name")
-        return findProductsUseCase.exec(name).map {
+    override fun search(value: String): Flow<PagingData<ProductFilterDto>> {
+        Log.d("PRESENTER", "Searching products with: $value")
+        return findProductsUseCase.exec(value).map {
             it.map { filter -> ProductFilterDto(name = filter.name) }
         }
     }

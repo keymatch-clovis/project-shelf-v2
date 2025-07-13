@@ -1,11 +1,11 @@
-package com.example.project_shelf.adapter.view_model.product
+package com.example.project_shelf.adapter.view_model.city
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.example.project_shelf.adapter.dto.ui.ProductFilterDto
-import com.example.project_shelf.adapter.repository.ProductRepository
+import com.example.project_shelf.adapter.dto.ui.CityFilterDto
+import com.example.project_shelf.adapter.repository.CityRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -19,30 +19,25 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 @HiltViewModel
-class ProductSearchViewModel @Inject constructor(
-    private val repository: ProductRepository,
+class CitySearchViewModel @Inject constructor(
+    private val repository: CityRepository,
 ) : ViewModel() {
-    private val _result: MutableStateFlow<PagingData<ProductFilterDto>> =
+    private val _result: MutableStateFlow<PagingData<CityFilterDto>> =
         MutableStateFlow(PagingData.empty())
-    val result = _result.asStateFlow()
+    var result = _result.asStateFlow()
 
     private val _query = MutableStateFlow("")
     val query = _query.asStateFlow()
 
     init {
         viewModelScope.launch {
-            _query
-                .debounce(300)
-                .distinctUntilChanged()
-                .flatMapLatest {
-                    repository.search(it.toString())
-                }
-                .cachedIn(viewModelScope)
-                .collectLatest {
-                    _result.value = it
-                }
+            _query.debounce(300).distinctUntilChanged().flatMapLatest {
+                repository.search(it.toString())
+            }.cachedIn(viewModelScope).collectLatest {
+                _result.value = it
+            }
         }
     }
 

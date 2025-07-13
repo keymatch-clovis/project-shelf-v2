@@ -15,7 +15,7 @@ class LoadDefaultCitiesUseCase @Inject constructor(private val cityService: City
             // Split all the strings into city, department.
             .map { it.split(",", ignoreCase = false, limit = 2) }
             // Insert the data into the database using room.
-            .forEach { (city, department) ->
+            .forEach { (department, city) ->
                 Log.d("USE_CASE", "Inserting: $city, $department")
                 cityService.create(name = city, department = department)
             }

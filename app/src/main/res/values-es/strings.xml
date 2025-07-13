@@ -41,4 +41,5 @@
     <string name="phone">Teléfono</string>
     <string name="address">Dirección</string>
     <string name="business_name">Nombre de negocio</string>
+    <string name="city">Ciudad</string>
 </resources>
