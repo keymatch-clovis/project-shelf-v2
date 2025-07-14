@@ -1,7 +1,5 @@
 package com.example.project_shelf.framework.ui.components
 
-import android.util.Log
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,7 +34,7 @@ fun CustomTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions(),
     errors: List<Int> = emptyList(),
     onClick: (Boolean) -> Unit = {},
-    onClear: () -> Unit = {},
+    onClear: (() -> Unit)? = null,
 ) {
     OutlinedTextField(
         modifier = modifier
@@ -81,7 +79,7 @@ fun CustomTextField(
             }
         },
         trailingIcon = {
-            if (value.isNotEmpty()) {
+            if (value.isNotEmpty() && onClear != null) {
                 IconButton(onClick = onClear) {
                     Icon(
                         modifier = Modifier.size(24.dp),

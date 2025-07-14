@@ -3,7 +3,7 @@ package com.example.project_shelf.adapter.presenter
 import android.util.Log
 import androidx.paging.PagingData
 import androidx.paging.map
-import com.example.project_shelf.adapter.dto.ui.CityFilterDto
+import com.example.project_shelf.adapter.dto.ui.CityDto
 import com.example.project_shelf.adapter.dto.ui.toDto
 import com.example.project_shelf.adapter.repository.CityRepository
 import com.example.project_shelf.app.use_case.city.CheckDefaultLoadedDataUseCase
@@ -33,7 +33,7 @@ class CityPresenter @Inject constructor(
         return checkDefaultLoadedDataUseCase.exec()
     }
 
-    override fun search(value: String): Flow<PagingData<CityFilterDto>> {
+    override fun search(value: String): Flow<PagingData<CityDto>> {
         Log.d("PRESENTER", "Searching cities with: $value")
         return searchCitiesUseCase.exec(value).map {
             it.map { entity -> entity.toDto() }

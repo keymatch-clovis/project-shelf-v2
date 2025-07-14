@@ -47,6 +47,12 @@ interface CustomerFtsDao {
     @Query("DELETE FROM customer_fts WHERE customer_id = :customerId")
     suspend fun delete(customerId: Long)
 
-    @Query("SELECT * FROM customer_fts WHERE customer_fts MATCH :value")
-    fun match(value: String): PagingSource<Int, CustomerFtsDto>
+    @Query(
+        """
+        SELECT e.* FROM customer_fts fts
+        JOIN customer e ON (e.rowid = fts.customer_id)
+        WHERE customer_fts MATCH :value
+    """
+    )
+    fun match(value: String): PagingSource<Int, CustomerDto>
 }

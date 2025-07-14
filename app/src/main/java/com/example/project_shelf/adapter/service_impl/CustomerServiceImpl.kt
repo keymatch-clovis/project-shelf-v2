@@ -36,7 +36,7 @@ class CustomerServiceImpl @Inject constructor(
         }
     }
 
-    override fun search(value: String): Flow<PagingData<CustomerFilter>> {
+    override fun search(value: String): Flow<PagingData<Customer>> {
         Log.d("SERVICE-IMPL", "Searching customers with: $value")
         return Pager(
             config = PagingConfig(DEFAULT_PAGE_SIZE)
@@ -45,7 +45,7 @@ class CustomerServiceImpl @Inject constructor(
             // https://www.sqlite.org/fts3.html
             database.customerFtsDao().match("$value*")
         }.flow.map {
-            it.map { dto -> dto.toCustomerFilter() }
+            it.map { dto -> dto.toEntity() }
         }
     }
 

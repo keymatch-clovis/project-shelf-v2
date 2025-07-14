@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.dto.ui.CustomerDto
-import com.example.project_shelf.adapter.dto.ui.CustomerFilterDto
 import com.example.project_shelf.adapter.view_model.customer.CustomerDeletionViewModel
 import com.example.project_shelf.adapter.view_model.customer.CustomerSearchViewModel
 import com.example.project_shelf.adapter.view_model.customer.CustomersViewModel
@@ -125,7 +124,7 @@ fun CustomersScreen(
                 enter = slideInVertically(initialOffsetY = { -it * 2 }),
                 exit = slideOutVertically(targetOffsetY = { -it * 2 })
             ) {
-                CustomSearchBar<CustomerFilterDto>(
+                CustomSearchBar<CustomerDto>(
                     query = query.value,
                     onQueryChange = { searchViewModel.updateQuery(it) },
                     expanded = showSearchBar,

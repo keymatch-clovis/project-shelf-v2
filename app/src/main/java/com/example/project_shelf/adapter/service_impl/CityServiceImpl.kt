@@ -24,7 +24,7 @@ import javax.inject.Inject
 class CityServiceImpl @Inject constructor(
     private val database: SqliteDatabase,
 ) : CityService {
-    override fun search(value: String): Flow<PagingData<CityFilter>> {
+    override fun search(value: String): Flow<PagingData<City>> {
         Log.d("SERVICE-IMPL", "Searching cities with: $value")
         return Pager(
             config = PagingConfig(pageSize = PAGE_SIZE)

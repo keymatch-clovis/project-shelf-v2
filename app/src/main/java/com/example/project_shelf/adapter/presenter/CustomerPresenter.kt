@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.paging.PagingData
 import androidx.paging.map
 import com.example.project_shelf.adapter.dto.ui.CustomerDto
-import com.example.project_shelf.adapter.dto.ui.CustomerFilterDto
 import com.example.project_shelf.adapter.dto.ui.toDto
 import com.example.project_shelf.adapter.repository.CustomerRepository
 import com.example.project_shelf.app.use_case.customer.CreateCustomerUseCase
@@ -38,7 +37,7 @@ class CustomerPresenter @Inject constructor(
         }
     }
 
-    override fun search(value: String): Flow<PagingData<CustomerFilterDto>> {
+    override fun search(value: String): Flow<PagingData<CustomerDto>> {
         Log.d("PRESENTER", "Searching customers with: $value")
         return searchCustomersUseCase.exec(value).map {
             it.map { filter -> filter.toDto() }

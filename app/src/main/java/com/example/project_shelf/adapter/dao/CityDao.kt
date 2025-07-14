@@ -21,6 +21,12 @@ interface CityFtsDao {
     @Insert
     suspend fun insert(dto: CityFtsDto)
 
-    @Query("SELECT * FROM city_fts WHERE city_fts MATCH :value")
-    fun match(value: String): PagingSource<Int, CityFtsDto>
+    @Query(
+        """
+        SELECT e.* FROM city_fts fts
+        JOIN city e ON (e.rowid = fts.city_id)
+        WHERE city_fts MATCH :value
+    """
+    )
+    fun match(value: String): PagingSource<Int, CityDto>
 }
