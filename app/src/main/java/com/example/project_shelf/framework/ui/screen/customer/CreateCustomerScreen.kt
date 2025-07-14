@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,9 +13,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -32,6 +36,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.project_shelf.R
@@ -179,7 +184,25 @@ fun CreateCustomerScreen(
                 LazyColumn {
                     items(count = citiesLazyPagingItems.itemCount) { index ->
                         citiesLazyPagingItems[index]?.let {
-                            Text(it.name)
+                            Surface(
+                                onClick = {}
+                            ) {
+                                ListItem(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    headlineContent = {
+                                        Text(
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            text = it.name,
+                                        )
+                                    },
+                                    supportingContent = {
+                                        Text(
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            text = it.department,
+                                        )
+                                    }
+                                )
+                            }
                         }
 
                         if (index < citiesLazyPagingItems.itemCount - 1) {

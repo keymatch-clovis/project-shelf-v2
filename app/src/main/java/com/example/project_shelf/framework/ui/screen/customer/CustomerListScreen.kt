@@ -37,6 +37,7 @@ import com.example.project_shelf.adapter.view_model.customer.CustomerSearchViewM
 import com.example.project_shelf.adapter.view_model.customer.CustomersViewModel
 import com.example.project_shelf.framework.ui.components.CustomList
 import com.example.project_shelf.framework.ui.components.CustomSearchBar
+import com.example.project_shelf.framework.ui.components.list_item.CustomerListItem
 import com.example.project_shelf.framework.ui.util.customNestedScrollConnection
 
 @Composable
@@ -115,7 +116,7 @@ fun CustomersScreen(
                     nestedScrollConnection = nestedScrollConnection,
                     emptyMessage = stringResource(R.string.customers_none),
                 ) {
-                    Text(it.name)
+                    CustomerListItem(dto = it, onClick = {})
                 }
             }
 

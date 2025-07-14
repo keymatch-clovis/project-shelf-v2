@@ -16,6 +16,6 @@ import javax.inject.Inject
 class ProductsViewModel @Inject constructor(
     repository: ProductRepository,
 ) : ViewModel() {
-    var products: Flow<PagingData<ProductDto>> = repository.find()
+    var products: Flow<PagingData<ProductDto>> = repository.get()
     var lazyListState: LazyListState by mutableStateOf(LazyListState(0, 0))
 }

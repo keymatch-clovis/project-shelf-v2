@@ -7,7 +7,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.random.Random
-import kotlin.random.nextInt
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -26,7 +25,7 @@ class ConfigViewModel @Inject constructor(
     fun loadTestProducts(onLoaded: suspend () -> Unit) {
         viewModelScope.launch {
             repeat(50) {
-                productRepository.createProduct(
+                productRepository.create(
                     name = Uuid.random().toString(),
                     price = Random.nextInt(1000).toBigDecimal(),
                     stock = Random.nextInt(100),

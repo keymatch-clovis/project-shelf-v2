@@ -14,7 +14,7 @@ interface CustomerRepository {
         phone: String,
         address: String,
         cityId: Long,
-        businessName: String?
+        businessName: String
     )
 
     suspend fun create(
@@ -22,7 +22,7 @@ interface CustomerRepository {
         phone: String,
         address: String,
         cityId: Long,
-        businessName: String?
+        businessName: String
     )
 
     suspend fun setPendingForDeletion(id: Long)

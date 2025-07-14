@@ -11,7 +11,7 @@ class CreateCustomerUseCase @Inject constructor(private val customerService: Cus
         phone: String,
         address: String,
         cityId: Long,
-        businessName: String?,
+        businessName: String,
     ): Customer {
         Log.d("USE-CASE", "Creating customer with: $name, $phone, $address, $cityId, $businessName")
 
@@ -20,6 +20,12 @@ class CreateCustomerUseCase @Inject constructor(private val customerService: Cus
         // creating a new one might fail. This is unexpected behavior, so we can accept that here.
         customerService.deletePendingForDeletion()
 
-        return customerService.create(name, phone, address, cityId, businessName)
+        return customerService.create(
+            name = name,
+            phone = phone,
+            address = address,
+            cityId = cityId,
+            businessName = businessName.ifBlank { null },
+        )
     }
 }

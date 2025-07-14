@@ -24,6 +24,9 @@ interface ProductDao {
     @Query("SELECT * FROM product WHERE pending_delete_until IS NOT NULL")
     suspend fun selectPendingForDeletion(): List<ProductDto>
 
+    @Query("SELECT * FROM product WHERE name = :name AND pending_delete_until IS NULL")
+    suspend fun selectByName(name: String): ProductDto?
+
     @Insert
     suspend fun insert(dto: ProductDto): Long
 
@@ -58,12 +61,12 @@ interface ProductFtsDao {
     // marked for deletion.
     @Query(
         """
-       SELECT fts.* FROM product_fts fts
-       JOIN product ON (product.rowid = fts.product_id)
+       SELECT e.* FROM product_fts fts
+       JOIN product e ON (e.rowid = fts.product_id)
        WHERE
-        product.pending_delete_until IS NULL
+        e.pending_delete_until IS NULL
         AND product_fts MATCH :value 
     """
     )
-    fun match(value: String): PagingSource<Int, ProductFtsDto>
+    fun match(value: String): PagingSource<Int, ProductDto>
 }

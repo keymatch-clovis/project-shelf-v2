@@ -1,6 +1,5 @@
 package com.example.project_shelf.app.use_case.customer
 
-import com.example.project_shelf.app.entity.Customer
 import com.example.project_shelf.app.service.CustomerService
 import javax.inject.Inject
 
@@ -11,7 +10,7 @@ class UpdateCustomerUseCase @Inject constructor(private val service: CustomerSer
         phone: String,
         address: String,
         cityId: Long,
-        businessName: String?,
+        businessName: String,
     ) {
         return service.update(
             id = id,
@@ -19,7 +18,7 @@ class UpdateCustomerUseCase @Inject constructor(private val service: CustomerSer
             phone = phone,
             address = address,
             cityId = cityId,
-            businessName = businessName,
+            businessName = businessName.ifBlank { null },
         )
     }
 }

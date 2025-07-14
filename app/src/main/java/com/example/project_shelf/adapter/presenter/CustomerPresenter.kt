@@ -8,7 +8,7 @@ import com.example.project_shelf.adapter.dto.ui.toDto
 import com.example.project_shelf.adapter.repository.CustomerRepository
 import com.example.project_shelf.app.use_case.customer.CreateCustomerUseCase
 import com.example.project_shelf.app.use_case.customer.DeleteAllCustomersUseCase
-import com.example.project_shelf.app.use_case.customer.FindCustomersUseCase
+import com.example.project_shelf.app.use_case.customer.GetCustomersUseCase
 import com.example.project_shelf.app.use_case.customer.SearchCustomersUseCase
 import com.example.project_shelf.app.use_case.customer.SetCustomerPendingForDeletionUseCase
 import com.example.project_shelf.app.use_case.customer.UnsetCustomerPendingForDeletionUseCase
@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class CustomerPresenter @Inject constructor(
-    private val findCustomersUseCase: FindCustomersUseCase,
+    private val getCustomersUseCase: GetCustomersUseCase,
     private val searchCustomersUseCase: SearchCustomersUseCase,
     private val updateCustomerUseCase: UpdateCustomerUseCase,
     private val createCustomerUseCase: CreateCustomerUseCase,
@@ -32,7 +32,7 @@ class CustomerPresenter @Inject constructor(
 ) : CustomerRepository {
     override fun find(): Flow<PagingData<CustomerDto>> {
         Log.d("PRESENTER", "Finding customers")
-        return findCustomersUseCase.exec().map {
+        return getCustomersUseCase.exec().map {
             it.map { customer -> customer.toDto() }
         }
     }
@@ -45,7 +45,7 @@ class CustomerPresenter @Inject constructor(
     }
 
     override suspend fun update(
-        id: Long, name: String, phone: String, address: String, cityId: Long, businessName: String?,
+        id: Long, name: String, phone: String, address: String, cityId: Long, businessName: String,
     ) {
         Log.d(
             "PRESENTER",
@@ -55,7 +55,7 @@ class CustomerPresenter @Inject constructor(
     }
 
     override suspend fun create(
-        name: String, phone: String, address: String, cityId: Long, businessName: String?
+        name: String, phone: String, address: String, cityId: Long, businessName: String
     ) {
         Log.d(
             "PRESENTER",

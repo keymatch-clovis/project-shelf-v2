@@ -1,6 +1,5 @@
 package com.example.project_shelf.adapter.view_model.product
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.project_shelf.adapter.ViewModelError
@@ -20,6 +19,7 @@ import com.example.project_shelf.adapter.view_model.validateString
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.firstOrNull
 
 sealed class CreateProductViewModelState {
     data class InputState(
@@ -69,7 +69,7 @@ class CreateProductViewModel @Inject constructor(
                     val errors = it.validateString(true).toMutableList()
                     // If we have no errors, we can check the product name.
                     if (errors.isEmpty()) {
-                        productRepository.getProduct(it)?.let {
+                        if (!productRepository.isProductNameUnique(it)) {
                             errors.add(ViewModelError.PRODUCT_NAME_TAKEN)
                         }
                     }
@@ -120,7 +120,7 @@ class CreateProductViewModel @Inject constructor(
         assert(isValid.value)
 
         viewModelScope.launch {
-            val product = productRepository.createProduct(
+            val product = productRepository.create(
                 name = _name.value.trim(),
                 price = _inputState.value.price.toBigDecimalOrZero(),
                 stock = _inputState.value.stock.toIntOrZero(),

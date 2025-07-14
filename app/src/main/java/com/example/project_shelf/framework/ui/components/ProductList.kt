@@ -31,6 +31,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.dto.ui.ProductDto
+import com.example.project_shelf.framework.ui.components.list_item.ProductListItem
 
 @Composable
 fun ProductList(

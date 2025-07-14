@@ -8,9 +8,7 @@ import androidx.paging.map
 import androidx.room.withTransaction
 import com.example.project_shelf.adapter.dto.room.ProductDto
 import com.example.project_shelf.adapter.dto.room.ProductFtsDto
-import com.example.project_shelf.adapter.dto.room.toDto
 import com.example.project_shelf.adapter.dto.room.toEntity
-import com.example.project_shelf.adapter.dto.room.toProductFilter
 import com.example.project_shelf.app.entity.Product
 import com.example.project_shelf.app.entity.ProductFilter
 import com.example.project_shelf.app.service.ProductService
@@ -30,7 +28,7 @@ const val PAGE_SIZE = 100;
 class ProductServiceImpl @Inject constructor(
     private val database: SqliteDatabase,
 ) : ProductService {
-    override fun find(): Flow<PagingData<Product>> {
+    override fun get(): Flow<PagingData<Product>> {
         Log.d("SERVICE-IMPL", "Finding products")
         return Pager(
             config = PagingConfig(pageSize = PAGE_SIZE)
@@ -39,7 +37,7 @@ class ProductServiceImpl @Inject constructor(
         }
     }
 
-    override fun search(value: String): Flow<PagingData<ProductFilter>> {
+    override fun search(value: String): Flow<PagingData<Product>> {
         Log.d("SERVICE-IMPL", "Searching products with: $value")
         return Pager(
             config = PagingConfig(pageSize = PAGE_SIZE)
@@ -48,8 +46,13 @@ class ProductServiceImpl @Inject constructor(
             // https://www.sqlite.org/fts3.html
             database.productFtsDao().match("$value*")
         }.flow.map {
-            it.map { dto -> dto.toProductFilter() }
+            it.map { dto -> dto.toEntity() }
         }
+    }
+
+    override suspend fun findByName(name: String): Product? {
+        Log.d("SERVICE-IMPL", "Finding product with name: $name")
+        return database.productDao().selectByName(name)?.toEntity()
     }
 
     override suspend fun create(

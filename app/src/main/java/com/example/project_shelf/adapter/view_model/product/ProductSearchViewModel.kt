@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.example.project_shelf.adapter.dto.ui.ProductFilterDto
+import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.repository.ProductRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,7 +24,7 @@ import javax.inject.Inject
 class ProductSearchViewModel @Inject constructor(
     private val repository: ProductRepository,
 ) : ViewModel() {
-    private val _result: MutableStateFlow<PagingData<ProductFilterDto>> =
+    private val _result: MutableStateFlow<PagingData<ProductDto>> =
         MutableStateFlow(PagingData.empty())
     val result = _result.asStateFlow()
 

@@ -88,12 +88,8 @@ class EditProductViewModel @AssistedInject constructor(
                     val errors = it.validateString(true).toMutableList()
                     // If we have no errors, we can check the product name.
                     if (errors.isEmpty()) {
-                        productRepository.getProduct(it)?.let {
-                            // If the product found is different to the one we are editing, then the
-                            // name is already taken.
-                            if (it != product) {
-                                errors.add(ViewModelError.PRODUCT_NAME_TAKEN)
-                            }
+                        if (!productRepository.isProductNameUnique(it)) {
+                            errors.add(ViewModelError.PRODUCT_NAME_TAKEN)
                         }
                     }
                     _validationState.update { it.copy(nameErrors = errors) }
@@ -121,6 +117,9 @@ class EditProductViewModel @AssistedInject constructor(
                         state.priceErrors,
                         state.stockErrors,
                     ).all { it.isEmpty() }
+                        // Also, for UI/UX, check the product name is not the same as the one we
+                        // already have.
+                        .and(product.name != _name.value)
                 }
             }
         }
@@ -151,7 +150,7 @@ class EditProductViewModel @AssistedInject constructor(
         assert(isValid.value)
 
         viewModelScope.launch {
-            productRepository.updateProduct(
+            productRepository.update(
                 id = product.id,
                 name = _name.value.trim(),
                 price = _inputState.value.price.toBigDecimalOrZero(),

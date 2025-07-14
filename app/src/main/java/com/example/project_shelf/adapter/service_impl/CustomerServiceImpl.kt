@@ -27,7 +27,7 @@ import javax.inject.Inject
 class CustomerServiceImpl @Inject constructor(
     private val database: SqliteDatabase,
 ) : CustomerService {
-    override fun find(): Flow<PagingData<Customer>> {
+    override fun get(): Flow<PagingData<Customer>> {
         Log.d("SERVICE-IMPL", "Finding customers")
         return Pager(
             config = PagingConfig(DEFAULT_PAGE_SIZE)

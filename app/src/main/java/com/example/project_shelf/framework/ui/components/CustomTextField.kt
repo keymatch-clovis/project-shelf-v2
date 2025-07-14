@@ -1,5 +1,6 @@
 package com.example.project_shelf.framework.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,8 +13,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -36,6 +42,13 @@ fun CustomTextField(
     onClick: (Boolean) -> Unit = {},
     onClear: (() -> Unit)? = null,
 ) {
+    // FIXME:
+    //  I couldn't find any implementation of the dirty input feature, so this may(must) be very
+    //  wrong, as I'm using 2 variables per input field just for this. It might not be very good,
+    //  but it stays like this for now.
+    var wasFocused by remember { mutableStateOf(false) }
+    var isDirty by remember { mutableStateOf(false) }
+
     OutlinedTextField(
         modifier = modifier
             .sizeIn(
@@ -43,11 +56,28 @@ fun CustomTextField(
                 minWidth = 360.dp,
                 maxWidth = 720.dp,
             )
-            .onFocusChanged { if (it.isFocused) onClick(true) },
+            .onFocusChanged {
+                if (it.isFocused) {
+                    wasFocused = true
+                    onClick(true)
+                }
+                // If the user focuses, and then un-focuses, we can mark the text field as
+                // dirty.
+                if (!it.isFocused && wasFocused) {
+                    wasFocused = false
+                    isDirty = true
+                }
+            },
         value = value,
-        onValueChange = onValueChange,
+        onValueChange = {
+            // Also, if the user starts typing, we have to mark the text field as dirty, so the
+            // other possible errors are checked.
+            isDirty = true
+
+            onValueChange(it)
+        },
         keyboardOptions = keyboardOptions,
-        isError = errors.isNotEmpty(),
+        isError = isDirty && errors.isNotEmpty(),
         singleLine = singleLine,
         readOnly = readOnly,
         label = {
@@ -64,17 +94,19 @@ fun CustomTextField(
             }
         },
         supportingText = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                // TODO: We are just showing the first error, maybe this is not wanted later.
-                errors.firstOrNull()?.let {
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        text = stringResource(it)
-                    )
+            if (isDirty) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    // TODO: We are just showing the first error, maybe this is not wanted later.
+                    errors.firstOrNull()?.let {
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            text = stringResource(it)
+                        )
+                    }
                 }
             }
         },

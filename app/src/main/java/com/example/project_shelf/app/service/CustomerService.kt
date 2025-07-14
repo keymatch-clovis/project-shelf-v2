@@ -5,7 +5,7 @@ import com.example.project_shelf.app.entity.Customer
 import kotlinx.coroutines.flow.Flow
 
 interface CustomerService {
-    fun find(): Flow<PagingData<Customer>>
+    fun get(): Flow<PagingData<Customer>>
 
     fun search(value: String): Flow<PagingData<Customer>>
 
