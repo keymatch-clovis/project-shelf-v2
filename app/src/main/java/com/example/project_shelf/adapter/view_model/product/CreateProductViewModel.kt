@@ -1,40 +1,39 @@
 package com.example.project_shelf.adapter.view_model.product
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.project_shelf.adapter.ViewModelError
 import com.example.project_shelf.adapter.dto.ui.ProductDto
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.example.project_shelf.adapter.repository.ProductRepository
-import com.example.project_shelf.adapter.view_model.toBigDecimalOrZero
-import com.example.project_shelf.adapter.view_model.toIntOrZero
-import com.example.project_shelf.adapter.view_model.validateBigDecimal
-import com.example.project_shelf.adapter.view_model.validateInt
-import com.example.project_shelf.adapter.view_model.validateString
+import com.example.project_shelf.adapter.view_model.util.BigDecimalValidator
+import com.example.project_shelf.adapter.view_model.util.Input
+import com.example.project_shelf.adapter.view_model.util.IntValidator
+import com.example.project_shelf.adapter.view_model.util.StringValidator
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combineTransform
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
+import java.math.BigDecimal
 
 sealed class CreateProductViewModelState {
     data class InputState(
-        val price: String = "",
-        val stock: String = "",
-    )
-
-    data class ValidationState(
-        val nameErrors: List<ViewModelError> = emptyList(),
-        val priceErrors: List<ViewModelError> = emptyList(),
-        val stockErrors: List<ViewModelError> = emptyList(),
+        val name: Input<String> = Input("", StringValidator(required = true)),
+        val price: Input<BigDecimal> = Input("", BigDecimalValidator()),
+        val stock: Input<Int> = Input("", IntValidator()),
     )
 }
 
-@OptIn(FlowPreview::class)
+@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class CreateProductViewModel @Inject constructor(
     private val productRepository: ProductRepository,
@@ -46,84 +45,52 @@ class CreateProductViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<Event>()
     val eventFlow: SharedFlow<Event> = _eventFlow
 
-    private val _inputState = MutableStateFlow(CreateProductViewModelState.InputState())
-    val inputState = _inputState.asStateFlow()
+    val inputState = CreateProductViewModelState.InputState()
 
-    private val _validationState = MutableStateFlow(CreateProductViewModelState.ValidationState())
-    val validationState = _validationState.asStateFlow()
-
-    // We ned this one outside the UI State, as it takes a more important responsibility than the
-    // other input elements.
-    private val _name = MutableStateFlow("")
-    val name = _name.asStateFlow()
-
-    private val _isValid = MutableStateFlow(false)
-    val isValid = _isValid.asStateFlow()
+    val isValid = combineTransform<List<ViewModelError>, Boolean>(
+        inputState.name.errors,
+        inputState.price.errors,
+        inputState.stock.errors,
+    ) {
+        emit(it.all { it.isEmpty() })
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     init {
         // When the name changes, we need to check if another product has this name.
         viewModelScope.launch {
-            _name
-                // We need to debounce this one, as we are looking up the database.
-                .collect {
-                    val errors = it.validateString(true).toMutableList()
-                    // If we have no errors, we can check the product name.
-                    if (errors.isEmpty()) {
-                        if (!productRepository.isProductNameUnique(it)) {
-                            errors.add(ViewModelError.PRODUCT_NAME_TAKEN)
-                        }
+            inputState.name.cleanValue.debounce(300).mapLatest {
+                mutableListOf<ViewModelError>().apply {
+                    if (it != null && !productRepository.isProductNameUnique(it)) {
+                        this.add(ViewModelError.PRODUCT_NAME_TAKEN)
                     }
-                    _validationState.update { it.copy(nameErrors = errors) }
                 }
-        }
-
-        // When all of the other UI inputs change, do the default checks.
-        viewModelScope.launch {
-            _inputState.collect { state ->
-                _validationState.update {
-                    it.copy(
-                        priceErrors = state.price.validateBigDecimal(),
-                        stockErrors = state.stock.validateInt(),
-                    )
-                }
+            }.collectLatest {
+                inputState.name.addErrors(*it.toTypedArray())
             }
         }
 
-        // When the validation state changes, check if the view model is valid.
+        // Verify the input state is valid.
         viewModelScope.launch {
-            _validationState.collect { state ->
-                _isValid.update {
-                    listOf(
-                        state.nameErrors,
-                        state.priceErrors,
-                        state.stockErrors,
-                    ).all { it.isEmpty() }
-                }
+            isValid.collect {
+                Log.d("test", it.toString())
             }
         }
     }
 
-    fun updateName(value: String) {
-        _name.update { value }
-    }
-
-    fun updatePrice(value: String) {
-        _inputState.update { it.copy(price = value) }
-    }
-
-    fun updateStock(value: String) {
-        _inputState.update { it.copy(stock = value) }
-    }
+    fun updateName(value: String) = inputState.name.update(value)
+    fun updatePrice(value: String) = inputState.price.update(value)
+    fun updateStock(value: String) = inputState.stock.update(value)
 
     fun create() {
+        Log.d("VIEW-MODEL", "Creating product")
         // NOTE: We should only call this method when all input data has been validated.
         assert(isValid.value)
 
         viewModelScope.launch {
             val product = productRepository.create(
-                name = _name.value.trim(),
-                price = _inputState.value.price.toBigDecimalOrZero(),
-                stock = _inputState.value.stock.toIntOrZero(),
+                name = inputState.name.cleanValue.value!!,
+                price = inputState.price.cleanValue.value ?: BigDecimal.ZERO,
+                stock = inputState.stock.cleanValue.value ?: 0,
             )
             _eventFlow.emit(Event.ProductCreated(product))
         }

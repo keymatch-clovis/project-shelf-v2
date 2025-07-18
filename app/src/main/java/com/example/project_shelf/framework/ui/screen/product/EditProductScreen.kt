@@ -36,10 +36,16 @@ fun EditProductScreen(
     onDismissRequest: () -> Unit,
     onDeleteRequest: () -> Unit,
 ) {
-    val nameState = viewModel.name.collectAsState()
+    val name = viewModel.inputState.name.rawValue.collectAsState()
+    val nameErrors = viewModel.inputState.name.errors.collectAsState()
+
+    val price = viewModel.inputState.price.rawValue.collectAsState()
+    val priceErrors = viewModel.inputState.price.errors.collectAsState()
+
+    val stock = viewModel.inputState.stock.rawValue.collectAsState()
+    val stockErrors = viewModel.inputState.stock.errors.collectAsState()
+
     val uiState = viewModel.uiState.collectAsState()
-    val inputState = viewModel.inputState.collectAsState()
-    val validationState = viewModel.validationState.collectAsState()
     val isValid = viewModel.isValid.collectAsState()
     val context = LocalContext.current
 
@@ -100,16 +106,16 @@ fun EditProductScreen(
         EditProductForm(
             innerPadding = innerPadding,
 
-            name = nameState.value,
-            nameErrors = validationState.value.nameErrors.map { it.getStringResource() },
+            name = name.value,
+            nameErrors = nameErrors.value.map { it.getStringResource() },
             onNameChange = { viewModel.updateName(it) },
 
-            price = inputState.value.price,
-            priceErrors = validationState.value.priceErrors.map { it.getStringResource() },
+            price = price.value,
+            priceErrors = priceErrors.value.map { it.getStringResource() },
             onPriceChange = { viewModel.updatePrice(it) },
 
-            stock = inputState.value.stock,
-            stockErrors = validationState.value.stockErrors.map { it.getStringResource() },
+            stock = stock.value,
+            stockErrors = stockErrors.value.map { it.getStringResource() },
             onStockChange = { viewModel.updateStock(it) },
         )
     }

@@ -51,8 +51,21 @@ fun CreateCustomerScreen(
     viewModel: CreateCustomerViewModel,
     onDismissRequest: () -> Unit,
 ) {
-    val inputState = viewModel.inputState.collectAsState()
-    val validationState = viewModel.validationState.collectAsState()
+    val name = viewModel.inputState.name.rawValue.collectAsState()
+    val nameErrors = viewModel.inputState.name.errors.collectAsState()
+
+    val phone = viewModel.inputState.phone.rawValue.collectAsState()
+    val phoneErrors = viewModel.inputState.phone.errors.collectAsState()
+
+    val address = viewModel.inputState.address.rawValue.collectAsState()
+    val addressErrors = viewModel.inputState.address.errors.collectAsState()
+
+    val businessName = viewModel.inputState.businessName.rawValue.collectAsState()
+    val businessNameErrors = viewModel.inputState.businessName.errors.collectAsState()
+
+    val city = viewModel.inputState.city.collectAsState()
+    val cityErrors = viewModel.inputState.cityErrors.collectAsState()
+
     val isValid = viewModel.isValid.collectAsState()
 
     /// Related to city search.
@@ -104,24 +117,24 @@ fun CreateCustomerScreen(
             CreateCustomerForm(
                 innerPadding = innerPadding,
 
-                name = inputState.value.name,
-                nameErrors = validationState.value.nameErrors.map { it.getStringResource() },
+                name = name.value,
+                nameErrors = nameErrors.value.map { it.getStringResource() },
                 onNameChange = { viewModel.updateName(it) },
 
-                phone = inputState.value.phone,
-                phoneErrors = validationState.value.phoneErrors.map { it.getStringResource() },
+                phone = phone.value,
+                phoneErrors = phoneErrors.value.map { it.getStringResource() },
                 onPhoneChange = { viewModel.updatePhone(it) },
 
-                address = inputState.value.address,
-                addressErrors = validationState.value.addressErrors.map { it.getStringResource() },
+                address = address.value,
+                addressErrors = addressErrors.value.map { it.getStringResource() },
                 onAddressChange = { viewModel.updateAddress(it) },
 
-                businessName = inputState.value.businessName,
-                businessNameErrors = validationState.value.businessNameErrors.map { it.getStringResource() },
+                businessName = businessName.value,
+                businessNameErrors = businessNameErrors.value.map { it.getStringResource() },
                 onBusinessNameChange = { viewModel.updateBusinessName(it) },
 
-                city = inputState.value.city,
-                cityErrors = validationState.value.cityErrors.map { it.getStringResource() },
+                city = city.value,
+                cityErrors = cityErrors.value.map { it.getStringResource() },
                 onCitySearch = { showCitySearchBar = true },
             )
         }
@@ -185,23 +198,18 @@ fun CreateCustomerScreen(
                     items(count = citiesLazyPagingItems.itemCount) { index ->
                         citiesLazyPagingItems[index]?.let {
                             Surface(
-                                onClick = {}
-                            ) {
-                                ListItem(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    headlineContent = {
-                                        Text(
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            text = it.name,
-                                        )
-                                    },
-                                    supportingContent = {
-                                        Text(
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            text = it.department,
-                                        )
-                                    }
-                                )
+                                onClick = {}) {
+                                ListItem(modifier = Modifier.fillMaxWidth(), headlineContent = {
+                                    Text(
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        text = it.name,
+                                    )
+                                }, supportingContent = {
+                                    Text(
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        text = it.department,
+                                    )
+                                })
                             }
                         }
 

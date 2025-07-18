@@ -9,7 +9,8 @@ import com.example.project_shelf.adapter.ViewModelError
 import com.example.project_shelf.adapter.dto.ui.CityDto
 import com.example.project_shelf.adapter.repository.CityRepository
 import com.example.project_shelf.adapter.repository.CustomerRepository
-import com.example.project_shelf.adapter.view_model.validateString
+import com.example.project_shelf.adapter.view_model.util.Input
+import com.example.project_shelf.adapter.view_model.util.StringValidator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -18,8 +19,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -27,19 +28,15 @@ import javax.inject.Inject
 
 sealed class CreateCustomerViewModelState {
     data class InputState(
-        val name: String = "",
-        val phone: String = "",
-        val address: String = "",
-        val city: CityDto? = null,
-        val businessName: String = "",
-    )
-
-    data class ValidationState(
-        val nameErrors: List<ViewModelError> = emptyList(),
-        val phoneErrors: List<ViewModelError> = emptyList(),
-        val addressErrors: List<ViewModelError> = emptyList(),
-        val businessNameErrors: List<ViewModelError> = emptyList(),
-        val cityErrors: List<ViewModelError> = emptyList(),
+        val name: Input<String> = Input("", StringValidator(required = true)),
+        val phone: Input<String> = Input("", StringValidator()),
+        val address: Input<String> = Input("", StringValidator()),
+        val businessName: Input<String> = Input("", StringValidator()),
+        // TODO:
+        //  We have not created an input for this one, as the input changes a lot. We might want to
+        //  create one for this later. But the replacement shouldn't be that hard. I hope :p
+        val city: MutableStateFlow<CityDto?> = MutableStateFlow(null),
+        val cityErrors: MutableStateFlow<List<ViewModelError>> = MutableStateFlow(emptyList()),
     )
 }
 
@@ -56,11 +53,7 @@ class CreateCustomerViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<Event>()
     val eventFlow: SharedFlow<Event> = _eventFlow
 
-    private val _inputState = MutableStateFlow(CreateCustomerViewModelState.InputState())
-    val inputState = _inputState.asStateFlow()
-
-    private val _validationState = MutableStateFlow(CreateCustomerViewModelState.ValidationState())
-    val validationState = _validationState.asStateFlow()
+    val inputState = CreateCustomerViewModelState.InputState()
 
     private val _isValid = MutableStateFlow(false)
     val isValid = _isValid.asStateFlow()
@@ -76,64 +69,45 @@ class CreateCustomerViewModel @Inject constructor(
     init {
         // Start listening for the city query changes.
         viewModelScope.launch {
-            _cityQuery.debounce(300).distinctUntilChanged().flatMapLatest {
+            _cityQuery.debounce(300).flatMapLatest {
                 cityRepository.search(it.toString())
             }.cachedIn(viewModelScope).collectLatest {
                 _citySearchResult.value = it
             }
         }
 
-        // When any of the UI inputs change, do the default checks.
         viewModelScope.launch {
-            _inputState.collect { state ->
-                _validationState.update {
-                    // Check that the city has been set.
-                    val cityErrors = mutableListOf<ViewModelError>()
-                    if (state.city == null) {
-                        cityErrors.add(ViewModelError.BLANK_VALUE)
-                    }
-
-                    it.copy(
-                        nameErrors = state.name.validateString(required = true),
-                        phoneErrors = state.phone.validateString(required = true),
-                        addressErrors = state.address.validateString(required = true),
-                        businessNameErrors = state.businessName.validateString(),
-                        cityErrors = cityErrors,
-                    )
-                }
-
-                // Also update the view model valid state.
-                _isValid.update {
-                    listOf(
-                        _validationState.value.nameErrors,
-                        _validationState.value.phoneErrors,
-                        _validationState.value.addressErrors,
-                        _validationState.value.businessNameErrors,
-                        _validationState.value.cityErrors,
-                    ).all { it.isEmpty() }
-                }
+            combineTransform<List<ViewModelError>, Boolean>(
+                inputState.name.errors,
+                inputState.phone.errors,
+                inputState.address.errors,
+                inputState.cityErrors,
+                inputState.businessName.errors,
+            ) { it.all { it.isEmpty() } }.collectLatest {
+                _isValid.update { it }
             }
         }
     }
 
-    fun updateName(value: String) = _inputState.update { it.copy(name = value) }
-    fun updatePhone(value: String) = _inputState.update { it.copy(phone = value) }
-    fun updateAddress(value: String) = _inputState.update { it.copy(address = value) }
-    fun updateBusinessName(value: String) = _inputState.update { it.copy(businessName = value) }
+    fun updateName(value: String) = inputState.name.update(value)
+    fun updatePhone(value: String) = inputState.phone.update(value)
+    fun updateAddress(value: String) = inputState.address.update(value)
+    fun updateBusinessName(value: String) = inputState.businessName.update(value)
 
     fun updateCityQuery(value: String) = _cityQuery.update { value }
-    fun updateCity(dto: CityDto?) = _inputState.update { it.copy(city = dto) }
+    fun updateCity(dto: CityDto?) = inputState.city.update { dto }
 
     fun create() = viewModelScope.launch {
         Log.d("VIEW-MODEL", "Creating customer")
+        // NOTE: We should only call this method when all input data has been validated.
         assert(_isValid.value)
 
         customerRepository.create(
-            name = _inputState.value.name.trim(),
-            phone = _inputState.value.phone.trim(),
-            address = _inputState.value.address.trim(),
-            cityId = _inputState.value.city!!.id,
-            businessName = _inputState.value.businessName,
+            name = inputState.name.cleanValue.value!!,
+            phone = inputState.phone.cleanValue.value ?: "",
+            address = inputState.address.cleanValue.value ?: "",
+            businessName = inputState.businessName.cleanValue.value ?: "",
+            cityId = inputState.city.value!!.id,
         )
     }
 }
