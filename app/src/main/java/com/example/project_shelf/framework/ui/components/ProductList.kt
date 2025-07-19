@@ -10,7 +10,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.overscroll
+import androidx.compose.foundation.rememberOverscrollEffect
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -35,8 +38,8 @@ import com.example.project_shelf.framework.ui.components.list_item.ProductListIt
 
 @Composable
 fun ProductList(
-    lazyPagingItems: LazyPagingItems<ProductDto>,
     lazyListState: LazyListState,
+    lazyPagingItems: LazyPagingItems<ProductDto>,
     onProductClicked: (ProductDto) -> Unit,
     nestedScrollConnection: NestedScrollConnection,
 ) {
@@ -60,14 +63,11 @@ fun ProductList(
         }
     }
 
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-    ) {
+    Box(modifier = Modifier.nestedScroll(nestedScrollConnection)) {
         LazyColumn(
             state = lazyListState,
             modifier = Modifier
-                .fillMaxWidth()
-                .nestedScroll(nestedScrollConnection),
+                .fillMaxSize()
         ) {
             items(count = lazyPagingItems.itemCount) { index ->
                 lazyPagingItems[index]?.let {

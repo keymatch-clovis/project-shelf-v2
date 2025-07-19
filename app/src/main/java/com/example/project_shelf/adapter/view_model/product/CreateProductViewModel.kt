@@ -68,16 +68,18 @@ class CreateProductViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     init {
-        // When the name changes, we need to check if another product has this name.
+        // When the raw name value changes, we need to check if another product has this name, using
+        // the clean name value.
         viewModelScope.launch {
-            inputState.name.cleanValue
+            inputState.name.rawValue
                 .onEach { isLoading.update { true } }
                 .debounce(500)
-                .filterNotNull()
                 .map {
                     mutableListOf<ViewModelError>().apply {
-                        if (!productRepository.isProductNameUnique(it)) {
-                            this.add(ViewModelError.PRODUCT_NAME_TAKEN)
+                        inputState.name.cleanValue.value?.let {
+                            if (!productRepository.isProductNameUnique(it)) {
+                                this.add(ViewModelError.PRODUCT_NAME_TAKEN)
+                            }
                         }
                     }
                 }.collectLatest {

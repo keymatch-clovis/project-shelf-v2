@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 @HiltViewModel()
-class ProductsViewModel @Inject constructor(
+class ProductListViewModel @Inject constructor(
     repository: ProductRepository,
 ) : ViewModel() {
     var products: Flow<PagingData<ProductDto>> = repository.get()

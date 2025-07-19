@@ -20,7 +20,7 @@ import com.example.project_shelf.framework.ui.screen.customer.CreateCustomerScre
 import com.example.project_shelf.framework.ui.screen.customer.CustomersScreen
 import com.example.project_shelf.framework.ui.screen.product.CreateProductScreen
 import com.example.project_shelf.framework.ui.screen.product.EditProductScreen
-import com.example.project_shelf.framework.ui.screen.product.ProductsScreen
+import com.example.project_shelf.framework.ui.screen.product.ProductListScreen
 
 @Composable
 fun MainNavHost(
@@ -37,7 +37,7 @@ fun MainNavHost(
 
     NavHost(navController, startDestination = startDestination.path, modifier) {
         composable(Destination.PRODUCT.path) {
-            ProductsScreen(
+            ProductListScreen(
                 viewModel = hiltViewModel(),
                 productDeletionViewModel = productDeletionViewModel,
                 onProductCreate = {
