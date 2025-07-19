@@ -19,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -84,11 +83,11 @@ fun CustomTextField(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (required) {
                     Icon(
-                        modifier = Modifier.size(11.dp),
-                        imageVector = ImageVector.vectorResource(R.drawable.asterisk_solid),
+                        modifier = Modifier.size(16.dp),
+                        imageVector = ImageVector.vectorResource(R.drawable.asterisk),
                         contentDescription = null
                     )
-                    Spacer(Modifier.width(4.dp))
+                    Spacer(Modifier.width(2.dp))
                 }
                 Text(stringResource(label))
             }
@@ -115,7 +114,7 @@ fun CustomTextField(
                 IconButton(onClick = onClear) {
                     Icon(
                         modifier = Modifier.size(24.dp),
-                        imageVector = ImageVector.vectorResource(R.drawable.xmark_solid),
+                        imageVector = ImageVector.vectorResource(R.drawable.x),
                         contentDescription = null
                     )
                 }

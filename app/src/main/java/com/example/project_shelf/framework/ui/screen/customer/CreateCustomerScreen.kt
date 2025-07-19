@@ -96,7 +96,7 @@ fun CreateCustomerScreen(
                         IconButton(onClick = onDismissRequest) {
                             Icon(
                                 modifier = Modifier.size(24.dp),
-                                imageVector = ImageVector.vectorResource(R.drawable.arrow_left_solid),
+                                imageVector = ImageVector.vectorResource(R.drawable.arrow_left),
                                 contentDescription = null
                             )
                         }
@@ -184,7 +184,7 @@ fun CreateCustomerScreen(
                         leadingIcon = {
                             Icon(
                                 modifier = Modifier.size(24.dp),
-                                imageVector = ImageVector.vectorResource(R.drawable.magnifying_glass_solid),
+                                imageVector = ImageVector.vectorResource(R.drawable.search),
                                 contentDescription = null,
                             )
                         },

@@ -24,10 +24,10 @@ import com.example.project_shelf.adapter.dto.ui.ProductDto
 @Composable
 fun ProductListItem(
     dto: ProductDto,
-    onItemClicked: (ProductDto) -> Unit = {},
+    onClick: (ProductDto) -> Unit,
 ) {
     Surface(
-        onClick = { onItemClicked(dto) },
+        onClick = { onClick(dto) },
     ) {
         ListItem(
             modifier = Modifier.fillMaxWidth(),
@@ -57,7 +57,7 @@ fun ProductListItem(
             },
             trailingContent = {
                 Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.chevron_right_solid),
+                    imageVector = ImageVector.vectorResource(R.drawable.chevron_right),
                     contentDescription = null
                 )
             },

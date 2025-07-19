@@ -7,30 +7,28 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,45 +36,45 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.view_model.product.ProductDeletionViewModel
 import com.example.project_shelf.adapter.view_model.product.ProductListViewModel
-import com.example.project_shelf.adapter.view_model.product.ProductSearchViewModel
+import com.example.project_shelf.framework.ui.components.CustomList
 import com.example.project_shelf.framework.ui.components.ProductList
-import com.example.project_shelf.framework.ui.util.CollapsingAppBarNestedScrollConnection
+import com.example.project_shelf.framework.ui.components.list_item.ProductListItem
 import kotlinx.coroutines.FlowPreview
-
-val AppBarHeight = 72.dp
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class, FlowPreview::class)
 @Composable
 fun ProductListScreen(
     viewModel: ProductListViewModel,
     productDeletionViewModel: ProductDeletionViewModel,
-    searchViewModel: ProductSearchViewModel = hiltViewModel(),
     onProductCreate: () -> Unit,
     onProductEdit: (product: ProductDto) -> Unit,
 ) {
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val lazyPagingItems = viewModel.products.collectAsLazyPagingItems()
-    val lazyPagingSearchItems = searchViewModel.result.collectAsLazyPagingItems()
-    val query = searchViewModel.query.collectAsState()
 
     val scope = rememberCoroutineScope()
     val localContext = LocalContext.current
-    var showSearchBar by remember { mutableStateOf(false) }
 
     var showTools: Boolean by remember { mutableStateOf(true) }
     val snackbarState = productDeletionViewModel.snackbarState.collectAsState()
+
+    // Related to product search
+    var showSearchBar = viewModel.showSearchBar.collectAsState()
+    var query = viewModel.query.collectAsState()
+    val lazyPagingSearchItems = viewModel.searchResult.collectAsLazyPagingItems()
 
     // Start the undo deletion snackbar. The snackbar state might recreate, when the user wants to
     // edit, or create an object. As such, we have to be aware of this.
@@ -87,93 +85,114 @@ fun ProductListScreen(
         )
     }
 
-    // Nested scrolling for top bars or any other bars.
-    // https://medium.com/androiddevelopers/understanding-nested-scrolling-in-jetpack-compose-eb57c1ea0af0
-    val appBarMaxHeight = with(LocalDensity.current) { AppBarHeight.roundToPx() }
-    val connection = remember(appBarMaxHeight) {
-        CollapsingAppBarNestedScrollConnection(appBarMaxHeight)
-    }
-    val density = LocalDensity.current
-    val spaceHeight by remember(density) {
-        derivedStateOf {
-            with(density) {
-                (appBarMaxHeight + connection.appBarOffset).toDp()
-            }
-        }
-    }
-
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarState.value) },
-        floatingActionButton = {
-            AnimatedVisibility(
-                visible = showTools && !showSearchBar,
-                enter = fadeIn(),
-                exit = fadeOut(),
-            ) {
-                FloatingActionButton(
-                    modifier = Modifier.height(56.dp),
-                    onClick = onProductCreate,
-                    shape = MaterialTheme.shapes.small,
+    // This box is used to render the search bars over all the content. If this is not this way, we
+    // might have problems showing the contents correctly.
+    Box {
+        Scaffold(
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            snackbarHost = { SnackbarHost(hostState = snackbarState.value) },
+            topBar = {
+                TopAppBar(
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                    scrollBehavior = scrollBehavior,
+                    title = { Text(stringResource(R.string.products)) },
+                    actions = {
+                        IconButton(onClick = { viewModel.openSearchBar() }) {
+                            Icon(
+                                modifier = Modifier.size(24.dp),
+                                imageVector = ImageVector.vectorResource(R.drawable.search),
+                                contentDescription = null,
+                            )
+                        }
+                    },
+                )
+            },
+            floatingActionButton = {
+                AnimatedVisibility(
+                    visible = showTools && !showSearchBar.value,
+                    enter = slideInVertically(),
+                    exit = slideOutVertically(),
                 ) {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        contentDescription = null,
-                        imageVector = Icons.Filled.Add,
-                    )
+                    FloatingActionButton(
+                        modifier = Modifier.height(56.dp),
+                        onClick = onProductCreate,
+                        shape = MaterialTheme.shapes.small,
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            contentDescription = null,
+                            imageVector = ImageVector.vectorResource(R.drawable.plus),
+                        )
+                    }
                 }
-            }
-        },
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier.padding(innerPadding),
-            contentAlignment = Alignment.TopCenter,
+            },
+        ) { innerPadding ->
+            ProductList(
+                modifier = Modifier.padding(innerPadding),
+                lazyListState = viewModel.lazyListState,
+                lazyPagingItems = lazyPagingItems,
+                onProductClicked = onProductEdit,
+            )
+        }
+
+        // Search Product Search Bar.
+        // NOTE:
+        //  I have to create this box here, as I don't really know if there is a way to put both a
+        //  search bar, and the results in a same component. I feel I really need to use two of them
+        //  separated.
+        AnimatedVisibility(
+            visible = showSearchBar.value,
+            enter = fadeIn() + slideInVertically(),
+            exit = fadeOut() + slideOutVertically(),
         ) {
-            Column {
-                Spacer(
-                    modifier = Modifier
-                        .height(spaceHeight)
-                )
-                ProductList(
-                    lazyListState = viewModel.lazyListState,
-                    lazyPagingItems = lazyPagingItems,
-                    onProductClicked = onProductEdit,
-                    nestedScrollConnection = connection,
-                )
+            val focusRequester = remember { FocusRequester() }
+            // NOTE:
+            //  Idk if this is working correctly, but I guess I have no other way of knowing when
+            //  this element is already in the composition tree.
+            LaunchedEffect(Unit) {
+                focusRequester.requestFocus()
+                focusRequester.captureFocus()
             }
 
             SearchBar(
-                // https://medium.com/androiddevelopers/understanding-nested-scrolling-in-jetpack-compose-eb57c1ea0af0
-                modifier = Modifier.offset { IntOffset(0, connection.appBarOffset) },
                 inputField = {
                     SearchBarDefaults.InputField(
+                        modifier = Modifier.focusRequester(focusRequester),
                         query = query.value,
-                        onQueryChange = { searchViewModel.updateQuery(it) },
-                        onSearch = { showSearchBar = false },
-                        expanded = showSearchBar,
-                        onExpandedChange = { showSearchBar = it },
+                        onSearch = {
+                            // If the user presses the search button, without selecting an item, we
+                            // will assume it wanted to select the first-most item in the search
+                            // list, if there was one.
+                            lazyPagingSearchItems.peek(0)?.let { onProductEdit(it) }
+                            viewModel.closeSearchBar()
+                        },
+                        onQueryChange = { viewModel.updateQuery(it) },
+                        expanded = showSearchBar.value,
+                        onExpandedChange = { if (it) viewModel.openSearchBar() else viewModel.closeSearchBar() },
                         leadingIcon = {
-                            Icon(
-                                modifier = Modifier.size(24.dp),
-                                imageVector = ImageVector.vectorResource(R.drawable.magnifying_glass_solid),
-                                contentDescription = null,
-                            )
+                            IconButton(onClick = { viewModel.closeSearchBar() }) {
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    imageVector = ImageVector.vectorResource(R.drawable.arrow_left),
+                                    contentDescription = null,
+                                )
+                            }
                         },
                         placeholder = { Text(stringResource(R.string.search)) },
                     )
                 },
-                expanded = showSearchBar,
-                onExpandedChange = { showSearchBar = it },
+                expanded = showSearchBar.value,
+                onExpandedChange = { if (it) viewModel.openSearchBar() else viewModel.closeSearchBar() },
             ) {
-                LazyColumn {
-                    items(count = lazyPagingSearchItems.itemCount) { index ->
-                        lazyPagingSearchItems[index]?.let {
-                            Text(it.name)
-                        }
-
-                        if (index < lazyPagingItems.itemCount - 1) {
-                            HorizontalDivider()
-                        }
-                    }
+                CustomList(
+                    lazyPagingItems = lazyPagingSearchItems,
+                    lazyListState = viewModel.lazyListState,
+                    emptyMessage = stringResource(R.string.products_none),
+                ) {
+                    ProductListItem(dto = it, onClick = {
+                        onProductEdit(it)
+                        viewModel.closeSearchBar()
+                    })
                 }
             }
         }

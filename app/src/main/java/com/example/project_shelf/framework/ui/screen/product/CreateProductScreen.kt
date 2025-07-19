@@ -42,7 +42,8 @@ fun CreateProductScreen(
     LaunchedEffect(Unit) {
         viewModel.eventFlow.collect {
             when (it) {
-                is CreateProductViewModel.Event.ProductCreated -> onDismissRequest()
+                is CreateProductViewModel.Event.Created -> onDismissRequest()
+                is CreateProductViewModel.Event.Searched -> TODO()
             }
         }
     }

@@ -44,7 +44,7 @@ fun <T : Any> CustomSearchBar(
                 leadingIcon = {
                     Icon(
                         modifier = Modifier.size(24.dp),
-                        imageVector = ImageVector.vectorResource(R.drawable.magnifying_glass_solid),
+                        imageVector = ImageVector.vectorResource(R.drawable.search),
                         contentDescription = null,
                     )
                 },

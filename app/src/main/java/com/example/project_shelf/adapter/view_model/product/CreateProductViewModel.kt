@@ -5,17 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.project_shelf.adapter.ViewModelError
 import com.example.project_shelf.adapter.dto.ui.ProductDto
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 import com.example.project_shelf.adapter.repository.ProductRepository
 import com.example.project_shelf.adapter.view_model.util.BigDecimalValidator
 import com.example.project_shelf.adapter.view_model.util.Input
 import com.example.project_shelf.adapter.view_model.util.IntValidator
 import com.example.project_shelf.adapter.view_model.util.StringValidator
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -23,15 +20,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.math.BigDecimal
+import javax.inject.Inject
 
 sealed class CreateProductViewModelState {
     data class InputState(
@@ -47,7 +42,8 @@ class CreateProductViewModel @Inject constructor(
     private val productRepository: ProductRepository,
 ) : ViewModel() {
     sealed class Event {
-        data class ProductCreated(val product: ProductDto) : Event()
+        data class Created(val product: ProductDto) : Event()
+        data class Searched(val result: ProductDto) : Event()
     }
 
     private val isLoading = MutableStateFlow(false)
@@ -71,21 +67,18 @@ class CreateProductViewModel @Inject constructor(
         // When the raw name value changes, we need to check if another product has this name, using
         // the clean name value.
         viewModelScope.launch {
-            inputState.name.rawValue
-                .onEach { isLoading.update { true } }
-                .debounce(500)
-                .map {
-                    mutableListOf<ViewModelError>().apply {
-                        inputState.name.cleanValue.value?.let {
-                            if (!productRepository.isProductNameUnique(it)) {
-                                this.add(ViewModelError.PRODUCT_NAME_TAKEN)
-                            }
+            inputState.name.rawValue.onEach { isLoading.update { true } }.debounce(500).map {
+                mutableListOf<ViewModelError>().apply {
+                    inputState.name.cleanValue.value?.let {
+                        if (!productRepository.isProductNameUnique(it)) {
+                            this.add(ViewModelError.PRODUCT_NAME_TAKEN)
                         }
                     }
-                }.collectLatest {
-                    inputState.name.addErrors(*it.toTypedArray())
-                    isLoading.update { false }
                 }
+            }.collectLatest {
+                inputState.name.addErrors(*it.toTypedArray())
+                isLoading.update { false }
+            }
         }
     }
 
@@ -104,7 +97,7 @@ class CreateProductViewModel @Inject constructor(
                 price = inputState.price.cleanValue.value ?: BigDecimal.ZERO,
                 stock = inputState.stock.cleanValue.value ?: 0,
             )
-            _eventFlow.emit(Event.ProductCreated(product))
+            _eventFlow.emit(Event.Created(product))
         }
     }
 }

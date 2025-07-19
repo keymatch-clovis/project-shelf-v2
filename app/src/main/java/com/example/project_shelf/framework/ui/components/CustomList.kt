@@ -34,11 +34,11 @@ import com.example.project_shelf.R
 fun <T : Any> CustomList(
     lazyListState: LazyListState,
     lazyPagingItems: LazyPagingItems<T>,
-    nestedScrollConnection: NestedScrollConnection,
     emptyMessage: String,
+    nestedScrollConnection: NestedScrollConnection? = null,
     renderer: @Composable (T) -> Unit,
 ) {
-    if (lazyPagingItems.loadState.isIdle && lazyPagingItems.itemCount == 0) {
+    if (lazyPagingItems.itemCount == 0) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center,
@@ -47,7 +47,7 @@ fun <T : Any> CustomList(
                 Icon(
                     modifier = Modifier.size(96.dp),
                     tint = MaterialTheme.colorScheme.surfaceDim,
-                    imageVector = ImageVector.vectorResource(R.drawable.box_open_solid),
+                    imageVector = ImageVector.vectorResource(R.drawable.package_open),
                     contentDescription = null,
                 )
                 Text(
@@ -65,7 +65,9 @@ fun <T : Any> CustomList(
             state = lazyListState,
             modifier = Modifier
                 .fillMaxWidth()
-                .nestedScroll(nestedScrollConnection),
+                .apply {
+                    if (nestedScrollConnection != null) this.nestedScroll(nestedScrollConnection)
+                },
         ) {
             items(count = lazyPagingItems.itemCount) { index ->
                 lazyPagingItems[index]?.let {

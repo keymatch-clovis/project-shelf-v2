@@ -78,7 +78,7 @@ fun EditProductScreen(
                         onClick = { viewModel.openConfirmDeletionDialog() },
                     ) {
                         Icon(
-                            ImageVector.vectorResource(R.drawable.trash_can_regular),
+                            ImageVector.vectorResource(R.drawable.trash),
                             modifier = Modifier.size(24.dp),
                             contentDescription = null
                         )

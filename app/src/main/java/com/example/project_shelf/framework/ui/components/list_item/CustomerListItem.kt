@@ -40,7 +40,7 @@ fun CustomerListItem(
             },
             trailingContent = {
                 Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.chevron_right_solid),
+                    imageVector = ImageVector.vectorResource(R.drawable.chevron_right),
                     contentDescription = null
                 )
             },

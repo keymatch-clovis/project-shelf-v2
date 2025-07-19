@@ -95,7 +95,7 @@ fun CustomersScreen(
                     Icon(
                         modifier = Modifier.size(24.dp),
                         contentDescription = null,
-                        imageVector = ImageVector.vectorResource(R.drawable.plus_solid),
+                        imageVector = ImageVector.vectorResource(R.drawable.plus),
                     )
                 }
             }

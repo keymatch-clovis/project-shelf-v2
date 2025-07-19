@@ -10,10 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.overscroll
-import androidx.compose.foundation.rememberOverscrollEffect
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -25,8 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -38,74 +33,74 @@ import com.example.project_shelf.framework.ui.components.list_item.ProductListIt
 
 @Composable
 fun ProductList(
+    modifier: Modifier = Modifier,
     lazyListState: LazyListState,
     lazyPagingItems: LazyPagingItems<ProductDto>,
     onProductClicked: (ProductDto) -> Unit,
-    nestedScrollConnection: NestedScrollConnection,
 ) {
-    if (lazyPagingItems.loadState.isIdle && lazyPagingItems.itemCount == 0) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(
-                    modifier = Modifier.size(96.dp),
-                    tint = MaterialTheme.colorScheme.surfaceDim,
-                    imageVector = ImageVector.vectorResource(R.drawable.box_open_solid),
-                    contentDescription = null,
-                )
-                Text(
-                    color = MaterialTheme.colorScheme.surfaceDim,
-                    text = stringResource(R.string.products_none)
-                )
-            }
-        }
-    }
-
-    Box(modifier = Modifier.nestedScroll(nestedScrollConnection)) {
-        LazyColumn(
-            state = lazyListState,
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            items(count = lazyPagingItems.itemCount) { index ->
-                lazyPagingItems[index]?.let {
-                    ProductListItem(it, onItemClicked = onProductClicked)
-                }
-
-                if (index < lazyPagingItems.itemCount - 1) {
-                    HorizontalDivider()
-                }
-            }
-
-            if (lazyPagingItems.loadState.append == LoadState.Loading) {
-                item {
-                    CircularProgressIndicator(
-                        Modifier
-                            .fillMaxWidth()
-                            .wrapContentWidth(Alignment.CenterHorizontally)
+    Box(modifier = modifier) {
+        if (lazyPagingItems.loadState.isIdle && lazyPagingItems.itemCount == 0) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        modifier = Modifier.size(96.dp),
+                        tint = MaterialTheme.colorScheme.surfaceDim,
+                        imageVector = ImageVector.vectorResource(R.drawable.package_open),
+                        contentDescription = null,
+                    )
+                    Text(
+                        color = MaterialTheme.colorScheme.surfaceDim,
+                        text = stringResource(R.string.products_none)
                     )
                 }
             }
         }
 
-        // if (lazyPagingItems.loadState.refresh == LoadState.Loading) {
-        AnimatedVisibility(
-            visible = lazyPagingItems.loadState.refresh == LoadState.Loading,
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center,
+        Box {
+            LazyColumn(
+                state = lazyListState, modifier = Modifier.fillMaxSize()
             ) {
-                Card(
-                    shape = AbsoluteRoundedCornerShape(100),
-                    // https://m3.material.io/styles/elevation/tokens
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                items(count = lazyPagingItems.itemCount) { index ->
+                    lazyPagingItems[index]?.let {
+                        ProductListItem(it, onClick = onProductClicked)
+                    }
+
+                    if (index < lazyPagingItems.itemCount - 1) {
+                        HorizontalDivider()
+                    }
+                }
+
+                if (lazyPagingItems.loadState.append == LoadState.Loading) {
+                    item {
+                        CircularProgressIndicator(
+                            Modifier
+                                .fillMaxWidth()
+                                .wrapContentWidth(Alignment.CenterHorizontally)
+                        )
+                    }
+                }
+            }
+
+            // if (lazyPagingItems.loadState.refresh == LoadState.Loading) {
+            AnimatedVisibility(
+                visible = lazyPagingItems.loadState.refresh == LoadState.Loading,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    CircularProgressIndicator(modifier = Modifier.padding(4.dp))
+                    Card(
+                        shape = AbsoluteRoundedCornerShape(100),
+                        // https://m3.material.io/styles/elevation/tokens
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.padding(4.dp))
+                    }
                 }
             }
         }
