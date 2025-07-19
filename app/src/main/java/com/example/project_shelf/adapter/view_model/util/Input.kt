@@ -26,11 +26,11 @@ class Input<I>(
 
     fun update(value: String) {
         _rawValue.update { value }
+        clearErrors()
 
         val (clean, errors) = validator.validate(value)
         if (errors.isEmpty()) {
             _cleanValue.update { clean }
-            clearErrors()
         } else {
             _cleanValue.update { null }
             addErrors(*errors.toTypedArray())

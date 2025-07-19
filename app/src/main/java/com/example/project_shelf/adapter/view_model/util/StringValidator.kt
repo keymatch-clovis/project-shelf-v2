@@ -1,6 +1,5 @@
 package com.example.project_shelf.adapter.view_model.util
 
-import android.util.Log
 import com.example.project_shelf.adapter.ViewModelError
 
 class StringValidator(

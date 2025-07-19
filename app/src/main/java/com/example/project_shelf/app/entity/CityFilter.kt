@@ -1,7 +1,6 @@
 package com.example.project_shelf.app.entity
 
-data class City(
+data class CityFilter(
     val id: Long,
     val name: String,
-    val department: String,
 )
