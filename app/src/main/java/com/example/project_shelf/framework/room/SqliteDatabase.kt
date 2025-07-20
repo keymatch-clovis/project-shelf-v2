@@ -11,6 +11,7 @@ import com.example.project_shelf.adapter.dao.InvoiceFtsDao
 import com.example.project_shelf.adapter.dao.InvoiceProductDao
 import com.example.project_shelf.adapter.dao.ProductDao
 import com.example.project_shelf.adapter.dao.ProductFtsDao
+import com.example.project_shelf.adapter.dao.PropertyDao
 import com.example.project_shelf.adapter.dto.room.CityDto
 import com.example.project_shelf.adapter.dto.room.CityFtsDto
 import com.example.project_shelf.adapter.dto.room.CustomerDto
@@ -20,6 +21,7 @@ import com.example.project_shelf.adapter.dto.room.InvoiceFtsDto
 import com.example.project_shelf.adapter.dto.room.InvoiceProductDto
 import com.example.project_shelf.adapter.dto.room.ProductDto
 import com.example.project_shelf.adapter.dto.room.ProductFtsDto
+import com.example.project_shelf.adapter.dto.room.PropertyDto
 
 @Database(
     entities = [
@@ -32,6 +34,7 @@ import com.example.project_shelf.adapter.dto.room.ProductFtsDto
         InvoiceDto::class,
         InvoiceProductDto::class,
         InvoiceFtsDto::class,
+        PropertyDto::class,
     ],
     version = VERSION,
 )
@@ -45,4 +48,5 @@ abstract class SqliteDatabase : RoomDatabase() {
     abstract fun invoiceDao(): InvoiceDao
     abstract fun invoiceProductDao(): InvoiceProductDao
     abstract fun invoiceFtsDao(): InvoiceFtsDao
+    abstract fun propertyDao(): PropertyDao
 }

@@ -8,11 +8,12 @@ import androidx.room.Query
 import androidx.room.Update
 import com.example.project_shelf.adapter.dto.room.InvoiceDto
 import com.example.project_shelf.adapter.dto.room.InvoiceFtsDto
+import com.example.project_shelf.adapter.dto.room.InvoiceWithCustomerDto
 import com.example.project_shelf.adapter.dto.room.ProductDto
 
 @Dao
 interface InvoiceDao {
-    @Query("SELECT * FROM invoice")
+    @Query("SELECT * FROM invoice WHERE pending_delete_until IS NULL")
     fun select(): PagingSource<Int, InvoiceDto>
 
     @Query("SELECT MAX(number) FROM invoice")
@@ -36,6 +37,15 @@ interface InvoiceFtsDao {
     @Insert
     suspend fun insert(dto: InvoiceFtsDto)
 
-    @Query("SELECT * FROM invoice_fts WHERE invoice_fts MATCH :value")
-    fun match(value: String): PagingSource<Int, InvoiceFtsDto>
+    @Query("""
+        SELECT i.*, c.* FROM invoice_fts fts
+        JOIN 
+            invoice i ON (fts.invoice_id = i.rowid)
+        JOIN
+            customer c ON (i.customer_id = c.rowid)
+        WHERE  
+            i.pending_delete_until IS NULL
+            AND invoice_fts MATCH :value
+    """)
+    fun match(value: String): PagingSource<Int, InvoiceWithCustomerDto>
 }

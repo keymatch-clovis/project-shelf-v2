@@ -8,9 +8,17 @@ import kotlinx.coroutines.flow.Flow
 import java.math.BigInteger
 
 interface InvoiceService {
-    fun getInvoices(): Flow<PagingData<Invoice>>
-    fun getInvoices(searchParam: String): Flow<PagingData<InvoiceFilter>>
+    fun get(): Flow<PagingData<Invoice>>
+
+    fun search(value: String): Flow<PagingData<Invoice>>
 
     suspend fun create(customer: Customer, discount: BigInteger = BigInteger.ZERO)
-    suspend fun delete(invoice: Invoice)
+    suspend fun update()
+
+    suspend fun delete()
+    suspend fun delete(id: Long)
+    suspend fun deletePendingForDeletion()
+
+    suspend fun setPendingForDeletion(id: Long, until: Long)
+    suspend fun unsetPendingForDeletion(id: Long)
 }

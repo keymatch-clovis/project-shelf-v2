@@ -65,10 +65,8 @@ fun ProductListScreen(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val lazyPagingItems = viewModel.products.collectAsLazyPagingItems()
 
-    val scope = rememberCoroutineScope()
     val localContext = LocalContext.current
 
-    var showTools: Boolean by remember { mutableStateOf(true) }
     val snackbarState = productDeletionViewModel.snackbarState.collectAsState()
 
     // Related to product search
@@ -109,7 +107,7 @@ fun ProductListScreen(
             },
             floatingActionButton = {
                 AnimatedVisibility(
-                    visible = showTools && !showSearchBar.value,
+                    visible = !showSearchBar.value,
                     enter = slideInVertically(),
                     exit = slideOutVertically(),
                 ) {

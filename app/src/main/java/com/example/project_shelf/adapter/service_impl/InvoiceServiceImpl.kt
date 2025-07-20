@@ -10,7 +10,6 @@ import com.example.project_shelf.adapter.DEFAULT_PAGE_SIZE
 import com.example.project_shelf.adapter.dto.room.InvoiceDto
 import com.example.project_shelf.adapter.dto.room.InvoiceFtsDto
 import com.example.project_shelf.adapter.dto.room.toDto
-import com.example.project_shelf.adapter.dto.room.toInvoice
 import com.example.project_shelf.adapter.dto.room.toEntity
 import com.example.project_shelf.app.entity.Customer
 import com.example.project_shelf.app.entity.Invoice
@@ -30,23 +29,23 @@ import javax.inject.Inject
 class InvoiceServiceImpl @Inject constructor(
     private val database: SqliteDatabase,
 ) : InvoiceService {
-    override fun getInvoices(): Flow<PagingData<Invoice>> {
+    override fun get(): Flow<PagingData<Invoice>> {
         Log.d("SERVICE-IMPL", "Getting invoices")
         return Pager(
             config = PagingConfig(DEFAULT_PAGE_SIZE)
         ) { database.invoiceDao().select() }.flow.map {
-            it.map { dto -> dto.toInvoice() }
+            it.map { dto -> dto.toEntity() }
         }
     }
 
-    override fun getInvoices(searchParam: String): Flow<PagingData<InvoiceFilter>> {
-        Log.d("SERVICE-IMPL", "Getting invoices with: $searchParam")
+    override fun search(value: String): Flow<PagingData<Invoice>> {
+        Log.d("SERVICE-IMPL", "Searching invoices with: $value")
         return Pager(
             config = PagingConfig(DEFAULT_PAGE_SIZE)
         ) {
             // Add a `*` at the end of the search to get a phrase query.
             // https://www.sqlite.org/fts3.html
-            database.invoiceFtsDao().match("$searchParam*")
+            database.invoiceFtsDao().match("$value*")
         }.flow.map {
             it.map { dto -> dto.toEntity() }
         }
@@ -65,7 +64,7 @@ class InvoiceServiceImpl @Inject constructor(
                 InvoiceDto(
                     number = consecutive,
                     date = Date().time,
-                    discount = discount.toString(),
+                    discount = discount.toLong(),
                     customerId = customer.id,
                 )
             )

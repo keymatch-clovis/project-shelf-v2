@@ -1,8 +1,10 @@
 package com.example.project_shelf.adapter.dto.room
 
 import androidx.room.ColumnInfo
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Relation
 import com.example.project_shelf.app.entity.InvoiceProduct
 
 @Entity(
@@ -31,6 +33,15 @@ data class InvoiceProductDto(
     @ColumnInfo(name = "count") val count: Int,
     @ColumnInfo(name = "price") val price: String,
     @ColumnInfo(name = "discount") val discount: String,
+)
+
+data class InvoiceProductWithProductDto(
+    @Embedded val invoiceProduct: InvoiceProductDto,
+    @Relation(
+        parentColumn = "rowid",
+        entityColumn = "product_id"
+    )
+    val product: ProductDto
 )
 
 fun InvoiceProductDto.toEntity(): InvoiceProduct {
