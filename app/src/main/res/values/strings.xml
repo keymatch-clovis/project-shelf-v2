@@ -43,4 +43,5 @@
     <string name="undo">Undo</string>
     <string name="city">City</string>
     <string name="invoices_none">No invoices</string>
+    <string name="invoice_create">Create invoice</string>
 </resources>

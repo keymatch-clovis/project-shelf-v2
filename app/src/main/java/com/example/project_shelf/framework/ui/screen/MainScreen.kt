@@ -21,7 +21,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavOptions
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navOptions
 import com.example.project_shelf.R
 import com.example.project_shelf.framework.ui.Destination
 import com.example.project_shelf.framework.ui.MainNavHost
@@ -39,15 +41,11 @@ fun MainScreen() {
                 NavigationBarItem(
                     selected = selectedDestination == Destination.PRODUCT.ordinal,
                     onClick = {
-                        if (selectedDestination != Destination.PRODUCT.ordinal) {
-                            navController.navigate(route = Destination.PRODUCT.path) {
-                                // Avoid multiple copies of the same destination when re-selecting the
-                                // same item.
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                            selectedDestination = Destination.PRODUCT.ordinal
+                        navController.popBackStack(Destination.PRODUCT.path, inclusive = true)
+                        navController.navigate(Destination.PRODUCT.path) {
+                            popUpTo(route = Destination.PRODUCT.path) { inclusive = true }
                         }
+                        selectedDestination = Destination.PRODUCT.ordinal
                     },
                     icon = {
                         if (selectedDestination == Destination.PRODUCT.ordinal) {
@@ -61,15 +59,11 @@ fun MainScreen() {
                 NavigationBarItem(
                     selected = selectedDestination == Destination.CUSTOMER.ordinal,
                     onClick = {
-                        if (selectedDestination != Destination.CUSTOMER.ordinal) {
-                            navController.navigate(route = Destination.CUSTOMER.path) {
-                                // Avoid multiple copies of the same destination when re-selecting the
-                                // same item.
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                            selectedDestination = Destination.CUSTOMER.ordinal
+                        navController.popBackStack(Destination.CUSTOMER.path, inclusive = true)
+                        navController.navigate(Destination.CUSTOMER.path) {
+                            popUpTo(route = Destination.CUSTOMER.path) { inclusive = true }
                         }
+                        selectedDestination = Destination.CUSTOMER.ordinal
                     },
                     icon = { Icon(Icons.Rounded.Groups, contentDescription = null) },
                     label = { Text(stringResource(R.string.clients)) })
@@ -86,15 +80,13 @@ fun MainScreen() {
                 NavigationBarItem(
                     selected = selectedDestination == Destination.CONFIG.ordinal,
                     onClick = {
-                        if (selectedDestination != Destination.CONFIG.ordinal) {
-                            navController.navigate(route = Destination.CONFIG.path) {
-                                // Avoid multiple copies of the same destination when re-selecting the
-                                // same item.
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                            selectedDestination = Destination.CONFIG.ordinal
+                        navController.navigate(route = Destination.CONFIG.path) {
+                            // Avoid multiple copies of the same destination when re-selecting the
+                            // same item.
+                            launchSingleTop = true
+                            restoreState = true
                         }
+                        selectedDestination = Destination.CONFIG.ordinal
                     },
                     icon = {
                         if (selectedDestination == Destination.CONFIG.ordinal) {

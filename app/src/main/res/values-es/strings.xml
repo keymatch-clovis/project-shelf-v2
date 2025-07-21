@@ -43,4 +43,5 @@
     <string name="business_name">Nombre de negocio</string>
     <string name="city">Ciudad</string>
     <string name="invoices_none">Sin facturas</string>
+    <string name="invoice_create">Crear factura</string>
 </resources>

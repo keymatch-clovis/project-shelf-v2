@@ -17,6 +17,7 @@ import com.example.project_shelf.adapter.view_model.product.EditProductViewModel
 import com.example.project_shelf.framework.ui.screen.ConfigScreen
 import com.example.project_shelf.framework.ui.screen.customer.CreateCustomerScreen
 import com.example.project_shelf.framework.ui.screen.customer.CustomersScreen
+import com.example.project_shelf.framework.ui.screen.invoice.CreateInvoiceScreen
 import com.example.project_shelf.framework.ui.screen.invoice.InvoiceListScreen
 import com.example.project_shelf.framework.ui.screen.product.CreateProductScreen
 import com.example.project_shelf.framework.ui.screen.product.EditProductScreen
@@ -35,7 +36,7 @@ fun MainNavHost(
     val productDeletionViewModel: ProductDeletionViewModel = hiltViewModel(viewModelStoreOwner)
     val customerDeletionViewModel: CustomerDeletionViewModel = hiltViewModel(viewModelStoreOwner)
 
-    NavHost(navController, startDestination = startDestination.path, modifier) {
+    NavHost(navController, modifier) {
         composable(Destination.PRODUCT.path) {
             ProductListScreen(
                 viewModel = hiltViewModel(),
@@ -81,7 +82,9 @@ fun MainNavHost(
             InvoiceListScreen(
                 viewModel = hiltViewModel(),
                 onRequestEdit = {},
-                onRequestCreate = {},
+                onRequestCreate = {
+                    navController.navigate(Destination.CREATE_INVOICE.path)
+                },
             )
         }
         composable(Destination.CONFIG.path) {
@@ -122,6 +125,16 @@ fun MainNavHost(
             CreateCustomerScreen(
                 viewModel = hiltViewModel(),
                 onDismissRequest = { navController.popBackStack() },
+            )
+        }
+
+        // Invoice Related
+        dialog(
+            Destination.CREATE_INVOICE.path,
+            dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            CreateInvoiceScreen(
+                onDismissRequest = {},
             )
         }
     }

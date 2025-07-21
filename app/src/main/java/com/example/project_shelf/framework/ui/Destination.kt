@@ -19,6 +19,7 @@ enum class Destination(
 
     // Invoice Category
     INVOICE("main.invoice"),
+    CREATE_INVOICE("main.invoice.create"),
 
     // Config Category
     CONFIG("main.config"),
