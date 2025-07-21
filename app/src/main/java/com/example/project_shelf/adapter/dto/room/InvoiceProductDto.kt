@@ -32,7 +32,7 @@ data class InvoiceProductDto(
     /// Required fields
     @ColumnInfo(name = "count") val count: Int,
     @ColumnInfo(name = "price") val price: String,
-    @ColumnInfo(name = "discount") val discount: String,
+    @ColumnInfo(name = "discount") val discount: String?,
 )
 
 data class InvoiceProductWithProductDto(
@@ -49,8 +49,8 @@ fun InvoiceProductDto.toEntity(): InvoiceProduct {
         invoiceId = this.invoiceId,
         productId = this.productId,
         count = this.count,
-        price = this.price.toBigInteger(),
-        discount = this.discount.toBigInteger(),
+        price = this.price.toBigDecimal(),
+        discount = this.discount?.toBigDecimal(),
     )
 }
 

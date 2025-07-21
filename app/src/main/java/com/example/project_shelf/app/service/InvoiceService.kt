@@ -1,18 +1,38 @@
 package com.example.project_shelf.app.service
 
 import androidx.paging.PagingData
-import com.example.project_shelf.app.entity.Customer
 import com.example.project_shelf.app.entity.Invoice
 import com.example.project_shelf.app.entity.InvoiceFilter
+import com.example.project_shelf.app.entity.InvoicePopulated
+import com.example.project_shelf.app.entity.InvoiceWithCustomer
 import kotlinx.coroutines.flow.Flow
-import java.math.BigInteger
+import java.math.BigDecimal
+import java.util.Date
 
 interface InvoiceService {
+    data class ProductParam(
+        val id: Long,
+        val count: Int,
+        val price: BigDecimal,
+        val discount: BigDecimal?,
+    )
+
     fun get(): Flow<PagingData<Invoice>>
+    fun getWithCustomer(): Flow<PagingData<InvoiceWithCustomer>>
+    fun getPopulated(): Flow<PagingData<InvoicePopulated>>
 
-    fun search(value: String): Flow<PagingData<Invoice>>
+    suspend fun getCurrentNumber(): Long
 
-    suspend fun create(customer: Customer, discount: BigInteger = BigInteger.ZERO)
+    fun search(value: String): Flow<PagingData<InvoiceFilter>>
+
+    suspend fun create(
+        number: Long,
+        customerId: Long,
+        date: Date,
+        products: List<ProductParam>,
+        discount: BigDecimal?,
+    ): Long
+
     suspend fun update()
 
     suspend fun delete()

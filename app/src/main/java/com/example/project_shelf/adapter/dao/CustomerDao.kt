@@ -13,6 +13,9 @@ interface CustomerDao {
     @Query("SELECT * FROM customer WHERE pending_delete_until IS NULL")
     fun select(): PagingSource<Int, CustomerDto>
 
+    @Query("SELECT * FROM customer WHERE rowid = :id")
+    suspend fun select(id: Long): CustomerDto
+
     @Query("SELECT * FROM customer WHERE pending_delete_until IS NOT NULL")
     suspend fun selectPendingForDeletion(): List<CustomerDto>
 

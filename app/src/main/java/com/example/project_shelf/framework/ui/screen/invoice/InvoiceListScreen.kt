@@ -30,7 +30,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.project_shelf.R
-import com.example.project_shelf.adapter.dto.ui.InvoiceDto
+import com.example.project_shelf.adapter.dto.ui.InvoiceFilterDto
 import com.example.project_shelf.adapter.view_model.invoice.InvoiceListViewModel
 import com.example.project_shelf.framework.ui.components.CustomList
 import com.example.project_shelf.framework.ui.components.CustomSearchBar
@@ -39,8 +39,8 @@ import com.example.project_shelf.framework.ui.components.CustomSearchBar
 @Composable
 fun InvoiceListScreen(
     viewModel: InvoiceListViewModel,
-    onInvoiceEdit: (InvoiceDto) -> Unit,
-    onInvoiceCreate: () -> Unit,
+    onRequestEdit: (invoiceId: Long) -> Unit,
+    onRequestCreate: () -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
@@ -78,7 +78,7 @@ fun InvoiceListScreen(
             ) {
                 FloatingActionButton(
                     modifier = Modifier.height(56.dp),
-                    onClick = { onInvoiceCreate() },
+                    onClick = { onRequestCreate() },
                     shape = MaterialTheme.shapes.small,
                 ) {
                     Icon(
@@ -107,7 +107,7 @@ fun InvoiceListScreen(
                 enter = fadeIn(),
                 exit = fadeOut(),
             ) {
-                CustomSearchBar<InvoiceDto>(
+                CustomSearchBar<InvoiceFilterDto>(
                     query = query.value,
                     onQueryChange = { viewModel.updateQuery(it) },
                     expanded = showSearchBar.value,
@@ -116,12 +116,12 @@ fun InvoiceListScreen(
                         // If the user presses the search button, without selecting an item, we
                         // will assume it wanted to select the first-most item in the search
                         // list, if there was one.
-                        lazyPagingSearchItems.peek(0)?.let { onInvoiceEdit(it) }
+                        lazyPagingSearchItems.peek(0)?.let { onRequestEdit(it.id) }
                         viewModel.closeSearchBar()
                     },
                     lazyPagingItems = lazyPagingSearchItems,
                 ) {
-                    Text(it.customer.name)
+                    Text(it.number.toString())
                 }
             }
         }

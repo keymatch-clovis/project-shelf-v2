@@ -10,20 +10,35 @@ import javax.inject.Inject
 class CreateInvoiceUseCase @Inject constructor(
     private val service: InvoiceService,
 ) {
-    data class ProductParam(
-        val id: String,
-        val price: BigDecimal,
-        val discount: BigDecimal,
-    )
-
     suspend fun exec(
         customerId: Long,
-        date: Date,
-        discount: BigDecimal,
-        products: List<ProductParam>,
+        products: List<InvoiceService.ProductParam>,
+        date: Date = Date(),
+        discount: BigDecimal? = null,
     ): Invoice {
-        Log.d("USE-CASE", "Creating invoice")
+        Log.d("USE-CASE", "Creating invoice with: $customerId, $products, $date, $discount")
+        assert(products.isNotEmpty())
 
-        return service.create()
+        // First, get the consecutive number we are going to assign to this invoice.
+        // NOTE:
+        //  We are doing a simple numbering, we just take the latest number + 1.
+        Log.d("USE-CASE", "Getting consecutive number")
+        val consecutiveNumber = service.getCurrentNumber() + 1
+
+        val invoiceId = service.create(
+            number = consecutiveNumber,
+            customerId = customerId,
+            products = products,
+            date = date,
+            discount = discount,
+        )
+
+        return Invoice(
+            id = invoiceId,
+            number = consecutiveNumber,
+            customerId = customerId,
+            date = date,
+            discount = discount,
+        )
     }
 }
