@@ -15,6 +15,7 @@ import com.example.project_shelf.adapter.view_model.customer.CustomerDeletionVie
 import com.example.project_shelf.adapter.view_model.product.ProductDeletionViewModel
 import com.example.project_shelf.adapter.view_model.product.EditProductViewModel
 import com.example.project_shelf.framework.ui.screen.ConfigScreen
+import com.example.project_shelf.framework.ui.screen.LoadingScreen
 import com.example.project_shelf.framework.ui.screen.customer.CreateCustomerScreen
 import com.example.project_shelf.framework.ui.screen.customer.CustomersScreen
 import com.example.project_shelf.framework.ui.screen.invoice.CreateInvoiceScreen
@@ -26,7 +27,7 @@ import com.example.project_shelf.framework.ui.screen.product.ProductListScreen
 @Composable
 fun MainNavHost(
     navController: NavHostController,
-    startDestination: Destination,
+    startDestination: MainDestination,
     modifier: Modifier = Modifier,
 ) {
     val viewModelStoreOwner =
@@ -36,8 +37,12 @@ fun MainNavHost(
     val productDeletionViewModel: ProductDeletionViewModel = hiltViewModel(viewModelStoreOwner)
     val customerDeletionViewModel: CustomerDeletionViewModel = hiltViewModel(viewModelStoreOwner)
 
-    NavHost(navController, modifier) {
-        composable(Destination.PRODUCT.path) {
+    NavHost(
+        navController = navController,
+        modifier = modifier,
+        startDestination = startDestination.route,
+    ) {
+        composable(MainDestination.PRODUCT.route) {
             ProductListScreen(
                 viewModel = hiltViewModel(),
                 productDeletionViewModel = productDeletionViewModel,
@@ -46,7 +51,7 @@ fun MainNavHost(
                     // prevents the user from restoring an object that might have been deleted
                     // before.
                     productDeletionViewModel.clear()
-                    navController.navigate(Destination.CREATE_PRODUCT.path)
+                    navController.navigate(Destination.CREATE_PRODUCT.route)
                 },
                 onProductEdit = {
                     // If we get an edit request, we want to clear the deletion view model. This
@@ -58,7 +63,7 @@ fun MainNavHost(
             )
         }
 
-        composable(Destination.CUSTOMER.path) {
+        composable(MainDestination.CUSTOMER.route) {
             CustomersScreen(
                 viewModel = hiltViewModel(),
                 deletionViewModel = customerDeletionViewModel,
@@ -68,7 +73,7 @@ fun MainNavHost(
                     // prevents the user from restoring an object that might have been deleted
                     // before.
                     customerDeletionViewModel.clear()
-                    navController.navigate(Destination.CREATE_CUSTOMER.path)
+                    navController.navigate(Destination.CREATE_CUSTOMER.route)
                 },
                 onEditRequest = {
                     // If we get an edit request, we want to clear the deletion view model. This
@@ -78,23 +83,43 @@ fun MainNavHost(
                     navController.navigate(it)
                 })
         }
-        composable(Destination.INVOICE.path) {
+        /// Invoice Related
+        composable(MainDestination.INVOICE.route) {
             InvoiceListScreen(
                 viewModel = hiltViewModel(),
                 onRequestEdit = {},
                 onRequestCreate = {
-                    navController.navigate(Destination.CREATE_INVOICE.path)
+                    navController.navigate(Destination.CREATE_INVOICE.route)
                 },
             )
         }
-        composable(Destination.CONFIG.path) {
+        composable(Destination.CREATE_INVOICE.route) {
+            CreateInvoiceScreen(
+                onDismissRequest = {},
+            )
+        }
+
+        composable(MainDestination.CONFIG.route) {
             ConfigScreen()
         }
 
         /// Dialogs
+        // Loading Related
+        dialog(
+            route = Destination.LOADING.route,
+            dialogProperties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false,
+            ),
+        ) {
+            LoadingScreen(onLoadingDone = { navController.popBackStack() })
+        }
+
+
         // Product Related
         dialog(
-            Destination.CREATE_PRODUCT.path,
+            Destination.CREATE_PRODUCT.route,
             dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
         ) {
             CreateProductScreen(
@@ -119,7 +144,7 @@ fun MainNavHost(
 
         // Customer Related
         dialog(
-            Destination.CREATE_CUSTOMER.path,
+            Destination.CREATE_CUSTOMER.route,
             dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
         ) {
             CreateCustomerScreen(
@@ -128,14 +153,5 @@ fun MainNavHost(
             )
         }
 
-        // Invoice Related
-        dialog(
-            Destination.CREATE_INVOICE.path,
-            dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
-        ) {
-            CreateInvoiceScreen(
-                onDismissRequest = {},
-            )
-        }
     }
 }

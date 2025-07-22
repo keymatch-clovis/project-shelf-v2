@@ -6,7 +6,6 @@ import androidx.paging.map
 import com.example.project_shelf.adapter.dto.ui.CityDto
 import com.example.project_shelf.adapter.dto.ui.toDto
 import com.example.project_shelf.adapter.repository.CityRepository
-import com.example.project_shelf.app.use_case.city.CheckDefaultLoadedDataUseCase
 import com.example.project_shelf.app.use_case.city.LoadDefaultCitiesUseCase
 import com.example.project_shelf.app.use_case.city.SearchCitiesUseCase
 import dagger.Binds
@@ -20,17 +19,11 @@ import javax.inject.Inject
 
 class CityPresenter @Inject constructor(
     private val loadDefaultCitiesUseCase: LoadDefaultCitiesUseCase,
-    private val checkDefaultLoadedDataUseCase: CheckDefaultLoadedDataUseCase,
     private val searchCitiesUseCase: SearchCitiesUseCase,
 ) : CityRepository {
     override suspend fun loadDefaultCities(stream: InputStream) {
         Log.d("PRESENTER", "Loading default cities")
         loadDefaultCitiesUseCase.exec(stream)
-    }
-
-    override suspend fun hasLoadedDefaultCities(): Boolean {
-        Log.d("PRESENTER", "Checking if default cities loaded")
-        return checkDefaultLoadedDataUseCase.exec()
     }
 
     override fun search(value: String): Flow<PagingData<CityDto>> {

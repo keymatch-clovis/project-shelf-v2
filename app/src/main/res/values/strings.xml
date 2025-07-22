@@ -6,7 +6,7 @@
     <string name="app_name" translatable="false">Zamya</string>
     <string name="business_name">Business name</string>
     <string name="cancel">Cancel</string>
-    <string name="clients">Clients</string>
+    <string name="customers">Customers</string>
     <string name="configuration">Configuration</string>
     <string name="customer_create">Create customer</string>
     <string name="customer_deleted">Customer deleted</string>
@@ -44,4 +44,6 @@
     <string name="city">City</string>
     <string name="invoices_none">No invoices</string>
     <string name="invoice_create">Create invoice</string>
+    <string name="loading">Loading</string>
+    <string name="details">Details</string>
 </resources>

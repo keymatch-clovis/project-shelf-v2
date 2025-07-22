@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 interface CityService {
     fun search(value: String): Flow<PagingData<City>>
 
+    suspend fun delete()
     suspend fun create(name: String, department: String): City
     suspend fun count(): Int
 }

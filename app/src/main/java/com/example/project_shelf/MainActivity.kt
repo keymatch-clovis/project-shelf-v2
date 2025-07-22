@@ -1,25 +1,26 @@
 package com.example.project_shelf
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.runtime.collectAsState
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.navigation.compose.rememberNavController
-import com.example.project_shelf.adapter.view_model.MainActivityViewModel
+import com.example.project_shelf.adapter.view_model.MainViewModel
 import com.example.project_shelf.framework.datastore.dataStore
-import com.example.project_shelf.framework.ui.AppNavHost
+import com.example.project_shelf.framework.ui.screen.MainScreen
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val viewModel by viewModels<MainActivityViewModel>(factoryProducer = {
+    private val viewModel by viewModels<MainViewModel>(factoryProducer = {
         viewModelFactory {
             initializer {
-                MainActivityViewModel(applicationContext.dataStore)
+                MainViewModel(applicationContext.dataStore)
             }
         }
     })
@@ -28,20 +29,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val splashScreen = installSplashScreen()
 
-        splashScreen.setKeepOnScreenCondition {
-            !viewModel.uiState.value.isReady
+        // Keep the splash screen showing while we do initialization steps. These initialization
+        // steps are not done here, they are done later in the main screen. This is so we can use
+        // the information to navigate to the correct route, but this has to be done with the
+        // navigation controller.
+        lifecycleScope.launch {
+            splashScreen.setKeepOnScreenCondition { !viewModel.isAppReady.value }
         }
 
         setContent {
-            val state = viewModel.uiState.collectAsState()
-            val navController = rememberNavController()
-
-            if (state.value.isReady) {
-                AppNavHost(
-                    navController = navController,
-                    startDestination = state.value.startDestination,
-                )
-            }
+            MainScreen(mainViewModel = viewModel)
         }
     }
 }

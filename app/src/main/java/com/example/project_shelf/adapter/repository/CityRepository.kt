@@ -7,7 +7,6 @@ import java.io.InputStream
 
 interface CityRepository {
     suspend fun loadDefaultCities(stream: InputStream)
-    suspend fun hasLoadedDefaultCities(): Boolean
 
     fun search(value: String): Flow<PagingData<CityDto>>
 }

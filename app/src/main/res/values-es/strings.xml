@@ -5,7 +5,7 @@
     <string name="name">Nombre</string>
     <string name="price">Precio</string>
     <string name="amount">Cantidad</string>
-    <string name="clients">Clientes</string>
+    <string name="customers">Clientes</string>
     <string name="invoice">Factura</string>
     <string name="invoices">Facturas</string>
     <string name="product_create">Crear producto</string>
@@ -44,4 +44,6 @@
     <string name="city">Ciudad</string>
     <string name="invoices_none">Sin facturas</string>
     <string name="invoice_create">Crear factura</string>
+    <string name="loading">Cargando</string>
+    <string name="details">Detalles</string>
 </resources>

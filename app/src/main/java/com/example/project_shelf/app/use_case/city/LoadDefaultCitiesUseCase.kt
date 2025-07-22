@@ -7,10 +7,16 @@ import javax.inject.Inject
 
 class LoadDefaultCitiesUseCase @Inject constructor(private val cityService: CityService) {
     suspend fun exec(stream: InputStream) {
-        // First, get a reader for the stream.
+        Log.d("USE_CASE", "Loading base cities")
+
+        // If we execute this use case, it means we want to restore the default data. In this case
+        // the cities. As such, we need to remove the old data, to restore the default one.
+        Log.d("USE_CASE", "Deleting old cities data")
+        cityService.delete()
+
+        // Get a reader for the stream.
         val reader = stream.bufferedReader()
 
-        Log.d("USE_CASE", "Loading base cities")
         reader.lineSequence().filter { it.isNotBlank() }
             // Split all the strings into city, department.
             .map { it.split(",", ignoreCase = false, limit = 2) }

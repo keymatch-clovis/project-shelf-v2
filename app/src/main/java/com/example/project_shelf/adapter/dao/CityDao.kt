@@ -14,12 +14,18 @@ interface CityDao {
 
     @Insert
     suspend fun insert(dto: CityDto): Long
+
+    @Query("DELETE FROM city")
+    suspend fun delete()
 }
 
 @Dao
 interface CityFtsDao {
     @Insert
     suspend fun insert(dto: CityFtsDto)
+
+    @Query("DELETE FROM city_fts")
+    suspend fun delete()
 
     @Query(
         """

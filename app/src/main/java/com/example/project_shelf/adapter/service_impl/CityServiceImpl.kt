@@ -37,6 +37,16 @@ class CityServiceImpl @Inject constructor(
         }
     }
 
+    override suspend fun delete() {
+        database.withTransaction {
+            Log.d("SERVICE-IMPL", "Deleting all cities")
+            database.cityDao().delete()
+
+            Log.d("SERVICE-IMPL", "Deleting all cities FTS")
+            database.cityFtsDao().delete()
+        }
+    }
+
     override suspend fun create(name: String, department: String): City {
         Log.d("SERVICE-IMPL", "Creating city with: $name, $department")
 
