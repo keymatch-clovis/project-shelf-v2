@@ -1,6 +1,10 @@
 package com.example.project_shelf.framework.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -92,6 +96,8 @@ fun <T : Any> CustomList(
 
         AnimatedVisibility(
             visible = lazyPagingItems.loadState.refresh == LoadState.Loading,
+            enter = fadeIn() + slideInVertically(initialOffsetY = { -it }),
+            exit = fadeOut() + slideOutVertically(targetOffsetY = { -it }),
         ) {
             Box(
                 modifier = Modifier

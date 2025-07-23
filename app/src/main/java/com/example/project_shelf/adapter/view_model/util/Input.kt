@@ -1,21 +1,22 @@
 package com.example.project_shelf.adapter.view_model.util
 
 import com.example.project_shelf.adapter.ViewModelError
+import com.example.project_shelf.adapter.view_model.util.validator.Validator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class Input<I>(
-    private val initialValue: String,
-    private val validator: Validator<I>,
+class Input<I, J>(
+    initialValue: I?,
+    private val validator: Validator<I, J>,
 ) {
-    private val _rawValue = MutableStateFlow("")
+    private val _rawValue = MutableStateFlow<I?>(null)
     val rawValue = _rawValue.asStateFlow()
 
     private val _errors = MutableStateFlow(emptyList<ViewModelError>())
     val errors = _errors.asStateFlow()
 
-    private val _cleanValue = MutableStateFlow<I?>(null)
+    private val _cleanValue = MutableStateFlow<J?>(null)
     val cleanValue = _cleanValue.asStateFlow()
 
     init {
@@ -24,7 +25,7 @@ class Input<I>(
         update(initialValue)
     }
 
-    fun update(value: String) {
+    fun update(value: I?) {
         _rawValue.update { value }
         clearErrors()
 

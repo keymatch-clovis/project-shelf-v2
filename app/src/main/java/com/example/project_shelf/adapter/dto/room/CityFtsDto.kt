@@ -10,11 +10,13 @@ import com.example.project_shelf.app.entity.CityFilter
 data class CityFtsDto(
     @ColumnInfo(name = "city_id") val cityId: Long,
     @ColumnInfo(name = "name") val name: String,
+    @ColumnInfo(name = "department") val department: String,
 )
 
 fun CityFtsDto.toEntity(): CityFilter {
     return CityFilter(
         id = this.cityId,
         name = this.name,
+        department = this.department,
     )
 }

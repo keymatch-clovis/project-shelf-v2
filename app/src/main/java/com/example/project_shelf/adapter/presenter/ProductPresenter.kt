@@ -5,9 +5,11 @@ import android.util.Log
 import androidx.paging.PagingData
 import androidx.paging.map
 import com.example.project_shelf.adapter.dto.ui.ProductDto
+import com.example.project_shelf.adapter.dto.ui.ProductFilterDto
 import com.example.project_shelf.adapter.dto.ui.toDto
 import com.example.project_shelf.adapter.repository.ProductRepository
 import com.example.project_shelf.app.use_case.product.CreateProductUseCase
+import com.example.project_shelf.app.use_case.product.FindProductUseCase
 import com.example.project_shelf.app.use_case.product.GetProductsUseCase
 import com.example.project_shelf.app.use_case.product.IsProductNameUniqueUseCase
 import com.example.project_shelf.app.use_case.product.MarkForDeletionUseCase
@@ -15,6 +17,7 @@ import com.example.project_shelf.app.use_case.product.RemoveAllProductsUseCase
 import com.example.project_shelf.app.use_case.product.SearchProductsUseCase
 import com.example.project_shelf.app.use_case.product.UnmarkForDeletionUseCase
 import com.example.project_shelf.app.use_case.product.UpdateProductUseCase
+import com.example.project_shelf.common.Id
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -26,6 +29,7 @@ import javax.inject.Inject
 
 class ProductPresenter @Inject constructor(
     private val getProductsUseCase: GetProductsUseCase,
+    private val findProductUseCase: FindProductUseCase,
     private val createProductUseCase: CreateProductUseCase,
     private val updateProductUseCase: UpdateProductUseCase,
     private val removeAllProductsUseCase: RemoveAllProductsUseCase,
@@ -43,13 +47,22 @@ class ProductPresenter @Inject constructor(
         }
     }
 
-    override fun search(value: String): Flow<PagingData<ProductDto>> {
+    override suspend fun find(id: Id): ProductDto {
+        Log.d("PRESENTER", "Product[$id]: finding product with ID")
+        return findProductUseCase.exec(id)
+            // TODO:
+            //  We can get the currency from a configuration option or something, but for now we'll
+            //  leave it hard coded.
+            .toDto(Currency.getInstance("COP"))
+    }
+
+    override fun search(value: String): Flow<PagingData<ProductFilterDto>> {
         Log.d("PRESENTER", "Searching products with: $value")
         return searchProductsUseCase.exec(value).map {
             // TODO:
             //  We can get the currency from a configuration option or something, but for now we'll
             //  leave it hard coded.
-            it.map { dto -> dto.toDto(Currency.getInstance("COP")) }
+            it.map { dto -> dto.toDto() }
         }
     }
 

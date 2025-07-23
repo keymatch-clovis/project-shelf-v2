@@ -3,44 +3,39 @@ package com.example.project_shelf.framework.ui.screen.customer
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.project_shelf.R
-import com.example.project_shelf.adapter.dto.ui.CityDto
+import com.example.project_shelf.adapter.dto.ui.CityFilterDto
 import com.example.project_shelf.adapter.dto.ui.CustomerDto
 import com.example.project_shelf.adapter.view_model.customer.CreateCustomerViewModel
-import com.example.project_shelf.framework.ui.components.form.CreateCustomerForm
+import com.example.project_shelf.framework.ui.components.CustomSearchBar
+import com.example.project_shelf.framework.ui.components.CustomTextField
+import com.example.project_shelf.framework.ui.components.list_item.CityFilterListItem
 import com.example.project_shelf.framework.ui.getStringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,17 +57,15 @@ fun CreateCustomerScreen(
     val businessName = viewModel.inputState.businessName.rawValue.collectAsState()
     val businessNameErrors = viewModel.inputState.businessName.errors.collectAsState()
 
-    val city = viewModel.inputState.city.collectAsState()
-    val cityErrors = viewModel.inputState.cityErrors.collectAsState()
+    val city = viewModel.inputState.city.rawValue.collectAsState()
+    val cityErrors = viewModel.inputState.city.errors.collectAsState()
 
     val isValid = viewModel.isValid.collectAsState()
 
     /// Related to city search.
-    val citySearchFocusRequester = remember { FocusRequester() }
-    val citiesLazyPagingItems = viewModel.citySearchResult.collectAsLazyPagingItems()
-    val cityQuery = viewModel.cityQuery.collectAsState()
-    val onCitySearchedFocusRequester = remember { FocusRequester() }
-    var showCitySearchBar by remember { mutableStateOf(false) }
+    var showCitySearchBar = viewModel.showCitySearchBar.collectAsState()
+    val cityQuery = viewModel.citySearch.query.collectAsState()
+    val citySearchItems = viewModel.citySearch.result.collectAsLazyPagingItems()
 
     // Listen to ViewModel events.
     LaunchedEffect(Unit) {
@@ -103,9 +96,7 @@ fun CreateCustomerScreen(
                     actions = {
                         Button(
                             enabled = isValid.value,
-                            onClick = {
-                                viewModel.create()
-                            },
+                            onClick = { viewModel.create() },
                         ) {
                             Text(stringResource(R.string.save))
                         }
@@ -113,110 +104,109 @@ fun CreateCustomerScreen(
                 )
             },
         ) { innerPadding ->
-            CreateCustomerForm(
-                innerPadding = innerPadding,
-
-                name = name.value,
-                nameErrors = nameErrors.value.map { it.getStringResource() },
-                onNameChange = { viewModel.updateName(it) },
-
-                phone = phone.value,
-                phoneErrors = phoneErrors.value.map { it.getStringResource() },
-                onPhoneChange = { viewModel.updatePhone(it) },
-
-                address = address.value,
-                addressErrors = addressErrors.value.map { it.getStringResource() },
-                onAddressChange = { viewModel.updateAddress(it) },
-
-                businessName = businessName.value,
-                businessNameErrors = businessNameErrors.value.map { it.getStringResource() },
-                onBusinessNameChange = { viewModel.updateBusinessName(it) },
-
-                city = city.value,
-                cityErrors = cityErrors.value.map { it.getStringResource() },
-                onCitySearch = { showCitySearchBar = true },
-            )
+            Box(modifier = Modifier.padding(innerPadding)) {
+                Column(
+                    // https://m3.material.io/components/dialogs/specs#2b93ced7-9b0d-4a59-9bc4-8ff59dcd24c1
+                    modifier = Modifier
+                        .padding(24.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    /// Name
+                    CustomTextField(
+                        required = true,
+                        value = name.value ?: "",
+                        onValueChange = { viewModel.updateName(it) },
+                        label = R.string.name,
+                        errors = nameErrors.value.map { it.getStringResource() },
+                        onClear = { viewModel.updateName("") },
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Characters,
+                            imeAction = ImeAction.Next
+                        ),
+                    )
+                    /// Phone
+                    CustomTextField(
+                        required = true,
+                        value = phone.value ?: "",
+                        onValueChange = { viewModel.updatePhone(it) },
+                        label = R.string.phone,
+                        errors = phoneErrors.value.map { it.getStringResource() },
+                        onClear = { viewModel.updatePhone("") },
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Characters,
+                            imeAction = ImeAction.Next
+                        ),
+                    )
+                    /// Address
+                    CustomTextField(
+                        required = true,
+                        value = address.value ?: "",
+                        onValueChange = { viewModel.updateAddress(it) },
+                        label = R.string.address,
+                        errors = addressErrors.value.map { it.getStringResource() },
+                        onClear = { viewModel.updateAddress("") },
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Characters,
+                            imeAction = ImeAction.Next
+                        ),
+                    )
+                    /// City Search Input
+                    CustomTextField(
+                        required = true,
+                        label = R.string.city,
+                        value = city.value?.name ?: "",
+                        readOnly = true,
+                        onClick = { viewModel.openCitySearchBar() },
+                        errors = cityErrors.value.map { it.getStringResource() },
+                    )
+                    /// Business Name
+                    CustomTextField(
+                        value = businessName.value ?: "",
+                        onValueChange = { viewModel.updateBusinessName(it) },
+                        onClear = { viewModel.updateBusinessName("") },
+                        label = R.string.business_name,
+                        errors = businessNameErrors.value.map { it.getStringResource() },
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Characters,
+                            imeAction = ImeAction.Done
+                        ),
+                    )
+                }
+            }
         }
 
-        // Search City Search Bar.
-        // NOTE:
-        //  I have to create this box here, as I don't really know if there is a way to put both a
-        //  search bar, and the results in a same component. I feel I really need to use two of them
-        //  separated.
+        /// Search City Search Bar.
         AnimatedVisibility(
-            visible = showCitySearchBar,
+            visible = showCitySearchBar.value,
             enter = fadeIn(),
             exit = fadeOut(),
         ) {
-            // NOTE:
-            //  Idk if this is working correctly, but I guess I have no other way of knowing when
-            //  this element is already in the composition tree.
-            LaunchedEffect(Unit) {
-                citySearchFocusRequester.requestFocus()
-                citySearchFocusRequester.captureFocus()
-            }
-
-            SearchBar(
-                inputField = {
-                    SearchBarDefaults.InputField(
-                        modifier = Modifier.focusRequester(citySearchFocusRequester),
-                        query = cityQuery.value,
-                        // If the user clicks the search button, we will assume it wants to select
-                        // the first-most item.
-                        // NOTE:
-                        //  I have not found a way to leave this to the viewmodel, as the view
-                        //  should not be dictating how the items are being selected. Or is it?
-                        //  Idk, I'll leave it like this for now, maybe in the future we'll figure
-                        //  out a better way.
-                        onSearch = {
-                            var item: CityDto? = null
-                            if (citiesLazyPagingItems.itemCount > 0) {
-                                item = citiesLazyPagingItems.peek(0)
-                            }
-
-                            viewModel.updateCity(item)
-                            showCitySearchBar = false
-                        },
-                        onQueryChange = { viewModel.updateCityQuery(it) },
-                        expanded = showCitySearchBar,
-                        onExpandedChange = { showCitySearchBar = it },
-                        leadingIcon = {
-                            Icon(
-                                modifier = Modifier.size(24.dp),
-                                imageVector = ImageVector.vectorResource(R.drawable.search),
-                                contentDescription = null,
-                            )
-                        },
-                        placeholder = { Text(stringResource(R.string.search)) },
-                    )
+            CustomSearchBar<CityFilterDto>(
+                query = cityQuery.value,
+                onQueryChange = { viewModel.citySearch.updateQuery(it) },
+                expanded = showCitySearchBar.value,
+                onExpandedChange = {
+                    if (it) viewModel.openCitySearchBar() else viewModel.closeCitySearchBar()
                 },
-                expanded = showCitySearchBar,
-                onExpandedChange = { showCitySearchBar = it },
-            ) {
-                LazyColumn {
-                    items(count = citiesLazyPagingItems.itemCount) { index ->
-                        citiesLazyPagingItems[index]?.let {
-                            Surface(
-                                onClick = {}) {
-                                ListItem(modifier = Modifier.fillMaxWidth(), headlineContent = {
-                                    Text(
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        text = it.name,
-                                    )
-                                }, supportingContent = {
-                                    Text(
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        text = it.department,
-                                    )
-                                })
-                            }
-                        }
+                onSearch = {
+                    // If the user presses the search button, without selecting an item, we will
+                    // assume it wanted to select the first-most item in the search list, if there
+                    // was one.
+                    citySearchItems.takeIf { it.itemCount > 0 }?.peek(0)
+                        ?.let { viewModel.updateCity(it) }
 
-                        if (index < citiesLazyPagingItems.itemCount - 1) {
-                            HorizontalDivider()
-                        }
-                    }
-                }
+                    viewModel.closeCitySearchBar()
+                },
+                lazyPagingItems = citySearchItems,
+            ) {
+                CityFilterListItem(
+                    dto = it,
+                    onClick = {
+                        viewModel.updateCity(it)
+                        viewModel.closeCitySearchBar()
+                    },
+                )
             }
         }
     }

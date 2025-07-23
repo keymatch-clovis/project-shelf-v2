@@ -12,15 +12,28 @@ import com.example.project_shelf.adapter.repository.CustomerRepository
 import com.example.project_shelf.adapter.view_model.util.SearchExtension
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel()
 class CustomerListViewModel @Inject constructor(
     repository: CustomerRepository,
 ) : ViewModel() {
+    /// List related
     var customers: Flow<PagingData<CustomerDto>> = repository.find()
     var lazyListState: LazyListState by mutableStateOf(LazyListState(0, 0))
 
     /// Search related
+    private val _showSearchBar = MutableStateFlow(false)
+    val showSearchBar = _showSearchBar.asStateFlow()
+
     val search = SearchExtension(scope = viewModelScope, repository = repository)
+
+    fun closeSearchBar() = _showSearchBar.update { false }
+    fun openSearchBar() {
+        search.updateQuery("")
+        _showSearchBar.update { true }
+    }
 }

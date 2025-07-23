@@ -39,12 +39,6 @@ fun MainScreen(
         mainViewModel.setAppReady()
     }
 
-    val test = navController.currentBackStack.collectAsState()
-    LaunchedEffect(test.value) {
-        test.value.forEach { Log.d("test", it.toString()) }
-        Log.d("test", "---")
-    }
-
     Scaffold(
         bottomBar = {
             NavigationBar {

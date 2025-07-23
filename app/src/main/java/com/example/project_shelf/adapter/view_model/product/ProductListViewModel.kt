@@ -7,27 +7,33 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.repository.ProductRepository
+import com.example.project_shelf.adapter.view_model.util.SearchExtension
+import com.example.project_shelf.common.Id
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @HiltViewModel()
 class ProductListViewModel @Inject constructor(
-    repository: ProductRepository,
+    private val repository: ProductRepository,
 ) : ViewModel() {
+    /// Event related
+    sealed interface Event {
+        data class RequestEdit(val dto: ProductDto) : Event
+    }
+
+    private val _eventFlow = MutableSharedFlow<Event>()
+    val eventFlow: SharedFlow<Event> = _eventFlow
+
+    /// List related
     var products: Flow<PagingData<ProductDto>> = repository.get()
     var lazyListState: LazyListState by mutableStateOf(LazyListState(0, 0))
 
@@ -35,32 +41,17 @@ class ProductListViewModel @Inject constructor(
     private val _showSearchBar = MutableStateFlow(false)
     val showSearchBar = _showSearchBar.asStateFlow()
 
-    private val _query = MutableStateFlow("")
-    val query = _query.asStateFlow()
+    val search = SearchExtension(scope = viewModelScope, repository = repository)
 
-    private val _searchResult = MutableStateFlow<PagingData<ProductDto>>(PagingData.empty())
-    val searchResult = _searchResult.asStateFlow()
-
+    fun closeSearchBar() = _showSearchBar.update { false }
     fun openSearchBar() {
-        _query.update { "" }
+        search.updateQuery("")
         _showSearchBar.update { true }
     }
 
-    fun closeSearchBar() {
-        _query.update { "" }
-        _showSearchBar.update { false }
-    }
-
-    fun updateQuery(value: String) = _query.update { value }
-
-    init {
-        // Start listening for the query changes.
-        viewModelScope.launch {
-            _query.debounce(300).flatMapLatest {
-                repository.search(it.toString())
-            }.cachedIn(viewModelScope).collectLatest {
-                _searchResult.value = it
-            }
-        }
+    /// Edit request related
+    fun requestEdit(id: Id) = viewModelScope.launch {
+        repository.find(id).let { _eventFlow.emit(Event.RequestEdit(it)) }
+        closeSearchBar()
     }
 }

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.paging.PagingData
 import androidx.paging.map
 import com.example.project_shelf.adapter.dto.ui.CityDto
+import com.example.project_shelf.adapter.dto.ui.CityFilterDto
 import com.example.project_shelf.adapter.dto.ui.toDto
 import com.example.project_shelf.adapter.repository.CityRepository
 import com.example.project_shelf.app.use_case.city.LoadDefaultCitiesUseCase
@@ -26,7 +27,7 @@ class CityPresenter @Inject constructor(
         loadDefaultCitiesUseCase.exec(stream)
     }
 
-    override fun search(value: String): Flow<PagingData<CityDto>> {
+    override fun search(value: String): Flow<PagingData<CityFilterDto>> {
         Log.d("PRESENTER", "Searching cities with: $value")
         return searchCitiesUseCase.exec(value).map {
             it.map { entity -> entity.toDto() }
@@ -38,5 +39,5 @@ class CityPresenter @Inject constructor(
 @InstallIn(ViewModelComponent::class)
 abstract class CityModule {
     @Binds
-    abstract fun bindCityService(presenter: CityPresenter): CityRepository
+    abstract fun bind(presenter: CityPresenter): CityRepository
 }

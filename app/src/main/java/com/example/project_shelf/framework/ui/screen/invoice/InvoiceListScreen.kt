@@ -116,7 +116,10 @@ fun InvoiceListScreen(
                         // If the user presses the search button, without selecting an item, we
                         // will assume it wanted to select the first-most item in the search
                         // list, if there was one.
-                        lazyPagingSearchItems.peek(0)?.let { onRequestEdit(it.id) }
+                        lazyPagingSearchItems
+                            .takeIf { it.itemCount > 0 }
+                            ?.peek(0)
+                            ?.let { onRequestEdit(it.id) }
                         viewModel.closeSearchBar()
                     },
                     lazyPagingItems = lazyPagingSearchItems,

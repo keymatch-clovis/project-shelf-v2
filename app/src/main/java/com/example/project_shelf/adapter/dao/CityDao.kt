@@ -29,10 +29,9 @@ interface CityFtsDao {
 
     @Query(
         """
-        SELECT e.* FROM city_fts fts
-        JOIN city e ON (e.rowid = fts.city_id)
+        SELECT * FROM city_fts
         WHERE city_fts MATCH :value
     """
     )
-    fun match(value: String): PagingSource<Int, CityDto>
+    fun match(value: String): PagingSource<Int, CityFtsDto>
 }

@@ -24,7 +24,7 @@ import javax.inject.Inject
 class CityServiceImpl @Inject constructor(
     private val database: SqliteDatabase,
 ) : CityService {
-    override fun search(value: String): Flow<PagingData<City>> {
+    override fun search(value: String): Flow<PagingData<CityFilter>> {
         Log.d("SERVICE-IMPL", "Searching cities with: $value")
         return Pager(
             config = PagingConfig(pageSize = PAGE_SIZE)
@@ -60,10 +60,18 @@ class CityServiceImpl @Inject constructor(
             )
 
             // Then, store the FTS value.
-            database.cityFtsDao().insert(CityFtsDto(cityId = cityId, name = name))
+            database.cityFtsDao().insert(
+                CityFtsDto(
+                    cityId = cityId,
+                    name = name,
+                    department = department,
+                )
+            )
 
             City(
-                id = cityId, name = name, department = department
+                id = cityId,
+                name = name,
+                department = department
             )
         }
     }
@@ -78,5 +86,5 @@ class CityServiceImpl @Inject constructor(
 @InstallIn(SingletonComponent::class)
 abstract class CityModule {
     @Binds
-    abstract fun bindService(impl: CityServiceImpl): CityService
+    abstract fun bind(impl: CityServiceImpl): CityService
 }

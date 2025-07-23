@@ -12,6 +12,7 @@ import com.example.project_shelf.adapter.dto.room.toEntity
 import com.example.project_shelf.app.entity.Product
 import com.example.project_shelf.app.entity.ProductFilter
 import com.example.project_shelf.app.service.ProductService
+import com.example.project_shelf.common.Id
 import com.example.project_shelf.framework.room.SqliteDatabase
 import dagger.Binds
 import dagger.Module
@@ -37,7 +38,17 @@ class ProductServiceImpl @Inject constructor(
         }
     }
 
-    override fun search(value: String): Flow<PagingData<Product>> {
+    override suspend fun findByName(name: String): Product? {
+        Log.d("SERVICE-IMPL", "Finding product with name: $name")
+        return database.productDao().selectByName(name)?.toEntity()
+    }
+
+    override suspend fun findById(id: Id): Product {
+        Log.d("SERVICE-IMPL", "Product[$id]: finding product with ID")
+        return database.productDao().select(id).toEntity()
+    }
+
+    override fun search(value: String): Flow<PagingData<ProductFilter>> {
         Log.d("SERVICE-IMPL", "Searching products with: $value")
         return Pager(
             config = PagingConfig(pageSize = PAGE_SIZE)
@@ -48,11 +59,6 @@ class ProductServiceImpl @Inject constructor(
         }.flow.map {
             it.map { dto -> dto.toEntity() }
         }
-    }
-
-    override suspend fun findByName(name: String): Product? {
-        Log.d("SERVICE-IMPL", "Finding product with name: $name")
-        return database.productDao().selectByName(name)?.toEntity()
     }
 
     override suspend fun create(

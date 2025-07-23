@@ -106,15 +106,15 @@ fun EditProductScreen(
         EditProductForm(
             innerPadding = innerPadding,
 
-            name = name.value,
+            name = name.value ?: "",
             nameErrors = nameErrors.value.map { it.getStringResource() },
             onNameChange = { viewModel.updateName(it) },
 
-            price = price.value,
+            price = price.value ?: "",
             priceErrors = priceErrors.value.map { it.getStringResource() },
             onPriceChange = { viewModel.updatePrice(it) },
 
-            stock = stock.value,
+            stock = stock.value ?: "",
             stockErrors = stockErrors.value.map { it.getStringResource() },
             onStockChange = { viewModel.updateStock(it) },
         )

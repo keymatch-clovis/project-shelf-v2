@@ -115,7 +115,18 @@ fun CustomTextField(
                     Icon(
                         modifier = Modifier.size(24.dp),
                         imageVector = ImageVector.vectorResource(R.drawable.x),
-                        contentDescription = null
+                        contentDescription = null,
+                    )
+                }
+            }
+
+            if (value.isNotEmpty() && readOnly) {
+                // TODO: do this
+                IconButton(onClick = {}) {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        imageVector = ImageVector.vectorResource(R.drawable.clipboard_copy),
+                        contentDescription = null,
                     )
                 }
             }

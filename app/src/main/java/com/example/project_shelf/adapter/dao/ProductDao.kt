@@ -9,6 +9,7 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.example.project_shelf.adapter.dto.room.ProductDto
 import com.example.project_shelf.adapter.dto.room.ProductFtsDto
+import com.example.project_shelf.common.Id
 
 @Dao
 interface ProductDao {
@@ -20,6 +21,9 @@ interface ProductDao {
     //  single item.
     @Query("SELECT * FROM product WHERE name = :name AND pending_delete_until IS NULL")
     suspend fun select(name: String): ProductDto
+
+    @Query("SELECT * FROM product WHERE rowid = :id AND pending_delete_until IS NULL")
+    suspend fun select(id: Id): ProductDto
 
     @Query("SELECT * FROM product WHERE pending_delete_until IS NOT NULL")
     suspend fun selectPendingForDeletion(): List<ProductDto>
@@ -61,12 +65,12 @@ interface ProductFtsDao {
     // marked for deletion.
     @Query(
         """
-       SELECT e.* FROM product_fts fts
+       SELECT fts.* FROM product_fts fts
        JOIN product e ON (e.rowid = fts.product_id)
        WHERE
         e.pending_delete_until IS NULL
         AND product_fts MATCH :value 
     """
     )
-    fun match(value: String): PagingSource<Int, ProductDto>
+    fun match(value: String): PagingSource<Int, ProductFtsDto>
 }

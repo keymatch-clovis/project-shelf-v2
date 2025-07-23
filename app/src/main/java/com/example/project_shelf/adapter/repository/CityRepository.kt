@@ -1,12 +1,8 @@
 package com.example.project_shelf.adapter.repository
 
-import androidx.paging.PagingData
-import com.example.project_shelf.adapter.dto.ui.CityDto
-import kotlinx.coroutines.flow.Flow
+import com.example.project_shelf.adapter.dto.ui.CityFilterDto
 import java.io.InputStream
 
-interface CityRepository {
+interface CityRepository : WithSearch<CityFilterDto> {
     suspend fun loadDefaultCities(stream: InputStream)
-
-    fun search(value: String): Flow<PagingData<CityDto>>
 }

@@ -47,4 +47,6 @@
     <string name="loading">Loading</string>
     <string name="details">Details</string>
     <string name="customer">Customer</string>
+    <string name="err_value_blank">The value can\'t be blank</string>
+    <string name="number">Number</string>
 </resources>

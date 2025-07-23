@@ -6,10 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.project_shelf.adapter.ViewModelError
 import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.repository.ProductRepository
-import com.example.project_shelf.adapter.view_model.util.BigDecimalValidator
+import com.example.project_shelf.adapter.view_model.util.validator.BigDecimalValidator
 import com.example.project_shelf.adapter.view_model.util.Input
-import com.example.project_shelf.adapter.view_model.util.IntValidator
-import com.example.project_shelf.adapter.view_model.util.StringValidator
+import com.example.project_shelf.adapter.view_model.util.validator.IntValidator
+import com.example.project_shelf.adapter.view_model.util.validator.StringValidator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -30,9 +30,9 @@ import javax.inject.Inject
 
 sealed class CreateProductViewModelState {
     data class InputState(
-        val name: Input<String> = Input("", StringValidator(required = true)),
-        val price: Input<BigDecimal> = Input("", BigDecimalValidator()),
-        val stock: Input<Int> = Input("", IntValidator()),
+        val name: Input<String, String> = Input("", StringValidator(required = true)),
+        val price: Input<String, BigDecimal> = Input("", BigDecimalValidator()),
+        val stock: Input<String, Int> = Input("", IntValidator()),
     )
 }
 
@@ -41,9 +41,8 @@ sealed class CreateProductViewModelState {
 class CreateProductViewModel @Inject constructor(
     private val productRepository: ProductRepository,
 ) : ViewModel() {
-    sealed class Event {
-        data class Created(val product: ProductDto) : Event()
-        data class Searched(val result: ProductDto) : Event()
+    sealed interface Event {
+        data class Created(val dto: ProductDto) : Event
     }
 
     private val isLoading = MutableStateFlow(false)
@@ -87,17 +86,18 @@ class CreateProductViewModel @Inject constructor(
     fun updateStock(value: String) = inputState.stock.update(value)
 
     fun create() {
-        Log.d("VIEW-MODEL", "Creating product")
-        // NOTE: We should only call this method when all input data has been validated.
-        assert(isValid.value)
-
         viewModelScope.launch {
-            val product = productRepository.create(
+            Log.d("VIEW-MODEL", "Creating product")
+            // NOTE: We should only call this method when all input data has been validated.
+            assert(isValid.value)
+
+            val dto = productRepository.create(
                 name = inputState.name.cleanValue.value!!,
                 price = inputState.price.cleanValue.value ?: BigDecimal.ZERO,
                 stock = inputState.stock.cleanValue.value ?: 0,
             )
-            _eventFlow.emit(Event.Created(product))
+
+            _eventFlow.emit(Event.Created(dto))
         }
     }
 }

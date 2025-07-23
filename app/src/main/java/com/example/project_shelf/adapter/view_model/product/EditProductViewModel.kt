@@ -5,10 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.project_shelf.adapter.ViewModelError
 import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.repository.ProductRepository
-import com.example.project_shelf.adapter.view_model.util.BigDecimalValidator
+import com.example.project_shelf.adapter.view_model.util.validator.BigDecimalValidator
 import com.example.project_shelf.adapter.view_model.util.Input
-import com.example.project_shelf.adapter.view_model.util.IntValidator
-import com.example.project_shelf.adapter.view_model.util.StringValidator
+import com.example.project_shelf.adapter.view_model.util.validator.IntValidator
+import com.example.project_shelf.adapter.view_model.util.validator.StringValidator
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -33,9 +33,9 @@ sealed class EditProductViewModelState {
     )
 
     data class InputState(
-        val name: Input<String>,
-        val price: Input<BigDecimal>,
-        val stock: Input<Int>,
+        val name: Input<String, String>,
+        val price: Input<String, BigDecimal>,
+        val stock: Input<String, Int>,
     )
 }
 

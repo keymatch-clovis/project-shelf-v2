@@ -43,18 +43,19 @@ fun MainNavHost(
         modifier = modifier,
         startDestination = startDestination.route,
     ) {
+        /// Product Related
         composable(MainDestination.PRODUCT.route) {
             ProductListScreen(
                 viewModel = hiltViewModel(),
                 productDeletionViewModel = productDeletionViewModel,
-                onProductCreate = {
+                onRequestCreate = {
                     // If we get a create request, we want to clear the deletion view model. This
                     // prevents the user from restoring an object that might have been deleted
                     // before.
                     productDeletionViewModel.clear()
                     navController.navigate(Destination.CREATE_PRODUCT.route)
                 },
-                onProductEdit = {
+                onRequestEdit = {
                     // If we get an edit request, we want to clear the deletion view model. This
                     // prevents the user from restoring an object that might have been deleted
                     // before.
@@ -63,19 +64,27 @@ fun MainNavHost(
                 },
             )
         }
+        composable(Destination.CREATE_PRODUCT.route) {
+            CreateProductScreen(
+                viewModel = hiltViewModel(),
+                onDismissed = { navController.popBackStack() },
+                onCreated = { navController.popBackStack() },
+            )
+        }
 
+        /// Customer related
         composable(MainDestination.CUSTOMER.route) {
             CustomerListScreen(
                 viewModel = hiltViewModel(),
                 deletionViewModel = customerDeletionViewModel,
-                onCreateRequest = {
+                onRequestCreate = {
                     // If we get a create request, we want to clear the deletion view model. This
                     // prevents the user from restoring an object that might have been deleted
                     // before.
                     customerDeletionViewModel.clear()
                     navController.navigate(Destination.CREATE_CUSTOMER.route)
                 },
-                onEditRequest = {
+                onRequestEdit = {
                     // If we get an edit request, we want to clear the deletion view model. This
                     // prevents the user from restoring an object that might have been deleted
                     // before.
@@ -84,6 +93,14 @@ fun MainNavHost(
                 },
             )
         }
+        composable(Destination.CREATE_CUSTOMER.route) {
+            CreateCustomerScreen(
+                viewModel = hiltViewModel(),
+                onDismissed = { navController.popBackStack() },
+                onCreated = { navController.popBackStack() },
+            )
+        }
+
         /// Invoice Related
         composable(MainDestination.INVOICE.route) {
             InvoiceListScreen(
@@ -129,15 +146,6 @@ fun MainNavHost(
         }
 
 
-        // Product Related
-        dialog(
-            Destination.CREATE_PRODUCT.route,
-            dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
-        ) {
-            CreateProductScreen(
-                onDismissRequest = { navController.popBackStack() },
-            )
-        }
 
         dialog<ProductDto>(
             dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
@@ -151,18 +159,6 @@ fun MainNavHost(
                 productDeletionViewModel = productDeletionViewModel,
                 onDismissRequest = { navController.popBackStack() },
                 onDeleteRequest = { navController.popBackStack() },
-            )
-        }
-
-        // Customer Related
-        dialog(
-            Destination.CREATE_CUSTOMER.route,
-            dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
-        ) {
-            CreateCustomerScreen(
-                viewModel = hiltViewModel(),
-                onCreated = {},
-                onDismissed = { navController.popBackStack() },
             )
         }
     }
