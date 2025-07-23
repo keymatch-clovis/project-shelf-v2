@@ -12,7 +12,7 @@ data class CustomerDto(
     val name: String,
     val phone: String,
     val address: String,
-    val businessName: String,
+    val businessName: String?,
 ) : Parcelable
 
 fun Customer.toDto(): CustomerDto {
@@ -21,6 +21,6 @@ fun Customer.toDto(): CustomerDto {
         name = this.name,
         phone = this.phone,
         address = this.address,
-        businessName = this.businessName ?: "",
+        businessName = this.businessName,
     )
 }

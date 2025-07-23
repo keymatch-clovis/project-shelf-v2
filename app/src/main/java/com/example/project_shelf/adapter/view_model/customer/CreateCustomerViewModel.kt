@@ -7,6 +7,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.example.project_shelf.adapter.ViewModelError
 import com.example.project_shelf.adapter.dto.ui.CityDto
+import com.example.project_shelf.adapter.dto.ui.CustomerDto
 import com.example.project_shelf.adapter.repository.CityRepository
 import com.example.project_shelf.adapter.repository.CustomerRepository
 import com.example.project_shelf.adapter.view_model.util.Input
@@ -46,8 +47,8 @@ class CreateCustomerViewModel @Inject constructor(
     private val customerRepository: CustomerRepository,
     private val cityRepository: CityRepository,
 ) : ViewModel() {
-    sealed class Event {
-        class Created : Event()
+    sealed interface Event {
+        data class Created(val dto: CustomerDto) : Event
     }
 
     private val _eventFlow = MutableSharedFlow<Event>()
@@ -102,12 +103,14 @@ class CreateCustomerViewModel @Inject constructor(
         // NOTE: We should only call this method when all input data has been validated.
         assert(_isValid.value)
 
-        customerRepository.create(
+        val dto = customerRepository.create(
             name = inputState.name.cleanValue.value!!,
             phone = inputState.phone.cleanValue.value ?: "",
             address = inputState.address.cleanValue.value ?: "",
             businessName = inputState.businessName.cleanValue.value ?: "",
             cityId = inputState.city.value!!.id,
         )
+
+        _eventFlow.emit(Event.Created(dto))
     }
 }

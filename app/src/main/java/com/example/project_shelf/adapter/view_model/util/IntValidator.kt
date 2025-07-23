@@ -5,12 +5,12 @@ import com.example.project_shelf.adapter.ViewModelError
 class IntValidator(
     private val required: Boolean = false,
 ) : Validator<Int> {
-    override fun validate(input: String): Pair<Int?, List<ViewModelError>> {
+    override fun validate(value: String): Pair<Int?, List<ViewModelError>> {
         val errors = mutableListOf<ViewModelError>()
-        val transformed = input.toIntOrNull()
+        val transformed = value.toIntOrNull()
 
         if (required) {
-            if (input.isBlank()) {
+            if (value.isBlank()) {
                 errors.add(ViewModelError.BLANK_VALUE)
             }
             if (transformed == null) {
@@ -18,7 +18,7 @@ class IntValidator(
             }
         }
 
-        if (input.isNotBlank()) {
+        if (value.isNotBlank()) {
             if (transformed == null) {
                 errors.add(ViewModelError.INVALID_INTEGER_VALUE)
             }

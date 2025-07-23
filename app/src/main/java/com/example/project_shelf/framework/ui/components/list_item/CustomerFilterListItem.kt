@@ -12,12 +12,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.example.project_shelf.R
-import com.example.project_shelf.adapter.dto.ui.CustomerDto
+import com.example.project_shelf.adapter.dto.ui.CustomerFilterDto
 
 @Composable
-fun CustomerListItem(
-    dto: CustomerDto,
-    onClick: (CustomerDto) -> Unit,
+fun CustomerFilterListItem(
+    dto: CustomerFilterDto,
+    onClick: (CustomerFilterDto) -> Unit,
 ) {
     Surface(
         onClick = { onClick(dto) },
@@ -35,8 +35,8 @@ fun CustomerListItem(
             supportingContent = {
                 Text(
                     style = MaterialTheme.typography.bodyMedium,
-                    // TODO: fix this
-                    text = dto.businessName ?: "name",
+                    // TODO: Fix this.
+                    text = dto.businessName ?: "no businessName",
                 )
             },
             trailingContent = {

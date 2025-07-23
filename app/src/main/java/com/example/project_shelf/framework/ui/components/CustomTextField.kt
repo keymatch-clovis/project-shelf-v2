@@ -30,9 +30,9 @@ import com.example.project_shelf.R
 @Composable
 fun CustomTextField(
     value: String,
-    onValueChange: (String) -> Unit,
     label: Int,
     modifier: Modifier = Modifier,
+    onValueChange: ((String) -> Unit)? = null,
     required: Boolean = false,
     readOnly: Boolean = false,
     singleLine: Boolean = true,
@@ -73,7 +73,7 @@ fun CustomTextField(
             // other possible errors are checked.
             isDirty = true
 
-            onValueChange(it)
+            onValueChange?.invoke(it)
         },
         keyboardOptions = keyboardOptions,
         isError = isDirty && errors.isNotEmpty(),

@@ -10,7 +10,11 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -29,9 +33,19 @@ fun <T : Any> CustomSearchBar(
     lazyPagingItems: LazyPagingItems<T>,
     renderer: @Composable (T) -> Unit,
 ) {
+    // Always request focus when the custom search bar is opened.
+    // NOTE:
+    //  This can be a problem if the custom search bar
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        focusRequester.captureFocus()
+        focusRequester.requestFocus()
+    }
+
     SearchBar(
         inputField = {
             SearchBarDefaults.InputField(
+                modifier = Modifier.focusRequester(focusRequester),
                 query = query,
                 onQueryChange = onQueryChange,
                 onSearch = onSearch,

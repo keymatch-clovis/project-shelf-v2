@@ -12,12 +12,13 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.toRoute
 import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.view_model.customer.CustomerDeletionViewModel
+import com.example.project_shelf.adapter.view_model.invoice.CreateInvoiceViewModel
 import com.example.project_shelf.adapter.view_model.product.ProductDeletionViewModel
 import com.example.project_shelf.adapter.view_model.product.EditProductViewModel
 import com.example.project_shelf.framework.ui.screen.ConfigScreen
 import com.example.project_shelf.framework.ui.screen.LoadingScreen
 import com.example.project_shelf.framework.ui.screen.customer.CreateCustomerScreen
-import com.example.project_shelf.framework.ui.screen.customer.CustomersScreen
+import com.example.project_shelf.framework.ui.screen.customer.CustomerListScreen
 import com.example.project_shelf.framework.ui.screen.invoice.CreateInvoiceScreen
 import com.example.project_shelf.framework.ui.screen.invoice.InvoiceListScreen
 import com.example.project_shelf.framework.ui.screen.product.CreateProductScreen
@@ -64,10 +65,9 @@ fun MainNavHost(
         }
 
         composable(MainDestination.CUSTOMER.route) {
-            CustomersScreen(
+            CustomerListScreen(
                 viewModel = hiltViewModel(),
                 deletionViewModel = customerDeletionViewModel,
-                searchViewModel = hiltViewModel(),
                 onCreateRequest = {
                     // If we get a create request, we want to clear the deletion view model. This
                     // prevents the user from restoring an object that might have been deleted
@@ -81,7 +81,8 @@ fun MainNavHost(
                     // before.
                     customerDeletionViewModel.clear()
                     navController.navigate(it)
-                })
+                },
+            )
         }
         /// Invoice Related
         composable(MainDestination.INVOICE.route) {
@@ -94,9 +95,20 @@ fun MainNavHost(
             )
         }
         composable(Destination.CREATE_INVOICE.route) {
+            val viewModel = hiltViewModel<CreateInvoiceViewModel>()
+
             CreateInvoiceScreen(
-                onDismissRequest = {},
+                viewModel = viewModel,
+                onRequestDismiss = { navController.popBackStack() },
             )
+
+            dialog(route = Destination.CREATE_CUSTOMER.route) {
+                CreateCustomerScreen(
+                    viewModel = hiltViewModel(),
+                    onCreated = {},
+                    onDismissed = { navController.popBackStack() },
+                )
+            }
         }
 
         composable(MainDestination.CONFIG.route) {
@@ -149,9 +161,9 @@ fun MainNavHost(
         ) {
             CreateCustomerScreen(
                 viewModel = hiltViewModel(),
-                onDismissRequest = { navController.popBackStack() },
+                onCreated = {},
+                onDismissed = { navController.popBackStack() },
             )
         }
-
     }
 }

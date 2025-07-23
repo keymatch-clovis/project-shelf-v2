@@ -134,10 +134,6 @@ fun ProductListScreen(
         }
 
         // Search Product Search Bar.
-        // NOTE:
-        //  I have to create this box here, as I don't really know if there is a way to put both a
-        //  search bar, and the results in a same component. I feel I really need to use two of them
-        //  separated.
         AnimatedVisibility(
             visible = showSearchBar.value,
             enter = fadeIn() + slideInVertically(),

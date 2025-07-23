@@ -2,11 +2,11 @@ package com.example.project_shelf.adapter.repository
 
 import androidx.paging.PagingData
 import com.example.project_shelf.adapter.dto.ui.CustomerDto
+import com.example.project_shelf.adapter.dto.ui.CustomerFilterDto
 import kotlinx.coroutines.flow.Flow
 
-interface CustomerRepository {
+interface CustomerRepository : WithSearch<CustomerFilterDto> {
     fun find(): Flow<PagingData<CustomerDto>>
-    fun search(value: String): Flow<PagingData<CustomerDto>>
 
     suspend fun update(
         id: Long,
@@ -23,7 +23,7 @@ interface CustomerRepository {
         address: String,
         cityId: Long,
         businessName: String
-    )
+    ): CustomerDto
 
     suspend fun setPendingForDeletion(id: Long)
     suspend fun unsetPendingForDeletion(id: Long)

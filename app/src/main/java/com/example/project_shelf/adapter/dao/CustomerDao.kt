@@ -51,10 +51,12 @@ interface CustomerFtsDao {
 
     @Query(
         """
-        SELECT e.* FROM customer_fts fts
+        SELECT fts.* FROM customer_fts fts
         JOIN customer e ON (e.rowid = fts.customer_id)
-        WHERE customer_fts MATCH :value
+        WHERE 
+            e.pending_delete_until IS NULL
+            AND customer_fts MATCH :value
     """
     )
-    fun match(value: String): PagingSource<Int, CustomerDto>
+    fun match(value: String): PagingSource<Int, CustomerFtsDto>
 }

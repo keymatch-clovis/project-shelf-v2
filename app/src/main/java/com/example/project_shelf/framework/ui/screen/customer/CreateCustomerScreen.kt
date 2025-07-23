@@ -29,18 +29,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.dto.ui.CityDto
+import com.example.project_shelf.adapter.dto.ui.CustomerDto
 import com.example.project_shelf.adapter.view_model.customer.CreateCustomerViewModel
 import com.example.project_shelf.framework.ui.components.form.CreateCustomerForm
 import com.example.project_shelf.framework.ui.getStringResource
@@ -49,7 +47,8 @@ import com.example.project_shelf.framework.ui.getStringResource
 @Composable
 fun CreateCustomerScreen(
     viewModel: CreateCustomerViewModel,
-    onDismissRequest: () -> Unit,
+    onCreated: (CustomerDto) -> Unit,
+    onDismissed: () -> Unit,
 ) {
     val name = viewModel.inputState.name.rawValue.collectAsState()
     val nameErrors = viewModel.inputState.name.errors.collectAsState()
@@ -79,7 +78,7 @@ fun CreateCustomerScreen(
     LaunchedEffect(Unit) {
         viewModel.eventFlow.collect {
             when (it) {
-                is CreateCustomerViewModel.Event.Created -> onDismissRequest()
+                is CreateCustomerViewModel.Event.Created -> onCreated(it.dto)
             }
         }
     }
@@ -93,7 +92,7 @@ fun CreateCustomerScreen(
                     modifier = Modifier.padding(horizontal = 4.dp),
                     title = { Text(stringResource(R.string.customer_create)) },
                     navigationIcon = {
-                        IconButton(onClick = onDismissRequest) {
+                        IconButton(onClick = onDismissed) {
                             Icon(
                                 modifier = Modifier.size(24.dp),
                                 imageVector = ImageVector.vectorResource(R.drawable.arrow_left),

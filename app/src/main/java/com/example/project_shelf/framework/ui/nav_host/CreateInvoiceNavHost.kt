@@ -6,8 +6,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.project_shelf.R
+import com.example.project_shelf.adapter.view_model.invoice.CreateInvoiceViewModel
 import com.example.project_shelf.framework.ui.components.form.invoice.CreateInvoiceDetailsForm
 import com.example.project_shelf.framework.ui.components.form.invoice.CreateInvoiceProductsForm
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 enum class CreateInvoiceDestination(
     val route: String,
@@ -28,6 +30,7 @@ fun CreateInvoiceNavHost(
     modifier: Modifier,
     navHostController: NavHostController,
     startDestination: CreateInvoiceDestination,
+    emitter: MutableSharedFlow<CreateInvoiceViewModel.Event>,
 ) {
     NavHost(
         modifier = modifier,
@@ -35,7 +38,9 @@ fun CreateInvoiceNavHost(
         startDestination = startDestination.route,
     ) {
         composable(CreateInvoiceDestination.DETAILS.route) {
-            CreateInvoiceDetailsForm()
+            CreateInvoiceDetailsForm(
+                emitter = emitter,
+            )
         }
 
         composable(CreateInvoiceDestination.PRODUCTS.route) {
