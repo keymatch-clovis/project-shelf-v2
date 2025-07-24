@@ -69,6 +69,9 @@ fun CreateInvoiceScreen(
     /// Customer related
     val customer = viewModel.inputState.customer.rawValue.collectAsState()
 
+    /// Products related
+    val invoiceProducts = viewModel.inputState.invoiceProducts.collectAsState()
+
     Box {
         Scaffold(
             topBar = {
@@ -127,6 +130,8 @@ fun CreateInvoiceScreen(
                     navHostController = navHostController,
                     startDestination = CreateInvoiceDestination.DETAILS,
                     emitter = viewModel.eventFlow,
+
+                    invoiceProducts = invoiceProducts.value,
                     customerInput = viewModel.inputState.customer,
                 )
             }
@@ -167,7 +172,7 @@ fun CreateInvoiceScreen(
             CustomSearchBar<ProductFilterDto>(
                 query = productQuery.value,
                 onQueryChange = { viewModel.productSearch.updateQuery(it) },
-                expanded = showProductSearchBar.value,
+                expanded = true,
                 onExpandedChange = {
                     if (it) viewModel.openProductSearchBar() else viewModel.closeProductSearchBar()
                 },
@@ -175,14 +180,15 @@ fun CreateInvoiceScreen(
                     // If the user presses the search button, without selecting an item, we will
                     // assume it wanted to select the first-most item in the search list, if there
                     // was one.
-                    productSearchItems
-                        .takeIf { it.itemCount > 0 }
-                        ?.peek(0)
-                        ?.let { viewModel.addProduct(it) }
+                    productSearchItems.takeIf { it.itemCount > 0 }?.peek(0)
+                        ?.let { viewModel.openAddInvoiceProductDialog(it) }
                 },
                 lazyPagingItems = productSearchItems,
             ) {
-                ProductFilterListItem(dto = it, onClick = { viewModel.addProduct(it) })
+                ProductFilterListItem(
+                    dto = it,
+                    onClick = { viewModel.openAddInvoiceProductDialog(it) },
+                )
             }
         }
     }
@@ -190,7 +196,7 @@ fun CreateInvoiceScreen(
     /// Modals and other related components
     if (showAddInvoiceProductBottomSheet.value) {
         AddInvoiceProductDialog(
-            onDismissRequest = { viewModel.closeAddInvoiceProductDialog() }
+            onDismissRequest = { viewModel.closeAddInvoiceProductDialog() },
         )
     }
 }

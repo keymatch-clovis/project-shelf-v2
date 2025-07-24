@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,29 +43,31 @@ fun <T : Any> CustomList(
     nestedScrollConnection: NestedScrollConnection? = null,
     renderer: @Composable (T) -> Unit,
 ) {
-    if (lazyPagingItems.itemCount == 0) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(
-                    modifier = Modifier.size(96.dp),
-                    tint = MaterialTheme.colorScheme.surfaceDim,
-                    imageVector = ImageVector.vectorResource(R.drawable.package_open),
-                    contentDescription = null,
-                )
-                Text(
-                    color = MaterialTheme.colorScheme.surfaceDim,
-                    text = emptyMessage,
-                )
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+    ) {
+        /// Empty products indicator
+        if (lazyPagingItems.itemCount == 0) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        modifier = Modifier.size(96.dp),
+                        tint = MaterialTheme.colorScheme.surfaceDim,
+                        imageVector = ImageVector.vectorResource(R.drawable.package_open),
+                        contentDescription = null,
+                    )
+                    Text(
+                        color = MaterialTheme.colorScheme.surfaceDim,
+                        text = emptyMessage,
+                    )
+                }
             }
         }
-    }
 
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-    ) {
         LazyColumn(
             state = lazyListState,
             modifier = Modifier

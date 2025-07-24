@@ -49,4 +49,6 @@
     <string name="customer">Cliente</string>
     <string name="err_value_blank">El valor no debe estar vacío</string>
     <string name="number">Número</string>
+    <string name="edit">Editar</string>
+    <string name="product_add">Añadir producto</string>
 </resources>

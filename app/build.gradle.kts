@@ -13,6 +13,9 @@ plugins {
 
     /// Hilt
     alias(libs.plugins.hilt)
+
+    /// Datastore Protobuf
+    alias(libs.plugins.protobuf)
 }
 
 android {
@@ -73,6 +76,7 @@ dependencies {
 
     /// Data Store
     implementation(libs.androidx.datastore)
+    implementation(libs.protobuf.javalite)
 
     /// Compose
     implementation(platform(libs.androidx.compose))
@@ -113,4 +117,20 @@ dependencies {
     implementation(libs.androidx.work)
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.compiler)
+}
+
+protobuf {
+    protoc {
+        // The artifact spec for the Protobuf Compiler
+        artifact = "com.google.protobuf:protoc:4.32.0-RC1"
+    }
+    generateProtoTasks {
+        all().configureEach {
+            builtins {
+                create("java") {
+                    option("lite")
+                }
+            }
+        }
+    }
 }

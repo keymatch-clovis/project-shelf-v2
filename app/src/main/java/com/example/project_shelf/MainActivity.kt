@@ -10,7 +10,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.project_shelf.adapter.view_model.MainViewModel
-import com.example.project_shelf.framework.datastore.dataStore
 import com.example.project_shelf.framework.ui.screen.MainScreen
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -20,7 +19,7 @@ class MainActivity : ComponentActivity() {
     private val viewModel by viewModels<MainViewModel>(factoryProducer = {
         viewModelFactory {
             initializer {
-                MainViewModel(applicationContext.dataStore)
+                MainViewModel()
             }
         }
     })

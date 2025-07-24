@@ -18,12 +18,23 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import javax.inject.Inject
 
 sealed interface CreateInvoiceViewModelState {
+    data class InvoiceProductState(
+        val productId: Long,
+        val name: String,
+        val count: Int,
+        val price: BigDecimal,
+        val discount: BigDecimal?,
+    )
+
     data class InputState(
         val customer: Input<CustomerFilterDto, CustomerFilterDto> = Input(null, ObjectValidator()),
-        val products: MutableStateFlow<List<ProductFilterDto>> = MutableStateFlow(emptyList()),
+        val invoiceProducts: MutableStateFlow<List<InvoiceProductState>> = MutableStateFlow(
+            emptyList()
+        ),
     )
 }
 
@@ -87,15 +98,27 @@ class CreateInvoiceViewModel @Inject constructor(
         _showProductSearchBar.update { false }
     }
 
-    fun openAddInvoiceProductDialog() {
+    fun openAddInvoiceProductDialog(dto: ProductFilterDto) {
         // This is most likely called after searching a product using the search bar, so close that
         // before opening the dialog.
         closeProductSearchBar()
 
-        _showAddInvoiceProductDialog.update { true }
+        // _showAddInvoiceProductDialog.update { true }
+        repeat(10) {
+            inputState.invoiceProducts.update {
+                it + CreateInvoiceViewModelState.InvoiceProductState(
+                    productId = dto.id,
+                    name = dto.name,
+                    count = 0,
+                    price = BigDecimal.ZERO,
+                    discount = BigDecimal.ZERO,
+                )
+            }
+        }
 
         // TODO: Search for the product from the filter, so we can get the info to show in the dialog
         //  after the dialog is closed, we can add the product to the list.
+
     }
 
     fun closeAddInvoiceProductDialog() {
