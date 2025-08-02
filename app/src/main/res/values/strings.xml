@@ -51,4 +51,6 @@
     <string name="number">Number</string>
     <string name="edit">Edit</string>
     <string name="product_add">Add product</string>
+    <string name="draft_list">Draft list</string>
+    <string name="invoice_number_message">This number is generated automatically for each invoice.</string>
 </resources>

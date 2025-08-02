@@ -32,7 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.view_model.invoice.CreateInvoiceViewModel
-import com.example.project_shelf.adapter.view_model.invoice.CreateInvoiceViewModelState
+import com.example.project_shelf.adapter.view_model.invoice.InvoiceProductState
 import com.example.project_shelf.framework.ui.components.DropdownMenu
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateInvoiceProductsForm(
-    invoiceProducts: List<CreateInvoiceViewModelState.InvoiceProductState>,
+    invoiceProducts: List<InvoiceProductState>,
     emitter: MutableSharedFlow<CreateInvoiceViewModel.Event>,
 ) {
     /// Related to UI behavior.
@@ -70,14 +70,6 @@ fun CreateInvoiceProductsForm(
                     }
                 }
             )
-//            Row(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    // https://m3.material.io/components/lists/specs
-//                    .padding(horizontal = 16.dp, vertical = 8.dp),
-//                horizontalArrangement = Arrangement.Center,
-//            ) {
-//            }
         },
         bottomBar = {
             HorizontalDivider()

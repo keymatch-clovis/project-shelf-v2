@@ -82,9 +82,7 @@ class CreateProductViewModel @Inject constructor(
     }
 
     fun updateName(value: String) = inputState.name.update(value)
-
     fun updatePrice(value: String) = inputState.price.update(value)
-
     fun updateStock(value: String) = inputState.stock.update(value)
 
     fun create() {

@@ -1,15 +1,15 @@
 package com.example.project_shelf.app.entity
 
-import java.math.BigDecimal
 import java.util.Date
 
 data class Invoice(
     val id: Long,
-    val customerId: Long,
-
+    /// Properties
     val number: Long,
     val date: Date,
-    val discount: BigDecimal?,
+    val remainingUnpaidBalance: Long,
+    /// Relations
+    val customerId: Long,
 )
 
 data class InvoiceWithCustomer(

@@ -7,11 +7,15 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import androidx.room.withTransaction
 import com.example.project_shelf.adapter.DEFAULT_PAGE_SIZE
+import com.example.project_shelf.adapter.dto.objectbox.InvoiceDraftDto
+import com.example.project_shelf.adapter.dto.objectbox.InvoiceDraftProductDto
 import com.example.project_shelf.adapter.dto.room.InvoiceDto
 import com.example.project_shelf.adapter.dto.room.InvoiceFtsDto
 import com.example.project_shelf.adapter.dto.room.InvoiceProductDto
 import com.example.project_shelf.adapter.dto.room.toEntity
 import com.example.project_shelf.app.entity.Invoice
+import com.example.project_shelf.app.entity.InvoiceDraft
+import com.example.project_shelf.app.entity.InvoiceDraftProduct
 import com.example.project_shelf.app.entity.InvoiceFilter
 import com.example.project_shelf.app.entity.InvoicePopulated
 import com.example.project_shelf.app.entity.InvoiceWithCustomer
@@ -21,6 +25,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import io.objectbox.BoxStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.math.BigDecimal
@@ -29,6 +34,7 @@ import javax.inject.Inject
 
 class InvoiceServiceImpl @Inject constructor(
     private val database: SqliteDatabase,
+    private val boxStore: BoxStore,
 ) : InvoiceService {
     override fun get(): Flow<PagingData<Invoice>> {
         Log.d("SERVICE-IMPL", "Getting invoices")
@@ -88,10 +94,9 @@ class InvoiceServiceImpl @Inject constructor(
             // Create the invoice
             val invoiceId = database.invoiceDao().insert(
                 InvoiceDto(
-                    number = number,
-                    customerId = customerId,
-                    date = Date().time,
-                    discount = discount?.toLong(),
+                    number = number, customerId = customerId, date = Date().time,
+                    // TODO: fixthis
+                    remainingUnpaidBalance = 0
                 )
             )
 
@@ -101,8 +106,7 @@ class InvoiceServiceImpl @Inject constructor(
                     invoiceId = invoiceId,
                     productId = it.id,
                     count = it.count,
-                    price = it.price.toString(),
-                    discount = it.discount.toString(),
+                    price = it.price,
                 )
             }.toTypedArray())
 
@@ -165,11 +169,79 @@ class InvoiceServiceImpl @Inject constructor(
     override suspend fun unsetPendingForDeletion(id: Long) {
         TODO("Not yet implemented")
     }
+
+    override suspend fun createDraft(
+        date: Date,
+        products: List<InvoiceService.ProductParam>,
+        remainingUnpaidBalance: Long,
+        customerId: Long?,
+    ): Long {
+        val invoiceDraftDto = InvoiceDraftDto(
+            date = date,
+            remainingUnpaidBalance = remainingUnpaidBalance,
+            customerId = customerId,
+        )
+
+        products.forEach {
+            invoiceDraftDto.products.add(
+                InvoiceDraftProductDto(
+                    productId = it.id,
+                    count = it.count,
+                    price = it.price,
+                    discount = it.discount,
+                )
+            )
+        }
+
+        return boxStore.boxFor(InvoiceDraftDto::class.java).put(invoiceDraftDto)
+    }
+
+    override suspend fun saveDraft(
+        draftId: Long,
+        date: Date,
+        products: List<InvoiceService.ProductParam>,
+        remainingUnpaidBalance: Long,
+        customerId: Long?,
+    ) {
+        val box = boxStore.boxFor(InvoiceDraftDto::class.java)
+        val dto = box.get(draftId)
+
+        dto.customerId = customerId
+
+        // FIXME: This can be improved, by filtering the ones that are not in this list, and
+        //  removing the ones that are in the DTO and not in this list. But for now I think it is
+        //  fine.
+        dto.products.clear()
+        products.forEach {
+            dto.products.add(
+                InvoiceDraftProductDto(
+                    productId = it.id,
+                    count = it.count,
+                    price = it.price,
+                    discount = it.discount,
+                )
+            )
+        }
+
+        box.put(dto)
+    }
+
+    override suspend fun getDrafts(): List<InvoiceDraft> {
+        Log.d("SERVICE-IMPL", "Getting invoice drafts")
+        return boxStore.boxFor(InvoiceDraftDto::class.java).all.map {
+            InvoiceDraft(
+                date = it.date,
+                remainingUnpaidBalance = it.remainingUnpaidBalance,
+                products = it.products.map { it.toEntity() },
+                customerId = it.customerId,
+            )
+        }
+    }
 }
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class InvoiceModule {
+abstract class InvoiceServiceImplModule {
     @Binds
-    abstract fun bindService(impl: InvoiceServiceImpl): InvoiceService
+    abstract fun bind(impl: InvoiceServiceImpl): InvoiceService
 }

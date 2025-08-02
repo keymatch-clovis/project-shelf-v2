@@ -1,5 +1,6 @@
 package com.example.project_shelf.adapter.view_model.invoice
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.project_shelf.adapter.dto.ui.CustomerFilterDto
@@ -9,9 +10,11 @@ import com.example.project_shelf.adapter.repository.ProductRepository
 import com.example.project_shelf.adapter.view_model.util.Input
 import com.example.project_shelf.adapter.view_model.util.SearchExtension
 import com.example.project_shelf.adapter.view_model.util.validator.ObjectValidator
+import com.example.project_shelf.app.use_case.invoice.CreateInvoiceDraftUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,15 +23,18 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import javax.inject.Inject
-import kotlin.coroutines.coroutineContext
+
+data class InvoiceProductState(
+    val productId: Long,
+    val name: String,
+    val count: Int,
+    val price: BigDecimal,
+    val discount: BigDecimal?,
+)
 
 sealed interface CreateInvoiceViewModelState {
-    data class InvoiceProductState(
-        val productId: Long,
-        val name: String,
-        val count: Int,
-        val price: BigDecimal,
-        val discount: BigDecimal?,
+    data class State(
+        val isSavingDraft: Boolean = false,
     )
 
     data class InputState(
@@ -44,7 +50,13 @@ sealed interface CreateInvoiceViewModelState {
 class CreateInvoiceViewModel @Inject constructor(
     customerRepository: CustomerRepository,
     productRepository: ProductRepository,
+    createInvoiceDraftUseCase: CreateInvoiceDraftUseCase,
 ) : ViewModel() {
+
+    /// State related
+    private val _state = MutableStateFlow(CreateInvoiceViewModelState.State())
+    val state = _state.asStateFlow()
+
     /// Input related
     val inputState = CreateInvoiceViewModelState.InputState()
 
@@ -77,6 +89,16 @@ class CreateInvoiceViewModel @Inject constructor(
     val showAddInvoiceProductBottomSheet = _showAddInvoiceProductDialog.asStateFlow()
 
     init {
+        // Whenever this view model is created, we want to create a matching draft object, so we
+        // can start working with it.
+        viewModelScope.launch {
+            Log.d("VIEW-MODEL", "Creating invoice draft")
+            _state.update { it.copy(isSavingDraft = true) }
+            createInvoiceDraftUseCase.exec()
+            delay(5000)
+            _state.update { it.copy(isSavingDraft = false) }
+        }
+
         viewModelScope.launch {
             eventFlow.collectLatest {
                 when (it) {
@@ -107,7 +129,7 @@ class CreateInvoiceViewModel @Inject constructor(
         // _showAddInvoiceProductDialog.update { true }
         repeat(10) {
             inputState.invoiceProducts.update {
-                it + CreateInvoiceViewModelState.InvoiceProductState(
+                it + InvoiceProductState(
                     productId = dto.id,
                     name = dto.name,
                     count = 0,

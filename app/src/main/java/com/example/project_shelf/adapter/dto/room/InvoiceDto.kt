@@ -26,8 +26,7 @@ data class InvoiceDto(
     /// Required fields
     @ColumnInfo(name = "number") val number: Long,
     @ColumnInfo(name = "date") val date: Long,
-    /// Optional fields
-    @ColumnInfo(name = "discount") val discount: Long?,
+    @ColumnInfo(name = "remaining_unpaid_balance") val remainingUnpaidBalance: Long,
     /// Relationships
     @ColumnInfo(name = "customer_id") val customerId: Long,
     /// Functional properties
@@ -39,7 +38,7 @@ fun InvoiceDto.toEntity() = Invoice(
     customerId = this.customerId,
     number = this.number,
     date = Date(this.date),
-    discount = this.discount?.toBigDecimal()
+    remainingUnpaidBalance = this.remainingUnpaidBalance,
 )
 
 fun Invoice.toDto(): InvoiceDto {
@@ -47,8 +46,8 @@ fun Invoice.toDto(): InvoiceDto {
         rowId = this.id,
         number = this.number,
         date = this.date.time,
-        discount = this.discount?.toLong(),
         customerId = this.customerId,
+        remainingUnpaidBalance = this.remainingUnpaidBalance,
     )
 }
 

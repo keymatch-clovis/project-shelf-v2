@@ -10,7 +10,7 @@ data class InvoiceDto(
     val id: Long,
     val number: Long,
     val date: Long,
-    val discount: String,
+    val remainingUnpaidBalance: Long?,
 ) : Parcelable
 
 @Serializable

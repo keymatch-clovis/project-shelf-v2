@@ -1,7 +1,6 @@
 package com.example.project_shelf
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -26,12 +25,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val splashScreen = installSplashScreen()
 
         // Keep the splash screen showing while we do initialization steps. These initialization
         // steps are not done here, they are done later in the main screen. This is so we can use
         // the information to navigate to the correct route, but this has to be done with the
         // navigation controller.
+        val splashScreen = installSplashScreen()
         lifecycleScope.launch {
             splashScreen.setKeepOnScreenCondition { !viewModel.isAppReady.value }
         }

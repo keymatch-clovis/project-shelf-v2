@@ -1,13 +1,24 @@
 package com.example.project_shelf.framework.ui.components.form.invoice
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.dto.ui.CustomerFilterDto
@@ -37,11 +48,24 @@ fun CreateInvoiceDetailsForm(
             .verticalScroll(rememberScrollState())
     ) {
         /// Number
-        CustomTextField(
-            readOnly = true,
-            label = R.string.number,
+        OutlinedTextField(
+            modifier = Modifier.sizeIn(minWidth = 360.dp, maxWidth = 720.dp),
             value = "1",
+            readOnly = true,
+            onValueChange = {},
+            label = { Text(stringResource(R.string.number)) },
+            trailingIcon = {
+                // TODO: do this
+                IconButton(onClick = {}) {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        imageVector = ImageVector.vectorResource(R.drawable.clipboard_copy),
+                        contentDescription = null,
+                    )
+                }
+            },
         )
+        Spacer(modifier = Modifier.height(16.dp))
         /// Customer
         CustomTextField(
             required = true,

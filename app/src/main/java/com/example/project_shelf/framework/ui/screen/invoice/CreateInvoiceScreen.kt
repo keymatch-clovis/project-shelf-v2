@@ -12,11 +12,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,6 +35,7 @@ import com.example.project_shelf.adapter.dto.ui.CustomerFilterDto
 import com.example.project_shelf.adapter.dto.ui.ProductFilterDto
 import com.example.project_shelf.adapter.view_model.invoice.CreateInvoiceViewModel
 import com.example.project_shelf.framework.ui.components.CustomSearchBar
+import com.example.project_shelf.framework.ui.components.DraftIndicator
 import com.example.project_shelf.framework.ui.components.dialog.AddInvoiceProductDialog
 import com.example.project_shelf.framework.ui.components.list_item.CustomerFilterListItem
 import com.example.project_shelf.framework.ui.components.list_item.ProductFilterListItem
@@ -72,10 +73,13 @@ fun CreateInvoiceScreen(
     /// Products related
     val invoiceProducts = viewModel.inputState.invoiceProducts.collectAsState()
 
+    /// State related
+    val state = viewModel.state.collectAsState()
+
     Box {
         Scaffold(
             topBar = {
-                TopAppBar(
+                MediumTopAppBar(
                     modifier = Modifier.padding(horizontal = 4.dp),
                     title = { Text(stringResource(R.string.invoice_create)) },
                     navigationIcon = {
@@ -88,6 +92,9 @@ fun CreateInvoiceScreen(
                         }
                     },
                     actions = {
+                        DraftIndicator(
+                            loading = state.value.isSavingDraft,
+                        )
                         Button(
                             // TODO: fix this
                             enabled = false,

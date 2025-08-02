@@ -33,10 +33,6 @@ import com.example.project_shelf.adapter.view_model.product.CreateProductViewMod
 import com.example.project_shelf.framework.ui.components.CustomTextField
 import com.example.project_shelf.framework.ui.getStringResource
 import com.example.project_shelf.framework.ui.util.CurrencyVisualTransformation
-import org.joda.money.CurrencyUnit
-import org.joda.money.Money
-import org.joda.money.format.MoneyFormatter
-import org.joda.money.format.MoneyFormatterBuilder
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -106,9 +102,9 @@ fun CreateProductScreen(
             ) {
                 /// Name
                 CustomTextField(
+                    value = name.value ?: "",
                     modifier = Modifier.focusRequester(focusRequester),
                     required = true,
-                    value = name.value ?: "",
                     onValueChange = { viewModel.updateName(it) },
                     onClear = { viewModel.updateName("") },
                     label = R.string.name,
@@ -120,8 +116,8 @@ fun CreateProductScreen(
                 )
                 /// Default price
                 CustomTextField(
-                    visualTransformation = CurrencyVisualTransformation(),
                     value = price.value ?: "",
+                    visualTransformation = CurrencyVisualTransformation(Locale.getDefault()),
                     onValueChange = {
                         viewModel.updatePrice(it)
                     },

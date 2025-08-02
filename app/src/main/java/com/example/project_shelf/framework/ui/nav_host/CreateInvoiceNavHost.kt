@@ -8,7 +8,7 @@ import androidx.navigation.compose.composable
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.dto.ui.CustomerFilterDto
 import com.example.project_shelf.adapter.view_model.invoice.CreateInvoiceViewModel
-import com.example.project_shelf.adapter.view_model.invoice.CreateInvoiceViewModelState
+import com.example.project_shelf.adapter.view_model.invoice.InvoiceProductState
 import com.example.project_shelf.adapter.view_model.util.Input
 import com.example.project_shelf.framework.ui.components.form.invoice.CreateInvoiceDetailsForm
 import com.example.project_shelf.framework.ui.components.form.invoice.CreateInvoiceProductsForm
@@ -35,7 +35,7 @@ fun CreateInvoiceNavHost(
     startDestination: CreateInvoiceDestination,
     emitter: MutableSharedFlow<CreateInvoiceViewModel.Event>,
 
-    invoiceProducts: List<CreateInvoiceViewModelState.InvoiceProductState>,
+    invoiceProducts: List<InvoiceProductState>,
     customerInput: Input<CustomerFilterDto, CustomerFilterDto>,
 ) {
     NavHost(

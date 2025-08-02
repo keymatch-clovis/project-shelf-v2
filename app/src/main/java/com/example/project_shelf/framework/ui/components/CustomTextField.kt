@@ -1,6 +1,5 @@
 package com.example.project_shelf.framework.ui.components
 
-import android.util.Log
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,7 +43,7 @@ fun CustomTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
 ) {
     // FIXME:
-    //  I couldn't find any implementation of the dirty input feature, so this may(must) be very
+    //  I couldn't find any implementation of the dirty input feature, so this may (must) be very
     //  wrong, as I'm using 2 variables per input field just for this. It might not be very good,
     //  but it stays like this for now.
     var wasFocused by remember { mutableStateOf(false) }
@@ -97,11 +96,11 @@ fun CustomTextField(
         },
         supportingText = {
             if (isDirty) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    // TODO: We are just showing the first error, maybe this is not wanted later.
-                    errors.firstOrNull()?.let {
+                errors.firstOrNull()?.let {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        // TODO: We are just showing the first error, maybe this is not wanted later.
                         Text(
                             modifier = Modifier.weight(1f),
                             maxLines = 1,

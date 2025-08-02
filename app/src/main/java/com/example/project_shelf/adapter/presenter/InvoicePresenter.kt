@@ -34,7 +34,7 @@ class InvoicePresenter @Inject constructor(
                         number = dto.invoice.number,
                         // TODO: Use correct format here.
                         date = dto.invoice.date.time,
-                        discount = dto.invoice.discount.toString(),
+                        remainingUnpaidBalance = dto.invoice.remainingUnpaidBalance,
                     ),
                     customer = CustomerDto(
                         id = dto.customer.id,

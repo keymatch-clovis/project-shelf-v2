@@ -38,7 +38,8 @@ class CreateInvoiceUseCase @Inject constructor(
             number = consecutiveNumber,
             customerId = customerId,
             date = date,
-            discount = discount,
+            // TODO: THIS
+            remainingUnpaidBalance = 0,
         )
     }
 }

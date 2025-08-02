@@ -1,10 +1,9 @@
 package com.example.project_shelf.app.entity
 
-data class InvoiceProduct(
+data class InvoiceDraftProduct(
     /// Properties
     val count: Int,
     val price: Long,
     /// Relations
-    val invoiceId: Long,
     val productId: Long,
 )

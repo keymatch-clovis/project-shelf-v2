@@ -2,7 +2,6 @@ package com.example.project_shelf.framework.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
@@ -22,7 +21,7 @@ import com.example.project_shelf.framework.ui.screen.customer.CreateCustomerScre
 import com.example.project_shelf.framework.ui.screen.customer.CustomerListScreen
 import com.example.project_shelf.framework.ui.screen.invoice.CreateInvoiceScreen
 import com.example.project_shelf.framework.ui.screen.invoice.InvoiceListScreen
-import com.example.project_shelf.framework.ui.screen.invoice.SavedInvoicesListScreen
+import com.example.project_shelf.framework.ui.screen.invoice.InvoiceDraftListScreen
 import com.example.project_shelf.framework.ui.screen.product.CreateProductScreen
 import com.example.project_shelf.framework.ui.screen.product.EditProductScreen
 import com.example.project_shelf.framework.ui.screen.product.ProductListScreen
@@ -135,7 +134,7 @@ fun MainNavHost(
         }
 
         composable(Destination.SAVED_INVOICES.route) {
-            SavedInvoicesListScreen(
+            InvoiceDraftListScreen(
                 viewModel = hiltViewModel(),
             )
         }
