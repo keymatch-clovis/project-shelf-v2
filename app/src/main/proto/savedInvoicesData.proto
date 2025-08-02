@@ -10,12 +10,12 @@ message InvoiceProduct {
   uint64 discount = 4;
 }
 
-message CreateInvoiceData {
+message SavedInvoice {
   uint64 date = 1;
   uint64 customerId = 2;
   repeated InvoiceProduct invoiceProducts = 3;
 }
 
 message SavedInvoices {
-  repeated CreateInvoiceData invoices = 1;
+  repeated SavedInvoice invoices = 1;
 }

@@ -5,7 +5,7 @@ data class Customer(
 
     val name: String,
     val phone: String,
-    val address: String,
+    val address: String?,
     val businessName: String?,
 
     val cityId: Long,

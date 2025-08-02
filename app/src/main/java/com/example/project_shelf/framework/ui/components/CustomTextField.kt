@@ -23,6 +23,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.project_shelf.R
@@ -40,6 +41,7 @@ fun CustomTextField(
     errors: List<Int> = emptyList(),
     onClick: (Boolean) -> Unit = {},
     onClear: (() -> Unit)? = null,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
 ) {
     // FIXME:
     //  I couldn't find any implementation of the dirty input feature, so this may(must) be very
@@ -67,6 +69,7 @@ fun CustomTextField(
                     isDirty = true
                 }
             },
+        visualTransformation = visualTransformation,
         value = value,
         onValueChange = {
             // Also, if the user starts typing, we have to mark the text field as dirty, so the

@@ -11,7 +11,7 @@ data class CustomerDto(
     val id: Long,
     val name: String,
     val phone: String,
-    val address: String,
+    val address: String?,
     val businessName: String?,
 ) : Parcelable
 

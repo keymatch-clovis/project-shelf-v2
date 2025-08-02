@@ -14,4 +14,7 @@ plugins {
 
     /// Hilt
     alias(libs.plugins.hilt) apply false
+
+    /// Object Box
+    alias(libs.plugins.objectbox) apply false
 }

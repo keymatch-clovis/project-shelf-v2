@@ -20,7 +20,7 @@ data class CustomerDto(
     /// Required fields
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "phone") val phone: String,
-    @ColumnInfo(name = "address") val address: String,
+    @ColumnInfo(name = "address") val address: String?,
     /// Optional fields
     @ColumnInfo(name = "business_name") val businessName: String?,
     /// Relationships

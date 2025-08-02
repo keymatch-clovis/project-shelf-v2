@@ -6,12 +6,12 @@ compose = "2025.07.00"
 coreKtx = "1.16.0"
 coroutines = "1.10.2"
 datastore = "1.1.7"
-espressoCore = "3.6.1"
+espressoCore = "3.7.0"
 hilt = "2.56.2"
 hiltNavigationCompose = "1.2.0"
 jodamoney = "2.0.2"
 junit = "4.13.2"
-junitVersion = "1.2.1"
+junitVersion = "1.3.0"
 kotlin = "2.1.21"
 kotlinFaker = "1.6.0"
 ksp = "2.1.21-2.0.1"
@@ -20,16 +20,17 @@ lifecycleViewmodelCompose = "2.9.2"
 lifecycleViewmodelKtx = "2.9.2"
 material = "1.12.0"
 material3 = "1.3.2"
-navigationCompose = "2.9.2"
-navigationFragmentKtx = "2.9.2"
-navigationUiKtx = "2.9.2"
+navigationCompose = "2.9.3"
+navigationFragmentKtx = "2.9.3"
+navigationUiKtx = "2.9.3"
 paging = "3.3.6"
 room = "2.7.2"
 splashscreen = "1.0.1"
-work = "2.10.2"
+work = "2.10.3"
 hiltWork = "1.2.0"
 protobuf = "0.9.5"
 protobufJavalite = "4.32.0-RC1"
+objectbox = "4.3.0"
 
 [libraries]
 androidx-activity = { group = "androidx.activity", name = "activity-ktx", version.ref = "activity" }
@@ -80,3 +81,4 @@ kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref =
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 protobuf = { id = "com.google.protobuf", version.ref = "protobuf" }
+objectbox = { id = "io.objectbox", version.ref = "objectbox" }

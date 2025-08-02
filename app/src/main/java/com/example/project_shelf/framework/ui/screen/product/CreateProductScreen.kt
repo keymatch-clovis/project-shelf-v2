@@ -32,6 +32,12 @@ import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.view_model.product.CreateProductViewModel
 import com.example.project_shelf.framework.ui.components.CustomTextField
 import com.example.project_shelf.framework.ui.getStringResource
+import com.example.project_shelf.framework.ui.util.CurrencyVisualTransformation
+import org.joda.money.CurrencyUnit
+import org.joda.money.Money
+import org.joda.money.format.MoneyFormatter
+import org.joda.money.format.MoneyFormatterBuilder
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -114,8 +120,11 @@ fun CreateProductScreen(
                 )
                 /// Default price
                 CustomTextField(
+                    visualTransformation = CurrencyVisualTransformation(),
                     value = price.value ?: "",
-                    onValueChange = { viewModel.updatePrice(it) },
+                    onValueChange = {
+                        viewModel.updatePrice(it)
+                    },
                     onClear = { viewModel.updatePrice("") },
                     label = R.string.default_price,
                     errors = priceErrors.value.map { it.getStringResource() },

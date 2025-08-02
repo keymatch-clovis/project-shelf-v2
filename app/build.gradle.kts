@@ -16,6 +16,9 @@ plugins {
 
     /// Datastore Protobuf
     alias(libs.plugins.protobuf)
+
+    /// ObjectBox
+    alias(libs.plugins.objectbox)
 }
 
 android {

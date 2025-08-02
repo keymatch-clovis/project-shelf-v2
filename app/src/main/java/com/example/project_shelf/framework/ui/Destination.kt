@@ -50,4 +50,5 @@ enum class Destination(
 
     /// Invoice Category
     CREATE_INVOICE("main.invoice.create"),
+    SAVED_INVOICES("main.invoice.saved"),
 }

@@ -41,6 +41,7 @@ fun InvoiceListScreen(
     viewModel: InvoiceListViewModel,
     onRequestEdit: (invoiceId: Long) -> Unit,
     onRequestCreate: () -> Unit,
+    onNavigateSaved: () -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
@@ -61,6 +62,13 @@ fun InvoiceListScreen(
                 scrollBehavior = scrollBehavior,
                 title = { Text(stringResource(R.string.invoices)) },
                 actions = {
+                    IconButton(onClick = { onNavigateSaved() }) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            imageVector = ImageVector.vectorResource(R.drawable.archive),
+                            contentDescription = null,
+                        )
+                    }
                     IconButton(onClick = { viewModel.openSearchBar() }) {
                         Icon(
                             modifier = Modifier.size(24.dp),
