@@ -53,4 +53,5 @@
     <string name="product_add">Add product</string>
     <string name="draft_list">Draft list</string>
     <string name="invoice_number_message">This number is generated automatically for each invoice.</string>
+    <string name="invoice_drafts">Invoice drafts</string>
 </resources>

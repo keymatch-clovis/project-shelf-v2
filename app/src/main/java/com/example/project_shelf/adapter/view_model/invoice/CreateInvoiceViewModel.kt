@@ -95,7 +95,6 @@ class CreateInvoiceViewModel @Inject constructor(
             Log.d("VIEW-MODEL", "Creating invoice draft")
             _state.update { it.copy(isSavingDraft = true) }
             createInvoiceDraftUseCase.exec()
-            delay(5000)
             _state.update { it.copy(isSavingDraft = false) }
         }
 

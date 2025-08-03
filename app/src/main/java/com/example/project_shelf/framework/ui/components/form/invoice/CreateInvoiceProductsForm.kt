@@ -111,8 +111,7 @@ fun CreateInvoiceProductsForm(
                     .background(MaterialTheme.colorScheme.surfaceContainer)
                     .verticalScroll(rememberScrollState()),
             ) {
-                invoiceProducts.forEach {
-                    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceContainer)
+                invoiceProducts.forEachIndexed { index, item ->
                     ListItem(
                         modifier = Modifier.fillMaxWidth(),
                         headlineContent = {
@@ -120,7 +119,7 @@ fun CreateInvoiceProductsForm(
                                 style = MaterialTheme.typography.titleLarge,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1,
-                                text = it.name,
+                                text = item.name,
                             )
                         },
                         supportingContent = {
@@ -130,6 +129,10 @@ fun CreateInvoiceProductsForm(
                             DropdownMenu()
                         },
                     )
+
+                    if (index < invoiceProducts.size - 1) {
+                        HorizontalDivider()
+                    }
                 }
             }
         }

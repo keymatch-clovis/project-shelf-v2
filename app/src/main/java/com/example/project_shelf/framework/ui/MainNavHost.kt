@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
+import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.view_model.customer.CustomerDeletionViewModel
@@ -25,6 +26,7 @@ import com.example.project_shelf.framework.ui.screen.invoice.InvoiceDraftListScr
 import com.example.project_shelf.framework.ui.screen.product.CreateProductScreen
 import com.example.project_shelf.framework.ui.screen.product.EditProductScreen
 import com.example.project_shelf.framework.ui.screen.product.ProductListScreen
+import com.example.project_shelf.framework.ui.util.navigation.sharedViewModel
 
 @Composable
 fun MainNavHost(
@@ -103,42 +105,45 @@ fun MainNavHost(
         }
 
         /// Invoice Related
-        composable(MainDestination.INVOICE.route) {
-            InvoiceListScreen(
-                viewModel = hiltViewModel(),
-                onRequestEdit = {},
-                onRequestCreate = {
-                    navController.navigate(Destination.CREATE_INVOICE.route)
-                },
-                onNavigateSaved = {
-                    navController.navigate(Destination.SAVED_INVOICES.route)
-                }
-            )
-        }
-
-        composable(Destination.CREATE_INVOICE.route) {
-            val viewModel = hiltViewModel<CreateInvoiceViewModel>()
-
-            CreateInvoiceScreen(
-                viewModel = viewModel,
-                onRequestDismiss = { navController.popBackStack() },
-            )
-
-            dialog(route = Destination.CREATE_CUSTOMER.route) {
-                CreateCustomerScreen(
+        // NOTE: We need nested graphs here, as we want to share a view model between some routes,
+        //  but have it constrained to these views only.
+        //  https://developer.android.com/guide/navigation/design/nested-graphs
+        //  https://developer.android.com/develop/ui/compose/libraries?authuser=1#hilt-navigation
+        //  https://stackoverflow.com/questions/68548488/sharing-viewmodel-within-jetpack-compose-navigation
+        navigation(
+            route = MainDestination.INVOICE.route,
+            startDestination = Destination.INVOICE_LIST.route,
+        ) {
+            composable(Destination.INVOICE_LIST.route) {
+                InvoiceListScreen(
                     viewModel = hiltViewModel(),
-                    onCreated = {},
-                    onDismissed = { navController.popBackStack() },
+                    onRequestEdit = {},
+                    onRequestCreate = {
+                        navController.navigate(Destination.CREATE_INVOICE.route)
+                    },
+                    onNavigateSaved = {
+                        navController.navigate(Destination.INVOICE_DRAFT_LIST.route)
+                    },
+                )
+            }
+
+            composable(Destination.INVOICE_DRAFT_LIST.route) { backStackEntry ->
+                InvoiceDraftListScreen(
+                    draftViewModel = backStackEntry.sharedViewModel(navController),
+                    viewModel = hiltViewModel(),
+                )
+            }
+
+            composable(Destination.CREATE_INVOICE.route) { backStackEntry ->
+                val viewModel = hiltViewModel<CreateInvoiceViewModel>()
+
+                CreateInvoiceScreen(
+                    draftViewModel = backStackEntry.sharedViewModel(navController),
+                    viewModel = viewModel,
+                    onRequestDismiss = { navController.popBackStack() },
                 )
             }
         }
-
-        composable(Destination.SAVED_INVOICES.route) {
-            InvoiceDraftListScreen(
-                viewModel = hiltViewModel(),
-            )
-        }
-
 
         /// Config related
         composable(MainDestination.CONFIG.route) {

@@ -11,7 +11,6 @@ data class InvoiceDraftProductDto(
     var productId: Long = 0,
     var count: Int = 0,
     var price: Long = 0,
-    var discount: Long = 0,
 ) {
     // To-one relation to an Author Object.
     // https://docs.objectbox.io/relations#to-one-relations

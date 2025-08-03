@@ -34,6 +34,7 @@ import com.example.project_shelf.R
 import com.example.project_shelf.adapter.dto.ui.CustomerFilterDto
 import com.example.project_shelf.adapter.dto.ui.ProductFilterDto
 import com.example.project_shelf.adapter.view_model.invoice.CreateInvoiceViewModel
+import com.example.project_shelf.adapter.view_model.invoice.InvoiceDraftViewModel
 import com.example.project_shelf.framework.ui.components.CustomSearchBar
 import com.example.project_shelf.framework.ui.components.DraftIndicator
 import com.example.project_shelf.framework.ui.components.dialog.AddInvoiceProductDialog
@@ -45,6 +46,7 @@ import com.example.project_shelf.framework.ui.nav_host.CreateInvoiceNavHost
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateInvoiceScreen(
+    draftViewModel: InvoiceDraftViewModel,
     viewModel: CreateInvoiceViewModel,
     onRequestDismiss: () -> Unit,
 ) {

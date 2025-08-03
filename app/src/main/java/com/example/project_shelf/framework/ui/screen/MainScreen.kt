@@ -49,7 +49,9 @@ fun MainScreen(
                 NavigationBar {
                     MainDestination.entries.forEach {
                         NavigationBarItem(
-                            selected = currentBackStackEntry.value?.destination?.route == it.route,
+                            selected = currentBackStackEntry.value?.destination?.route?.startsWith(
+                                it.route
+                            ) != false,
                             onClick = {
                                 // FIXME: I don't know if this is correct
                                 //  I have searched the interwebs for information about how to clear
