@@ -1,7 +1,7 @@
 package com.example.project_shelf.app.entity
 
 data class InvoiceDraftProduct(
-    /// Properties
+    /// Settings
     val count: Int,
     val price: Long,
     /// Relations

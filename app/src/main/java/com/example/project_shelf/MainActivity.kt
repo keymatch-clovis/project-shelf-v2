@@ -15,13 +15,7 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val viewModel by viewModels<MainViewModel>(factoryProducer = {
-        viewModelFactory {
-            initializer {
-                MainViewModel()
-            }
-        }
-    })
+    private val viewModel by viewModels<MainViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,11 +26,11 @@ class MainActivity : ComponentActivity() {
         // navigation controller.
         val splashScreen = installSplashScreen()
         lifecycleScope.launch {
-            splashScreen.setKeepOnScreenCondition { !viewModel.isAppReady.value }
+            splashScreen.setKeepOnScreenCondition { viewModel.isLoading.value }
         }
 
         setContent {
-            MainScreen(mainViewModel = viewModel)
+            MainScreen(viewModel = viewModel)
         }
     }
 }

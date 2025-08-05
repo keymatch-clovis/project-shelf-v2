@@ -43,6 +43,8 @@ interface InvoiceService {
     suspend fun setPendingForDeletion(id: Long, until: Long)
     suspend fun unsetPendingForDeletion(id: Long)
 
+    suspend fun getDrafts(): List<InvoiceDraft>
+
     suspend fun createDraft(
         date: Date,
         products: List<ProductParam>,
@@ -50,7 +52,7 @@ interface InvoiceService {
         customerId: Long?,
     ): Long
 
-    suspend fun saveDraft(
+    suspend fun editDraft(
         draftId: Long,
         date: Date,
         products: List<ProductParam>,
@@ -58,5 +60,5 @@ interface InvoiceService {
         customerId: Long?,
     )
 
-    suspend fun getDrafts(): List<InvoiceDraft>
+    suspend fun deleteDrafts(vararg ids: Long)
 }

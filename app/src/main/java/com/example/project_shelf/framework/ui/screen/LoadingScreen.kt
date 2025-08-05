@@ -13,28 +13,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.project_shelf.R
-import com.example.project_shelf.adapter.view_model.LoadingViewModel
-import kotlinx.coroutines.flow.collectLatest
+import com.example.project_shelf.adapter.view_model.MainViewModel
 
 @Composable()
 fun LoadingScreen(
-    viewModel: LoadingViewModel = hiltViewModel(),
-    onLoadingDone: () -> Unit,
+    viewModel: MainViewModel,
 ) {
     val context = LocalContext.current
 
+    // > Triggering logic != holding logic
+    // We need to trigger the data load when this view is loaded.
     LaunchedEffect(Unit) {
-        viewModel.loadDefaultCities(
-            stream = context.resources.openRawResource(R.raw.departments_cities),
+        viewModel.loadDefaultData(
+            cityData = context.resources.openRawResource(R.raw.departments_cities),
         )
-
-        viewModel.eventFlow.collectLatest {
-            when (it) {
-                is LoadingViewModel.Event.Loaded -> onLoadingDone()
-            }
-        }
     }
 
     Box(

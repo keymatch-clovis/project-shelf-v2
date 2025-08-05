@@ -20,6 +20,7 @@ data class InvoiceDraftDto(
     lateinit var products: ToMany<InvoiceDraftProductDto>
 
     fun toEntity(): InvoiceDraft = InvoiceDraft(
+        id = this.id,
         date = this.date,
         remainingUnpaidBalance = this.remainingUnpaidBalance,
         products = this.products.map { it.toEntity() },

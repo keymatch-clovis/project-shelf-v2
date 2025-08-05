@@ -1,5 +1,6 @@
 package com.example.project_shelf.framework.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,17 +28,22 @@ import com.example.project_shelf.framework.ui.MainNavHost
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    mainViewModel: MainViewModel,
+    viewModel: MainViewModel,
 ) {
     val navController = rememberNavController()
     val startDestination = rememberSaveable { MainDestination.PRODUCT }
     val currentBackStackEntry = navController.currentBackStackEntryAsState()
 
     LaunchedEffect(Unit) {
-        if (mainViewModel.isFirstAppLaunch()) {
+        // NOTE: We HAVE to execute the initial view model methods from the view. I think this is
+        //  expected, as the view model should exist even if the view is not present. Still, I don't
+        //  like it that much, I feel the view model should have more responsibility, as this feels
+        //  like the view is doing stuff it shouldn't do.
+        if (viewModel.shouldLoadDefaultData()) {
             navController.navigate(Destination.LOADING.route)
         }
-        mainViewModel.setAppReady()
+
+        viewModel.updateIsLoading(false)
     }
 
     Scaffold(
@@ -80,9 +86,10 @@ fun MainScreen(
         },
     ) { contentPadding ->
         MainNavHost(
-            navController,
-            startDestination,
-            Modifier.padding(contentPadding),
+            mainViewModel = viewModel,
+            navController = navController,
+            startDestination = startDestination,
+            modifier = Modifier.padding(contentPadding),
         )
     }
 }

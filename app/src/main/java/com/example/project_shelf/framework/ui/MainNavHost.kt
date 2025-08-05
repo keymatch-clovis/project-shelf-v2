@@ -1,6 +1,7 @@
 package com.example.project_shelf.framework.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -12,6 +13,7 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.example.project_shelf.adapter.dto.ui.ProductDto
+import com.example.project_shelf.adapter.view_model.MainViewModel
 import com.example.project_shelf.adapter.view_model.customer.CustomerDeletionViewModel
 import com.example.project_shelf.adapter.view_model.invoice.CreateInvoiceViewModel
 import com.example.project_shelf.adapter.view_model.product.ProductDeletionViewModel
@@ -27,9 +29,11 @@ import com.example.project_shelf.framework.ui.screen.product.CreateProductScreen
 import com.example.project_shelf.framework.ui.screen.product.EditProductScreen
 import com.example.project_shelf.framework.ui.screen.product.ProductListScreen
 import com.example.project_shelf.framework.ui.util.navigation.sharedViewModel
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun MainNavHost(
+    mainViewModel: MainViewModel,
     navController: NavHostController,
     startDestination: MainDestination,
     modifier: Modifier = Modifier,
@@ -131,7 +135,7 @@ fun MainNavHost(
                 InvoiceDraftListScreen(
                     draftViewModel = backStackEntry.sharedViewModel(navController),
                     viewModel = hiltViewModel(),
-                )
+                    onDismissed = { navController.popBackStack() })
             }
 
             composable(Destination.CREATE_INVOICE.route) { backStackEntry ->
@@ -160,7 +164,15 @@ fun MainNavHost(
                 dismissOnClickOutside = false,
             ),
         ) {
-            LoadingScreen(onLoadingDone = { navController.popBackStack() })
+            LaunchedEffect(Unit) {
+                mainViewModel.eventFlow.collectLatest {
+                    when (it) {
+                        is MainViewModel.Event.Loaded -> navController.popBackStack()
+                    }
+                }
+            }
+
+            LoadingScreen(viewModel = mainViewModel)
         }
 
 

@@ -30,13 +30,7 @@
           "type": 6
         }
       ],
-      "relations": [
-        {
-          "id": "1:2618561398677745183",
-          "name": "products",
-          "targetId": "2:6822390883505573514"
-        }
-      ]
+      "relations": []
     },
     {
       "id": "2:6822390883505573514",
@@ -90,6 +84,8 @@
   "retiredEntityUids": [],
   "retiredIndexUids": [],
   "retiredPropertyUids": [],
-  "retiredRelationUids": [],
+  "retiredRelationUids": [
+    2618561398677745183
+  ],
   "version": 1
 }

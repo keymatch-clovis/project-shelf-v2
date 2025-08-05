@@ -54,4 +54,5 @@
     <string name="draft_list">Lista de borradores</string>
     <string name="invoice_number_message">Este número es generado automáticamente para cada factura.</string>
     <string name="invoice_drafts">Borradores de facturas</string>
+    <string name="drafts_none">Sin borradores</string>
 </resources>

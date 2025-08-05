@@ -4,7 +4,7 @@ import java.util.Date
 
 data class Invoice(
     val id: Long,
-    /// Properties
+    /// Settings
     val number: Long,
     val date: Date,
     val remainingUnpaidBalance: Long,

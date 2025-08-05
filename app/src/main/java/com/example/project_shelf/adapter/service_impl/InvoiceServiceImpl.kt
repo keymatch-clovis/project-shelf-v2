@@ -170,6 +170,19 @@ class InvoiceServiceImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
+    override suspend fun getDrafts(): List<InvoiceDraft> {
+        Log.d("SERVICE-IMPL", "Getting invoice drafts")
+        return boxStore.boxFor(InvoiceDraftDto::class.java).all.map {
+            InvoiceDraft(
+                id = it.id,
+                date = it.date,
+                remainingUnpaidBalance = it.remainingUnpaidBalance,
+                products = it.products.map { it.toEntity() },
+                customerId = it.customerId,
+            )
+        }
+    }
+
     override suspend fun createDraft(
         date: Date,
         products: List<InvoiceService.ProductParam>,
@@ -188,7 +201,6 @@ class InvoiceServiceImpl @Inject constructor(
                     productId = it.id,
                     count = it.count,
                     price = it.price,
-                    discount = it.discount,
                 )
             )
         }
@@ -196,7 +208,7 @@ class InvoiceServiceImpl @Inject constructor(
         return boxStore.boxFor(InvoiceDraftDto::class.java).put(invoiceDraftDto)
     }
 
-    override suspend fun saveDraft(
+    override suspend fun editDraft(
         draftId: Long,
         date: Date,
         products: List<InvoiceService.ProductParam>,
@@ -218,7 +230,6 @@ class InvoiceServiceImpl @Inject constructor(
                     productId = it.id,
                     count = it.count,
                     price = it.price,
-                    discount = it.discount,
                 )
             )
         }
@@ -226,16 +237,8 @@ class InvoiceServiceImpl @Inject constructor(
         box.put(dto)
     }
 
-    override suspend fun getDrafts(): List<InvoiceDraft> {
-        Log.d("SERVICE-IMPL", "Getting invoice drafts")
-        return boxStore.boxFor(InvoiceDraftDto::class.java).all.map {
-            InvoiceDraft(
-                date = it.date,
-                remainingUnpaidBalance = it.remainingUnpaidBalance,
-                products = it.products.map { it.toEntity() },
-                customerId = it.customerId,
-            )
-        }
+    override suspend fun deleteDrafts(vararg ids: Long) {
+        boxStore.boxFor(InvoiceDraftDto::class.java).remove(*ids)
     }
 }
 

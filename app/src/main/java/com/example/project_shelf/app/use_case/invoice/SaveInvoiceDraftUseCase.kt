@@ -14,7 +14,7 @@ class SaveInvoiceDraftUseCase @Inject constructor(private val service: InvoiceSe
         customerId: Long? = null,
     ) {
         Log.d("USE-CASE", "Saving invoice draft")
-        service.saveDraft(
+        service.editDraft(
             draftId = draftId,
             date = date,
             products = products,
