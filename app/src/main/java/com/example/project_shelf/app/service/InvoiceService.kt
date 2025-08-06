@@ -15,7 +15,6 @@ interface InvoiceService {
         val id: Long,
         val count: Int,
         val price: Long,
-        val discount: Long,
     )
 
     fun get(): Flow<PagingData<Invoice>>

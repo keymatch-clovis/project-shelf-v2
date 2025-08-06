@@ -33,19 +33,29 @@ class ProductServiceImpl @Inject constructor(
         Log.d("SERVICE-IMPL", "Finding products")
         return Pager(
             config = PagingConfig(pageSize = PAGE_SIZE)
-        ) { database.productDao().select() }.flow.map {
+        ) {
+            database
+                .productDao()
+                .select()
+        }.flow.map {
             it.map { dto -> dto.toEntity() }
         }
     }
 
     override suspend fun findByName(name: String): Product? {
         Log.d("SERVICE-IMPL", "Finding product with name: $name")
-        return database.productDao().selectByName(name)?.toEntity()
+        return database
+            .productDao()
+            .selectByName(name)
+            ?.toEntity()
     }
 
     override suspend fun findById(id: Id): Product {
         Log.d("SERVICE-IMPL", "Product[$id]: finding product with ID")
-        return database.productDao().select(id).toEntity()
+        return database
+            .productDao()
+            .select(id)
+            .toEntity()
     }
 
     override fun search(value: String): Flow<PagingData<ProductFilter>> {
@@ -55,10 +65,21 @@ class ProductServiceImpl @Inject constructor(
         ) {
             // Add a `*` at the end of the search to get a phrase query.
             // https://www.sqlite.org/fts3.html
-            database.productFtsDao().match("$value*")
+            database
+                .productFtsDao()
+                .match("$value*")
         }.flow.map {
             it.map { dto -> dto.toEntity() }
         }
+    }
+
+    override suspend fun search(id: Id): Product? {
+        Log.d("IMPL", "Searching product with ID: $id")
+        return database
+            .productDao()
+            .search(id)
+            ?.toEntity()
+
     }
 
     override suspend fun create(
@@ -69,21 +90,25 @@ class ProductServiceImpl @Inject constructor(
         Log.d("SERVICE-IMPL", "Creating product with: $name, $price, $stock")
         return database.withTransaction {
             // First, create the product.
-            val productId = database.productDao().insert(
-                ProductDto(
-                    name = name,
-                    defaultPrice = price.toString(),
-                    stock = stock,
+            val productId = database
+                .productDao()
+                .insert(
+                    ProductDto(
+                        name = name,
+                        defaultPrice = price.toString(),
+                        stock = stock,
+                    )
                 )
-            )
 
             // Then, store the FTS value.
-            database.productFtsDao().insert(
-                ProductFtsDto(
-                    productId = productId,
-                    name = name,
+            database
+                .productFtsDao()
+                .insert(
+                    ProductFtsDto(
+                        productId = productId,
+                        name = name,
+                    )
                 )
-            )
 
             Product(
                 id = productId,
@@ -107,27 +132,37 @@ class ProductServiceImpl @Inject constructor(
             defaultPrice = price.toString(),
             stock = stock,
         )
-        database.productDao().update(dto)
+        database
+            .productDao()
+            .update(dto)
         return dto.toEntity()
     }
 
     override suspend fun delete() {
         database.withTransaction {
             Log.d("SERVICE-IMPL", "Deleting all products")
-            database.productDao().delete()
+            database
+                .productDao()
+                .delete()
 
             Log.d("SERVICE-IMPL", "Deleting all products FTS")
-            database.productFtsDao().delete()
+            database
+                .productFtsDao()
+                .delete()
         }
     }
 
     override suspend fun delete(id: Long) {
         database.withTransaction {
             Log.d("SERVICE-IMPL", "Product[$id]: Deleting product")
-            database.productDao().delete(id)
+            database
+                .productDao()
+                .delete(id)
 
             Log.d("SERVICE-IMPL", "Product[$id]: Deleting product FTS")
-            database.productFtsDao().delete(id)
+            database
+                .productFtsDao()
+                .delete(id)
         }
     }
 
@@ -137,19 +172,26 @@ class ProductServiceImpl @Inject constructor(
         // NOTE:
         //  This might not be the best way of doing this, but we don't expect this to have more than
         //  10 or 100 items at a time.
-        database.productDao().selectPendingForDeletion().forEach {
-            delete(it.rowId)
-        }
+        database
+            .productDao()
+            .selectPendingForDeletion()
+            .forEach {
+                delete(it.rowId)
+            }
     }
 
     override suspend fun setPendingForDeletion(id: Long, until: Long) {
         Log.d("SERVICE-IMPL", "Product[$id]: Setting product pending for deletion")
-        database.productDao().setPendingForDeletion(id, until)
+        database
+            .productDao()
+            .setPendingForDeletion(id, until)
     }
 
     override suspend fun unsetPendingForDeletion(id: Long) {
         Log.d("SERVICE-IMPL", "Product[$id]: Unsetting product pending for deletion")
-        database.productDao().unsetPendingForDeletion(id)
+        database
+            .productDao()
+            .unsetPendingForDeletion(id)
     }
 }
 

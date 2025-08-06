@@ -15,6 +15,7 @@ import com.example.project_shelf.adapter.dto.room.toEntity
 import com.example.project_shelf.app.entity.Customer
 import com.example.project_shelf.app.entity.CustomerFilter
 import com.example.project_shelf.app.service.CustomerService
+import com.example.project_shelf.common.Id
 import com.example.project_shelf.framework.room.SqliteDatabase
 import dagger.Binds
 import dagger.Module
@@ -53,6 +54,11 @@ class CustomerServiceImpl @Inject constructor(
                 )
             }
         }
+    }
+
+    override suspend fun search(id: Id): Customer? {
+        Log.d("IMPL", "Searching customer with ID: $id")
+        return database.customerDao().search(id)?.toEntity()
     }
 
     override suspend fun create(

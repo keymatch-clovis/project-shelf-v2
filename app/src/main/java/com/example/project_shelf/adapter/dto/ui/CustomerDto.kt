@@ -24,3 +24,9 @@ fun Customer.toDto(): CustomerDto {
         businessName = this.businessName,
     )
 }
+
+fun Customer.toFilter(): CustomerFilterDto = CustomerFilterDto(
+    id = this.id,
+    name = this.name,
+    businessName = this.businessName,
+)

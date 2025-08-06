@@ -95,6 +95,7 @@ fun EditProductScreen(
     ) { innerPadding ->
         if (uiState.value.showConfirmDeletionDialog) {
             AlertDialog(
+                headerTextResource = R.string.product_delete_alert,
                 onDismissRequest = { viewModel.closeConfirmDeletionDialog() },
                 onAcceptRequest = {
                     productDeletionViewModel.markProductForDeletion(viewModel.product)

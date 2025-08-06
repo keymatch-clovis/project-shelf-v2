@@ -13,6 +13,7 @@ interface ProductService {
     suspend fun findById(id: Id): Product
 
     fun search(value: String): Flow<PagingData<ProductFilter>>
+    suspend fun search(id: Id): Product?
 
     suspend fun create(name: String, price: BigDecimal, stock: Int): Product
     suspend fun update(id: Long, name: String, price: BigDecimal, stock: Int): Product

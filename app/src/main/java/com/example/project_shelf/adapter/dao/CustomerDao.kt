@@ -13,8 +13,25 @@ interface CustomerDao {
     @Query("SELECT * FROM customer WHERE pending_delete_until IS NULL")
     fun select(): PagingSource<Int, CustomerDto>
 
-    @Query("SELECT * FROM customer WHERE rowid = :id")
+    @Query(
+        """
+        SELECT * FROM customer 
+        WHERE 
+            rowid = :id
+            AND pending_delete_until IS NULL
+        """
+    )
     suspend fun select(id: Long): CustomerDto
+
+    @Query(
+        """
+        SELECT * FROM customer 
+        WHERE 
+            rowid = :id
+            AND pending_delete_until IS NULL
+        """
+    )
+    suspend fun search(id: Long): CustomerDto?
 
     @Query("SELECT * FROM customer WHERE pending_delete_until IS NOT NULL")
     suspend fun selectPendingForDeletion(): List<CustomerDto>
@@ -56,7 +73,7 @@ interface CustomerFtsDao {
         WHERE 
             e.pending_delete_until IS NULL
             AND customer_fts MATCH :value
-    """
+        """
     )
     fun match(value: String): PagingSource<Int, CustomerFtsDto>
 }

@@ -53,8 +53,7 @@ fun CreateInvoiceProductsForm(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             CenterAlignedTopAppBar(
-                scrollBehavior = scrollBehavior,
-                title = {
+                scrollBehavior = scrollBehavior, title = {
                     Button(
                         onClick = {
                             scope.launch { emitter.emit(CreateInvoiceViewModel.Event.OpenSearchProduct) }
@@ -68,16 +67,14 @@ fun CreateInvoiceProductsForm(
                         )
                         Text(stringResource(R.string.product_add))
                     }
-                }
-            )
+                })
         },
         bottomBar = {
             HorizontalDivider()
             Column(modifier = Modifier.padding(8.dp)) {
-
-                Text("test")
+                Text(stringResource(R.string.total).uppercase())
             }
-        }
+        },
     ) { innerPadding ->
         Column(
             modifier = Modifier

@@ -13,5 +13,5 @@ class InvoiceDraftViewModel @Inject constructor() : ViewModel() {
     private val _currentDraft = MutableStateFlow<InvoiceDraftDto?>(null)
     val currentDraft = _currentDraft.asStateFlow()
 
-    fun updateDraft(dto: InvoiceDraftDto) = _currentDraft.update { dto }
+    fun setCurrentDraft(dto: InvoiceDraftDto?) = _currentDraft.update { dto }
 }

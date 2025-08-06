@@ -3,12 +3,14 @@ package com.example.project_shelf.app.service
 import androidx.paging.PagingData
 import com.example.project_shelf.app.entity.Customer
 import com.example.project_shelf.app.entity.CustomerFilter
+import com.example.project_shelf.common.Id
 import kotlinx.coroutines.flow.Flow
 
 interface CustomerService {
     fun get(): Flow<PagingData<Customer>>
 
     fun search(value: String): Flow<PagingData<CustomerFilter>>
+    suspend fun search(id: Id): Customer?
 
     suspend fun create(
         name: String,

@@ -5,7 +5,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.RichTooltip
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.example.project_shelf.R
@@ -32,14 +33,17 @@ fun DraftIndicator(
 
     TooltipBox(
         state = tooltipState,
-        positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
+        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
         tooltip = {
-            RichTooltip(
-                title = { Text("title") },
-            ) {
-                Text("This is the text")
+            PlainTooltip {
+                if (loading) {
+                    Text(stringResource(R.string.invoice_draft_save_loading))
+                } else {
+                    Text(stringResource(R.string.invoice_draft_save_success))
+                }
             }
-        }) {
+        },
+    ) {
         if (loading) {
             IconButton(
                 onClick = { coroutineScope.launch { tooltipState.show() } },
@@ -52,7 +56,7 @@ fun DraftIndicator(
             ) {
                 Icon(
                     modifier = Modifier.size(24.dp),
-                    imageVector = ImageVector.vectorResource(R.drawable.file_check),
+                    imageVector = ImageVector.vectorResource(R.drawable.shield_check),
                     contentDescription = null,
                 )
             }

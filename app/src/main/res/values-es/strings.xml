@@ -27,8 +27,7 @@
     <string name="cancel">Cancelar</string>
     <string name="delete">Eliminar</string>
     <string name="accept">Aceptar</string>
-    <string name="product_delete_alert">Eliminar producto?</string>
-    <string name="product_delete_alert_text">¿Estás seguro? Esta acción no se puede deshacer.</string>
+    <string name="product_delete_alert">¿Eliminar producto?</string>
     <string name="default_price">Precio estándar</string>
     <string name="err_product_name_taken">Este nombre ya se encuentra en uso</string>
     <string name="product_updated">Producto actualizado</string>
@@ -55,4 +54,10 @@
     <string name="invoice_number_message">Este número es generado automáticamente para cada factura.</string>
     <string name="invoice_drafts">Borradores de facturas</string>
     <string name="drafts_none">Sin borradores</string>
+    <string name="total">Total</string>
+    <string name="drafts_delete_selected_alert">¿Eliminar borradores seleccionados?</string>
+    <string name="drafts_delete_selected_alert_message">Esta acción no se puede deshacer.</string>
+    <string name="invoice_draft_save_success">El borrador de la factura ha sido guardado.</string>
+    <string name="invoice_draft_save_loading">Guardando borrador de la factura.</string>
+    <string name="invoice_loading_draft_dialog_headline">Cargando borrador</string>
 </resources>

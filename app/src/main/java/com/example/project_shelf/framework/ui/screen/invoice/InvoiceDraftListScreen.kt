@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -28,6 +27,10 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -38,17 +41,22 @@ import androidx.compose.ui.unit.dp
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.view_model.invoice.InvoiceDraftListViewModel
 import com.example.project_shelf.adapter.view_model.invoice.InvoiceDraftViewModel
+import com.example.project_shelf.framework.ui.components.dialog.AlertDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InvoiceDraftListScreen(
     draftViewModel: InvoiceDraftViewModel,
     viewModel: InvoiceDraftListViewModel,
+    onSelectedDraft: () -> Unit,
     onDismissed: () -> Unit,
 ) {
     /// Scroll related
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val scrollState = rememberScrollState()
+
+    /// Alert dialog related
+    var showConfirmDeletionDialog by remember { mutableStateOf(false) }
 
     /// State related
     val state = viewModel.state.collectAsState()
@@ -58,6 +66,18 @@ fun InvoiceDraftListScreen(
         viewModel.exitEdition()
 
         viewModel.clearCheckedItems()
+    }
+
+    if (showConfirmDeletionDialog) {
+        AlertDialog(
+            headerTextResource = R.string.drafts_delete_selected_alert,
+            bodyTextResource = R.string.drafts_delete_selected_alert_message,
+            onDismissRequest = { showConfirmDeletionDialog = false },
+            onAcceptRequest = {
+                viewModel.deleteMarkedItems()
+                showConfirmDeletionDialog = false
+            },
+        )
     }
 
     Scaffold(
@@ -95,7 +115,7 @@ fun InvoiceDraftListScreen(
                 },
                 actions = {
                     if (state.value.isEditing) {
-                        IconButton(onClick = { viewModel.deleteMarkedItems() }) {
+                        IconButton(onClick = { showConfirmDeletionDialog = true }) {
                             Icon(
                                 modifier = Modifier.size(24.dp),
                                 imageVector = ImageVector.vectorResource(R.drawable.trash),
@@ -149,7 +169,6 @@ fun InvoiceDraftListScreen(
                             interactionSource = null,
                             indication = ripple(),
                             onClick = {
-                                Log.d("SCREEN", "click")
                                 if (state.value.isEditing) {
                                     // NOTE: What do you think? Should this be in the view model? Or
                                     //  here is better?
@@ -158,6 +177,9 @@ fun InvoiceDraftListScreen(
                                     } else {
                                         viewModel.checkItem(item.id)
                                     }
+                                } else {
+                                    draftViewModel.setCurrentDraft(item)
+                                    onSelectedDraft()
                                 }
                             },
                             onLongClick = {

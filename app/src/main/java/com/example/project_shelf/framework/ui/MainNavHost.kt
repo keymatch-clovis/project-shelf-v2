@@ -1,5 +1,6 @@
 package com.example.project_shelf.framework.ui
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -16,6 +17,7 @@ import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.view_model.MainViewModel
 import com.example.project_shelf.adapter.view_model.customer.CustomerDeletionViewModel
 import com.example.project_shelf.adapter.view_model.invoice.CreateInvoiceViewModel
+import com.example.project_shelf.adapter.view_model.invoice.InvoiceDraftViewModel
 import com.example.project_shelf.adapter.view_model.product.ProductDeletionViewModel
 import com.example.project_shelf.adapter.view_model.product.EditProductViewModel
 import com.example.project_shelf.framework.ui.screen.ConfigScreen
@@ -118,11 +120,15 @@ fun MainNavHost(
             route = MainDestination.INVOICE.route,
             startDestination = Destination.INVOICE_LIST.route,
         ) {
-            composable(Destination.INVOICE_LIST.route) {
+            composable(Destination.INVOICE_LIST.route) { backStackEntry ->
+                val invoiceDraftViewModel =
+                    backStackEntry.sharedViewModel<InvoiceDraftViewModel>(navController)
+
                 InvoiceListScreen(
                     viewModel = hiltViewModel(),
                     onRequestEdit = {},
                     onRequestCreate = {
+                        // Before navigating to the create invoice route, we need to set the current
                         navController.navigate(Destination.CREATE_INVOICE.route)
                     },
                     onNavigateSaved = {
@@ -135,16 +141,36 @@ fun MainNavHost(
                 InvoiceDraftListScreen(
                     draftViewModel = backStackEntry.sharedViewModel(navController),
                     viewModel = hiltViewModel(),
-                    onDismissed = { navController.popBackStack() })
+                    onDismissed = { navController.popBackStack() },
+                    onSelectedDraft = {
+                        navController.popBackStack()
+                        navController.navigate(Destination.CREATE_INVOICE.route)
+                    },
+                )
             }
 
             composable(Destination.CREATE_INVOICE.route) { backStackEntry ->
-                val viewModel = hiltViewModel<CreateInvoiceViewModel>()
+                val draftViewModel =
+                    backStackEntry.sharedViewModel<InvoiceDraftViewModel>(navController)
+
+                val viewModel =
+                    hiltViewModel<CreateInvoiceViewModel, CreateInvoiceViewModel.Factory> {
+                        it.create(draftViewModel.currentDraft.value)
+                    }
+
+                // Once we have created the `CreateInvoiceViewModel` with the current selected
+                // draft, we need to set the current draft to null. This is so it doesn't clash with
+                // further invoice creation.
+                // FIXME: Maybe we could use a stack here, or a channel with only one value? Idk,
+                //  I don't have the enough knowledge for this.
+                draftViewModel.setCurrentDraft(null)
 
                 CreateInvoiceScreen(
                     draftViewModel = backStackEntry.sharedViewModel(navController),
                     viewModel = viewModel,
-                    onRequestDismiss = { navController.popBackStack() },
+                    onRequestDismiss = {
+                        navController.popBackStack()
+                    },
                 )
             }
         }

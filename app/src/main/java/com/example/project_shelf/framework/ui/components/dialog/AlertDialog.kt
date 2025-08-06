@@ -20,25 +20,30 @@ import com.example.project_shelf.R
 
 @Composable
 fun AlertDialog(
+    headerTextResource: Int,
     onDismissRequest: () -> Unit,
     onAcceptRequest: () -> Unit,
+    bodyTextResource: Int? = null,
 ) {
     // https://m3.material.io/components/dialogs/specs
     Dialog(onDismissRequest = onDismissRequest) {
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
+            // https://m3.material.io/components/dialogs/specs#9a8c226b-19fa-4d6b-894e-e7d5ca9203e8
             Column(modifier = Modifier.padding(24.dp)) {
                 Text(
                     style = MaterialTheme.typography.headlineSmall,
-                    text = stringResource(R.string.product_delete_alert),
+                    text = stringResource(headerTextResource),
                 )
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    text = stringResource(R.string.product_delete_alert_text),
-                )
+                if (bodyTextResource != null) {
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        text = stringResource(bodyTextResource),
+                    )
+                }
                 Spacer(Modifier.height(24.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),

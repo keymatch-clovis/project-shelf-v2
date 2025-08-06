@@ -32,7 +32,6 @@
     <string name="product_created">Product %1$s created</string>
     <string name="product_creating">Creating product</string>
     <string name="product_delete_alert">Delete product?</string>
-    <string name="product_delete_alert_text">Are you sure? This action can\'t be undone.</string>
     <string name="product_deleted">Product deleted</string>
     <string name="product_edit">Edit product</string>
     <string name="product_updated">Product updated</string>
@@ -55,4 +54,10 @@
     <string name="invoice_number_message">This number is generated automatically for each invoice.</string>
     <string name="invoice_drafts">Invoice drafts</string>
     <string name="drafts_none">No drafts</string>
+    <string name="total">Total</string>
+    <string name="drafts_delete_selected_alert">Delete selected drafts?</string>
+    <string name="drafts_delete_selected_alert_message">This action can\'t be undone.</string>
+    <string name="invoice_draft_save_success">The invoice draft has been saved.</string>
+    <string name="invoice_draft_save_loading">Saving invoice draft.</string>
+    <string name="invoice_loading_draft_dialog_headline">Loading draft</string>
 </resources>

@@ -5,7 +5,7 @@ import com.example.project_shelf.app.service.InvoiceService
 import java.util.Date
 import javax.inject.Inject
 
-class SaveInvoiceDraftUseCase @Inject constructor(private val service: InvoiceService) {
+class EditInvoiceDraftUseCase @Inject constructor(private val service: InvoiceService) {
     suspend fun exec(
         draftId: Long,
         date: Date = Date(),
@@ -13,7 +13,10 @@ class SaveInvoiceDraftUseCase @Inject constructor(private val service: InvoiceSe
         remainingUnpaidBalance: Long = 0,
         customerId: Long? = null,
     ) {
-        Log.d("USE-CASE", "Saving invoice draft")
+        Log.d(
+            "USE-CASE",
+            "Editing invoice draft with: $draftId, $date, $products, $remainingUnpaidBalance, $customerId"
+        )
         service.editDraft(
             draftId = draftId,
             date = date,

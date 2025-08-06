@@ -25,6 +25,16 @@ interface ProductDao {
     @Query("SELECT * FROM product WHERE rowid = :id AND pending_delete_until IS NULL")
     suspend fun select(id: Id): ProductDto
 
+    @Query(
+        """
+            SELECT * FROM product
+            WHERE  
+                rowid = :id
+                AND pending_delete_until IS NULL
+        """
+    )
+    suspend fun search(id: Long): ProductDto?
+
     @Query("SELECT * FROM product WHERE pending_delete_until IS NOT NULL")
     suspend fun selectPendingForDeletion(): List<ProductDto>
 

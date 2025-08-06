@@ -15,7 +15,6 @@ import com.example.project_shelf.adapter.dto.room.InvoiceProductDto
 import com.example.project_shelf.adapter.dto.room.toEntity
 import com.example.project_shelf.app.entity.Invoice
 import com.example.project_shelf.app.entity.InvoiceDraft
-import com.example.project_shelf.app.entity.InvoiceDraftProduct
 import com.example.project_shelf.app.entity.InvoiceFilter
 import com.example.project_shelf.app.entity.InvoicePopulated
 import com.example.project_shelf.app.entity.InvoiceWithCustomer
@@ -40,7 +39,11 @@ class InvoiceServiceImpl @Inject constructor(
         Log.d("SERVICE-IMPL", "Getting invoices")
         return Pager(
             config = PagingConfig(DEFAULT_PAGE_SIZE)
-        ) { database.invoiceDao().select() }.flow.map {
+        ) {
+            database
+                .invoiceDao()
+                .select()
+        }.flow.map {
             it.map { dto -> dto.toEntity() }
         }
     }
@@ -49,7 +52,11 @@ class InvoiceServiceImpl @Inject constructor(
         Log.d("SERVICE-IMPL", "Getting invoices with customer")
         return Pager(
             config = PagingConfig(DEFAULT_PAGE_SIZE)
-        ) { database.invoiceDao().selectWithCustomer() }.flow.map {
+        ) {
+            database
+                .invoiceDao()
+                .selectWithCustomer()
+        }.flow.map {
             it.map { dto ->
                 InvoiceWithCustomer(
                     invoice = dto.invoice.toEntity(),
@@ -65,7 +72,9 @@ class InvoiceServiceImpl @Inject constructor(
 
     override suspend fun getCurrentNumber(): Long {
         Log.d("SERVICE-IMPL", "Getting current invoice number")
-        return database.invoiceDao().getMaxNumber()
+        return database
+            .invoiceDao()
+            .getMaxNumber()
     }
 
     override fun search(value: String): Flow<PagingData<InvoiceFilter>> {
@@ -75,7 +84,9 @@ class InvoiceServiceImpl @Inject constructor(
         ) {
             // Add a `*` at the end of the search to get a phrase query.
             // https://www.sqlite.org/fts3.html
-            database.invoiceFtsDao().match("$value*")
+            database
+                .invoiceFtsDao()
+                .match("$value*")
         }.flow.map { it.map { dto -> dto.toEntity() } }
     }
 
@@ -84,7 +95,7 @@ class InvoiceServiceImpl @Inject constructor(
         customerId: Long,
         date: Date,
         products: List<InvoiceService.ProductParam>,
-        discount: BigDecimal?
+        discount: BigDecimal?,
     ): Long {
         Log.d(
             "SERVICE-IMPL",
@@ -92,36 +103,47 @@ class InvoiceServiceImpl @Inject constructor(
         )
         return database.withTransaction {
             // Create the invoice
-            val invoiceId = database.invoiceDao().insert(
-                InvoiceDto(
-                    number = number, customerId = customerId, date = Date().time,
-                    // TODO: fixthis
-                    remainingUnpaidBalance = 0
+            val invoiceId = database
+                .invoiceDao()
+                .insert(
+                    InvoiceDto(
+                        number = number, customerId = customerId, date = Date().time,
+                        // TODO: fixthis
+                        remainingUnpaidBalance = 0
+                    )
                 )
-            )
 
             // Create the invoice products.
-            database.invoiceProductDao().insert(*products.map {
-                InvoiceProductDto(
-                    invoiceId = invoiceId,
-                    productId = it.id,
-                    count = it.count,
-                    price = it.price,
-                )
-            }.toTypedArray())
+            database
+                .invoiceProductDao()
+                .insert(
+                    *products
+                        .map {
+                            InvoiceProductDto(
+                                invoiceId = invoiceId,
+                                productId = it.id,
+                                count = it.count,
+                                price = it.price,
+                            )
+                        }
+                        .toTypedArray())
 
             // Get the customer to assign the search values.
-            val customer = database.customerDao().select(customerId)
+            val customer = database
+                .customerDao()
+                .select(customerId)
 
             // Finally, store the FTS value.
-            database.invoiceFtsDao().insert(
-                InvoiceFtsDto(
-                    invoiceId = invoiceId,
-                    number = number,
-                    customerName = customer.name,
-                    customerBusinessName = customer.businessName,
+            database
+                .invoiceFtsDao()
+                .insert(
+                    InvoiceFtsDto(
+                        invoiceId = invoiceId,
+                        number = number,
+                        customerName = customer.name,
+                        customerBusinessName = customer.businessName,
+                    )
                 )
-            )
 
             invoiceId
         }
@@ -135,26 +157,38 @@ class InvoiceServiceImpl @Inject constructor(
         Log.d("SERVICE-IMPL", "Deleting all invoices")
         database.withTransaction {
             Log.d("SERVICE-IMPL", "Deleting all invoice products")
-            database.invoiceProductDao().delete()
+            database
+                .invoiceProductDao()
+                .delete()
 
             Log.d("SERVICE-IMPL", "Deleting all invoices")
-            database.invoiceDao().delete()
+            database
+                .invoiceDao()
+                .delete()
 
             Log.d("SERVICE-IMPL", "Deleting all invoices FTS")
-            database.invoiceFtsDao().delete()
+            database
+                .invoiceFtsDao()
+                .delete()
         }
     }
 
     override suspend fun delete(id: Long) {
         database.withTransaction {
             Log.d("SERVICE-IMPL", "Invoice[$id]: Deleting invoice products")
-            database.invoiceProductDao().deleteProducts(id)
+            database
+                .invoiceProductDao()
+                .deleteProducts(id)
 
             Log.d("SERVICE-IMPL", "Invoice[$id]: Deleting invoice")
-            database.invoiceDao().delete(id)
+            database
+                .invoiceDao()
+                .delete(id)
 
             Log.d("SERVICE-IMPL", "Invoice[$id]: Deleting invoice FTS")
-            database.invoiceFtsDao().delete(id)
+            database
+                .invoiceFtsDao()
+                .delete(id)
         }
     }
 
@@ -189,23 +223,28 @@ class InvoiceServiceImpl @Inject constructor(
         remainingUnpaidBalance: Long,
         customerId: Long?,
     ): Long {
-        val invoiceDraftDto = InvoiceDraftDto(
+        val invoiceDraft = InvoiceDraftDto(
             date = date,
             remainingUnpaidBalance = remainingUnpaidBalance,
             customerId = customerId,
         )
 
         products.forEach {
-            invoiceDraftDto.products.add(
-                InvoiceDraftProductDto(
-                    productId = it.id,
-                    count = it.count,
-                    price = it.price,
-                )
+            val dto = InvoiceDraftProductDto(
+                productId = it.id,
+                count = it.count,
+                price = it.price,
             )
+
+            // https://docs.objectbox.io/relations#updating-toone
+            dto.invoiceDraft.setAndPutTarget(invoiceDraft)
+
+            invoiceDraft.products.add(dto)
         }
 
-        return boxStore.boxFor(InvoiceDraftDto::class.java).put(invoiceDraftDto)
+        return boxStore
+            .boxFor(InvoiceDraftDto::class.java)
+            .put(invoiceDraft)
     }
 
     override suspend fun editDraft(
@@ -215,30 +254,52 @@ class InvoiceServiceImpl @Inject constructor(
         remainingUnpaidBalance: Long,
         customerId: Long?,
     ) {
-        val box = boxStore.boxFor(InvoiceDraftDto::class.java)
-        val dto = box.get(draftId)
+        // TODO: Maybe move all this to the application layer?
+        //
+        // > It seems we need to update both relationships, like a RDBMS, not like mongo, silly me.
+        // https://docs.objectbox.io/relations#updating-tomany
 
-        dto.customerId = customerId
+        val box = boxStore.boxFor(InvoiceDraftDto::class.java)
+        val invoiceDraft = box.get(draftId)
+
+        invoiceDraft.customerId = customerId
 
         // FIXME: This can be improved, by filtering the ones that are not in this list, and
         //  removing the ones that are in the DTO and not in this list. But for now I think it is
         //  fine.
-        dto.products.clear()
+        // https://docs.objectbox.io/relations#one-to-many-1-n
+        invoiceDraft.products
+            .map { it.id }
+            .toLongArray()
+            .let {
+                boxStore
+                    .boxFor(InvoiceDraftProductDto::class.java)
+                    .remove(*it)
+            }
+        // FIXME: This is also not completely good, as we are deleting all the products, and then
+        //  adding them again.
+        invoiceDraft.products.clear()
+
         products.forEach {
-            dto.products.add(
-                InvoiceDraftProductDto(
-                    productId = it.id,
-                    count = it.count,
-                    price = it.price,
-                )
+            val dto = InvoiceDraftProductDto(
+                productId = it.id,
+                count = it.count,
+                price = it.price,
             )
+
+            // https://docs.objectbox.io/relations#updating-toone
+            dto.invoiceDraft.setAndPutTarget(invoiceDraft)
+
+            invoiceDraft.products.add(dto)
         }
 
-        box.put(dto)
+        box.put(invoiceDraft)
     }
 
     override suspend fun deleteDrafts(vararg ids: Long) {
-        boxStore.boxFor(InvoiceDraftDto::class.java).remove(*ids)
+        boxStore
+            .boxFor(InvoiceDraftDto::class.java)
+            .remove(*ids)
     }
 }
 

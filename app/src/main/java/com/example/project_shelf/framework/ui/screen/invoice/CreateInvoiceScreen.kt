@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -23,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -38,6 +40,7 @@ import com.example.project_shelf.adapter.view_model.invoice.InvoiceDraftViewMode
 import com.example.project_shelf.framework.ui.components.CustomSearchBar
 import com.example.project_shelf.framework.ui.components.DraftIndicator
 import com.example.project_shelf.framework.ui.components.dialog.AddInvoiceProductDialog
+import com.example.project_shelf.framework.ui.components.dialog.LoadingDialog
 import com.example.project_shelf.framework.ui.components.list_item.CustomerFilterListItem
 import com.example.project_shelf.framework.ui.components.list_item.ProductFilterListItem
 import com.example.project_shelf.framework.ui.nav_host.CreateInvoiceDestination
@@ -163,7 +166,9 @@ fun CreateInvoiceScreen(
                     // If the user presses the search button, without selecting an item, we will
                     // assume it wanted to select the first-most item in the search list, if there
                     // was one.
-                    customerSearchItems.takeIf { it.itemCount > 0 }?.peek(0)
+                    customerSearchItems
+                        .takeIf { it.itemCount > 0 }
+                        ?.peek(0)
                         ?.let { viewModel.updateCustomer(it) }
                 },
                 lazyPagingItems = customerSearchItems,
@@ -189,7 +194,9 @@ fun CreateInvoiceScreen(
                     // If the user presses the search button, without selecting an item, we will
                     // assume it wanted to select the first-most item in the search list, if there
                     // was one.
-                    productSearchItems.takeIf { it.itemCount > 0 }?.peek(0)
+                    productSearchItems
+                        .takeIf { it.itemCount > 0 }
+                        ?.peek(0)
                         ?.let { viewModel.openAddInvoiceProductDialog(it) }
                 },
                 lazyPagingItems = productSearchItems,
@@ -201,6 +208,15 @@ fun CreateInvoiceScreen(
             }
         }
     }
+
+    AnimatedVisibility(
+        visible = state.value.isLoading,
+    ) {
+        LoadingDialog(
+            headlineStringResource = R.string.invoice_loading_draft_dialog_headline,
+        )
+    }
+
 
     /// Modals and other related components
     if (showAddInvoiceProductBottomSheet.value) {
