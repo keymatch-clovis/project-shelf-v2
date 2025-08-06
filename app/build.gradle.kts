@@ -107,7 +107,7 @@ dependencies {
     ksp(libs.hilt.compiler)
 
     /// Faker
-    testImplementation(libs.faker)
+    implementation(libs.faker)
 
     /// Paging
     implementation(libs.androidx.paging)

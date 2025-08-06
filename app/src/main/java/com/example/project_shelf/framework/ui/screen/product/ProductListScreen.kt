@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -58,8 +59,8 @@ fun ProductListScreen(
     val productList = viewModel.products.collectAsLazyPagingItems()
 
     /// Related to product search
-    var showSearchBar = viewModel.showSearchBar.collectAsState()
-    var query = viewModel.search.query.collectAsState()
+    val showSearchBar = viewModel.showSearchBar.collectAsState()
+    val query = viewModel.search.query.collectAsState()
     val searchItems = viewModel.search.result.collectAsLazyPagingItems()
 
     /// Related to deletion snackbar.
@@ -110,15 +111,16 @@ fun ProductListScreen(
                     enter = slideInVertically(),
                     exit = slideOutVertically(),
                 ) {
+                    // https://m3.material.io/components/floating-action-button/specs#0a064a5d-8373-4150-9665-40acd0f14b0a
                     FloatingActionButton(
-                        modifier = Modifier.height(56.dp),
+                        modifier = Modifier.size(96.dp),
                         onClick = onRequestCreate,
-                        shape = MaterialTheme.shapes.small,
+                        shape = MaterialTheme.shapes.large,
                     ) {
                         Icon(
-                            modifier = Modifier.size(24.dp),
-                            contentDescription = null,
+                            modifier = Modifier.size(36.dp),
                             imageVector = ImageVector.vectorResource(R.drawable.plus),
+                            contentDescription = null,
                         )
                     }
                 }
@@ -127,7 +129,7 @@ fun ProductListScreen(
             Box(modifier = Modifier.padding(innerPadding)) {
                 CustomList(
                     lazyPagingItems = productList,
-                    lazyListState = viewModel.lazyListState,
+                    lazyListState = rememberLazyListState(),
                     emptyMessage = stringResource(R.string.products_none),
                 ) {
                     ProductListItem(

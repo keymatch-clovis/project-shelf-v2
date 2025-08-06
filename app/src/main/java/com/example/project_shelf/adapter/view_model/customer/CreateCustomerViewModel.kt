@@ -67,7 +67,8 @@ class CreateCustomerViewModel @Inject constructor(
     val showCitySearchBar = _showCitySearchBar.asStateFlow()
     val citySearch = SearchExtension<CityFilterDto>(
         scope = viewModelScope,
-        repository = cityRepository,
+        // TODO: Fix this
+        onSearch = { cityRepository.search(it) },
     )
 
     fun updateName(value: String) = inputState.name.update(value)

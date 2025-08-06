@@ -2,6 +2,7 @@ package com.example.project_shelf.app.use_case.product
 
 import com.example.project_shelf.app.entity.Product
 import com.example.project_shelf.app.service.ProductService
+import com.example.project_shelf.app.service.model.UpdateProductInput
 import org.joda.money.CurrencyUnit
 import org.joda.money.Money
 import java.math.BigDecimal
@@ -20,10 +21,12 @@ class UpdateProductUseCase @Inject constructor(private val productService: Produ
         // leave it hard coded.
         val money = Money.of(CurrencyUnit.of("COP"), price)
         return productService.update(
-            id = id,
-            name = name.uppercase(),
-            price = money.amountMinor,
-            stock = stock,
+            UpdateProductInput(
+                id = id,
+                name = name.uppercase(),
+                price = money.amountMinorLong,
+                stock = stock,
+            )
         )
     }
 }

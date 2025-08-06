@@ -1,11 +1,8 @@
 package com.example.project_shelf.framework.ui.screen
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.DeveloperMode
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -13,11 +10,15 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.project_shelf.BuildConfig
 import com.example.project_shelf.R
@@ -38,28 +39,20 @@ fun ConfigScreen(
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             if (BuildConfig.DEBUG == true) {
-                ListItem(
-                    modifier = Modifier.clickable(onClick = {
-                        viewModel.removeAllData {
-                            snackbarHostState.showSnackbar("[DEBUG] All data removed")
-                        }
-                    }),
-                    leadingContent = {
-                        Icon(Icons.Rounded.DeveloperMode, contentDescription = null)
-                    },
-                    headlineContent = { Text("[DEBUG] Remove all data") },
-                )
-                ListItem(
-                    modifier = Modifier.clickable(onClick = {
-                        viewModel.loadTestProducts {
-                            snackbarHostState.showSnackbar("[DEBUG] Test Products Loaded")
-                        }
-                    }),
-                    leadingContent = {
-                        Icon(Icons.Rounded.DeveloperMode, contentDescription = null)
-                    },
-                    headlineContent = { Text("[DEBUG] Load Test Products") },
-                )
+                Surface(
+                    onClick = { viewModel.loadTestProducts() },
+                ) {
+                    ListItem(
+                        leadingContent = {
+                            Icon(
+                                modifier = Modifier.size(24.dp),
+                                imageVector = ImageVector.vectorResource(R.drawable.bug),
+                                contentDescription = null
+                            )
+                        },
+                        headlineContent = { Text("[DEBUG] Load Test Products") },
+                    )
+                }
             }
         }
     }

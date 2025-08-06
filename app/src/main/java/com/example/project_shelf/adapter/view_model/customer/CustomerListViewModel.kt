@@ -29,7 +29,10 @@ class CustomerListViewModel @Inject constructor(
     private val _showSearchBar = MutableStateFlow(false)
     val showSearchBar = _showSearchBar.asStateFlow()
 
-    val search = SearchExtension(scope = viewModelScope, repository = repository)
+    val search = SearchExtension(scope = viewModelScope, onSearch = {
+        // TODO: Fix this
+        repository.search(it)
+    })
 
     fun closeSearchBar() = _showSearchBar.update { false }
     fun openSearchBar() {

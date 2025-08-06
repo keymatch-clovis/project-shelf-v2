@@ -2,6 +2,7 @@ package com.example.project_shelf.framework.room
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.example.project_shelf.adapter.dao.CityDao
 import com.example.project_shelf.adapter.dao.CityFtsDao
 import com.example.project_shelf.adapter.dao.CustomerDao
@@ -35,6 +36,7 @@ import com.example.project_shelf.adapter.dto.room.ProductFtsDto
     ],
     version = VERSION,
 )
+@TypeConverters(Converters::class)
 abstract class SqliteDatabase : RoomDatabase() {
     abstract fun customerDao(): CustomerDao
     abstract fun customerFtsDao(): CustomerFtsDao

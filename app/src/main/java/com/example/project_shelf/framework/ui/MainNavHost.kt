@@ -1,6 +1,5 @@
 package com.example.project_shelf.framework.ui
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -53,32 +52,56 @@ fun MainNavHost(
         startDestination = startDestination.route,
     ) {
         /// Product Related
-        composable(MainDestination.PRODUCT.route) {
-            ProductListScreen(
-                viewModel = hiltViewModel(),
-                productDeletionViewModel = productDeletionViewModel,
-                onRequestCreate = {
-                    // If we get a create request, we want to clear the deletion view model. This
-                    // prevents the user from restoring an object that might have been deleted
-                    // before.
-                    productDeletionViewModel.clear()
-                    navController.navigate(Destination.CREATE_PRODUCT.route)
-                },
-                onRequestEdit = {
-                    // If we get an edit request, we want to clear the deletion view model. This
-                    // prevents the user from restoring an object that might have been deleted
-                    // before.
-                    productDeletionViewModel.clear()
-                    navController.navigate(it)
-                },
-            )
-        }
-        composable(Destination.CREATE_PRODUCT.route) {
-            CreateProductScreen(
-                viewModel = hiltViewModel(),
-                onDismissed = { navController.popBackStack() },
-                onCreated = { navController.popBackStack() },
-            )
+        // NOTE: We need nested graphs here, as we want to share a view model between some routes,
+        //  but have it constrained to these views only.
+        //  https://developer.android.com/guide/navigation/design/nested-graphs
+        //  https://developer.android.com/develop/ui/compose/libraries?authuser=1#hilt-navigation
+        //  https://stackoverflow.com/questions/68548488/sharing-viewmodel-within-jetpack-compose-navigation
+        navigation(
+            route = MainDestination.PRODUCT.route,
+            startDestination = Destination.PRODUCT_LIST.route,
+        ) {
+            composable(Destination.PRODUCT_LIST.route) {
+                ProductListScreen(
+                    viewModel = hiltViewModel(),
+                    productDeletionViewModel = productDeletionViewModel,
+                    onRequestCreate = {
+                        // If we get a create request, we want to clear the deletion view model. This
+                        // prevents the user from restoring an object that might have been deleted
+                        // before.
+                        productDeletionViewModel.clear()
+                        navController.navigate(Destination.PRODUCT_CREATE.route)
+                    },
+                    onRequestEdit = {
+                        // If we get an edit request, we want to clear the deletion view model. This
+                        // prevents the user from restoring an object that might have been deleted
+                        // before.
+                        productDeletionViewModel.clear()
+                        navController.navigate(it)
+                    },
+                )
+            }
+
+            composable(Destination.PRODUCT_CREATE.route) {
+                CreateProductScreen(
+                    viewModel = hiltViewModel(),
+                    onDismissed = { navController.popBackStack() },
+                    onCreated = { navController.popBackStack() },
+                )
+            }
+
+            composable(Destination.PRODUCT_EDIT.route) {
+                val product: ProductDto = it.toRoute()
+
+                EditProductScreen(
+                    viewModel = hiltViewModel<EditProductViewModel, EditProductViewModel.Factory> {
+                        it.create(product)
+                    },
+                    productDeletionViewModel = productDeletionViewModel,
+                    onDismissRequest = { navController.popBackStack() },
+                    onDeleteRequest = { navController.popBackStack() },
+                )
+            }
         }
 
         /// Customer related
@@ -91,7 +114,7 @@ fun MainNavHost(
                     // prevents the user from restoring an object that might have been deleted
                     // before.
                     customerDeletionViewModel.clear()
-                    navController.navigate(Destination.CREATE_CUSTOMER.route)
+                    navController.navigate(Destination.CUSTOMER_CREATE.route)
                 },
                 onRequestEdit = {
                     // If we get an edit request, we want to clear the deletion view model. This
@@ -102,7 +125,7 @@ fun MainNavHost(
                 },
             )
         }
-        composable(Destination.CREATE_CUSTOMER.route) {
+        composable(Destination.CUSTOMER_CREATE.route) {
             CreateCustomerScreen(
                 viewModel = hiltViewModel(),
                 onDismissed = { navController.popBackStack() },
@@ -129,7 +152,7 @@ fun MainNavHost(
                     onRequestEdit = {},
                     onRequestCreate = {
                         // Before navigating to the create invoice route, we need to set the current
-                        navController.navigate(Destination.CREATE_INVOICE.route)
+                        navController.navigate(Destination.INVOICE_CREATE.route)
                     },
                     onNavigateSaved = {
                         navController.navigate(Destination.INVOICE_DRAFT_LIST.route)
@@ -144,26 +167,19 @@ fun MainNavHost(
                     onDismissed = { navController.popBackStack() },
                     onSelectedDraft = {
                         navController.popBackStack()
-                        navController.navigate(Destination.CREATE_INVOICE.route)
+                        navController.navigate(Destination.INVOICE_CREATE.route)
                     },
                 )
             }
 
-            composable(Destination.CREATE_INVOICE.route) { backStackEntry ->
+            composable(Destination.INVOICE_CREATE.route) { backStackEntry ->
                 val draftViewModel =
                     backStackEntry.sharedViewModel<InvoiceDraftViewModel>(navController)
 
                 val viewModel =
                     hiltViewModel<CreateInvoiceViewModel, CreateInvoiceViewModel.Factory> {
-                        it.create(draftViewModel.currentDraft.value)
+                        it.create(draftViewModel.currentDraft.consume())
                     }
-
-                // Once we have created the `CreateInvoiceViewModel` with the current selected
-                // draft, we need to set the current draft to null. This is so it doesn't clash with
-                // further invoice creation.
-                // FIXME: Maybe we could use a stack here, or a channel with only one value? Idk,
-                //  I don't have the enough knowledge for this.
-                draftViewModel.setCurrentDraft(null)
 
                 CreateInvoiceScreen(
                     draftViewModel = backStackEntry.sharedViewModel(navController),
@@ -199,23 +215,6 @@ fun MainNavHost(
             }
 
             LoadingScreen(viewModel = mainViewModel)
-        }
-
-
-
-        dialog<ProductDto>(
-            dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
-        ) {
-            val product: ProductDto = it.toRoute()
-
-            EditProductScreen(
-                viewModel = hiltViewModel<EditProductViewModel, EditProductViewModel.Factory> {
-                    it.create(product)
-                },
-                productDeletionViewModel = productDeletionViewModel,
-                onDismissRequest = { navController.popBackStack() },
-                onDeleteRequest = { navController.popBackStack() },
-            )
         }
     }
 }

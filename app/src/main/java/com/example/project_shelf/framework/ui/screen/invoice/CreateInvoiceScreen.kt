@@ -121,10 +121,14 @@ fun CreateInvoiceScreen(
                         Tab(
                             selected = selectedDestination == index,
                             onClick = {
-                                navHostController.popBackStack(
-                                    navHostController.graph.startDestinationId,
-                                    true,
-                                )
+                                // FIXME: I don't know if this is correct
+                                //  I have searched the interwebs for information about how to clear
+                                //  _completely_ the back stack, and nothing seems to work as I
+                                //  expect it to. This most likely means I'm not doing something
+                                //  correctly, but I seem unable to find more information that
+                                //  explains otherwise.
+                                navHostController.popBackStack(0, false)
+
                                 navHostController.navigate(route = destination.route) {
                                     launchSingleTop = true
                                     restoreState = true

@@ -94,7 +94,7 @@ class CreateInvoiceViewModel @AssistedInject constructor(
     val showCustomerSearchBar = _showCustomerSearchBar.asStateFlow()
     val customerSearch = SearchExtension<CustomerFilterDto>(
         scope = viewModelScope,
-        repository = customerRepository,
+        onSearch = { customerRepository.search(it) },
     )
 
     /// Related to product search
@@ -102,7 +102,7 @@ class CreateInvoiceViewModel @AssistedInject constructor(
     val showProductSearchBar = _showProductSearchBar.asStateFlow()
     val productSearch = SearchExtension<ProductFilterDto>(
         scope = viewModelScope,
-        repository = productRepository,
+        onSearch = { productRepository.search(it) },
     )
 
     /// Related to invoice product adding

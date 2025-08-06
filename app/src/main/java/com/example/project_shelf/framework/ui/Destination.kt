@@ -43,13 +43,15 @@ enum class Destination(
     LOADING("loading"),
 
     /// Client Category
-    CREATE_CUSTOMER("main.client.create"),
+    CUSTOMER_CREATE("main.client.create"),
 
     /// Product Category
-    CREATE_PRODUCT("main.product.create"),
+    PRODUCT_LIST("main.product.list"),
+    PRODUCT_CREATE("main.product.create"),
+    PRODUCT_EDIT("main.product.create"),
 
     /// Invoice Category
     INVOICE_LIST("main.invoice.list"),
-    CREATE_INVOICE("main.invoice.create"),
+    INVOICE_CREATE("main.invoice.create"),
     INVOICE_DRAFT_LIST("main.invoice.saved"),
 }

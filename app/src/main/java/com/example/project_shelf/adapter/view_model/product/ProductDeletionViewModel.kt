@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.repository.ProductRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
 @HiltViewModel
 class ProductDeletionViewModel @Inject constructor(
@@ -64,7 +66,7 @@ class ProductDeletionViewModel @Inject constructor(
     }
 
     private fun unmarkProductForDeletion(dto: ProductDto) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Main.immediate) {
             Log.d("VIEW-MODEL", "Unmarking product marked for deletion: $dto")
             productRepository.unsetPendingForDeletion(dto.id)
         }

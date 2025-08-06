@@ -13,7 +13,12 @@ import com.example.project_shelf.common.Id
 
 @Dao
 interface ProductDao {
-    @Query("SELECT * FROM product WHERE pending_delete_until IS NULL")
+    @Query(
+        """
+            SELECT * FROM product 
+            WHERE pending_delete_until IS NULL 
+        """
+    )
     fun select(): PagingSource<Int, ProductDto>
 
     // NOTE:

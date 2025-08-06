@@ -12,6 +12,8 @@ import com.example.project_shelf.adapter.dto.room.toEntity
 import com.example.project_shelf.app.entity.Product
 import com.example.project_shelf.app.entity.ProductFilter
 import com.example.project_shelf.app.service.ProductService
+import com.example.project_shelf.app.service.model.CreateProductInput
+import com.example.project_shelf.app.service.model.UpdateProductInput
 import com.example.project_shelf.common.Id
 import com.example.project_shelf.framework.room.SqliteDatabase
 import dagger.Binds
@@ -20,7 +22,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import java.math.BigDecimal
 import javax.inject.Inject
 
 // Recommended value for simple text data.
@@ -79,24 +80,19 @@ class ProductServiceImpl @Inject constructor(
             .productDao()
             .search(id)
             ?.toEntity()
-
     }
 
-    override suspend fun create(
-        name: String,
-        price: BigDecimal,
-        stock: Int,
-    ): Product {
-        Log.d("SERVICE-IMPL", "Creating product with: $name, $price, $stock")
+    override suspend fun create(input: CreateProductInput): Product {
+        Log.d("IMPL", "Creating product with: $input")
         return database.withTransaction {
             // First, create the product.
             val productId = database
                 .productDao()
                 .insert(
                     ProductDto(
-                        name = name,
-                        defaultPrice = price.toString(),
-                        stock = stock,
+                        name = input.name,
+                        defaultPrice = input.price,
+                        stock = input.stock,
                     )
                 )
 
@@ -106,31 +102,61 @@ class ProductServiceImpl @Inject constructor(
                 .insert(
                     ProductFtsDto(
                         productId = productId,
-                        name = name,
+                        name = input.name,
                     )
                 )
 
             Product(
                 id = productId,
-                name = name,
-                defaultPrice = price,
-                stock = stock,
+                name = input.name,
+                defaultPrice = input.price,
+                stock = input.stock,
             )
         }
     }
 
-    override suspend fun update(
-        id: Long,
-        name: String,
-        price: BigDecimal,
-        stock: Int,
-    ): Product {
-        Log.d("SERVICE-IMPL", "Updating product with: $id, $name, $price, $stock")
+    override suspend fun create(input: List<CreateProductInput>): List<Product> {
+        Log.d("IMPL", "Creating products with: $input")
+        return database.withTransaction {
+            input.map {
+                // First, create the product.
+                val productId = database
+                    .productDao()
+                    .insert(
+                        ProductDto(
+                            name = it.name,
+                            defaultPrice = it.price,
+                            stock = it.stock,
+                        )
+                    )
+
+                // Then, store the FTS value.
+                database
+                    .productFtsDao()
+                    .insert(
+                        ProductFtsDto(
+                            productId = productId,
+                            name = it.name,
+                        )
+                    )
+
+                Product(
+                    id = productId,
+                    name = it.name,
+                    defaultPrice = it.price,
+                    stock = it.stock,
+                )
+            }
+        }
+    }
+
+    override suspend fun update(input: UpdateProductInput): Product {
+        Log.d("SERVICE-IMPL", "Updating product with: $input")
         val dto = ProductDto(
-            rowId = id,
-            name = name,
-            defaultPrice = price.toString(),
-            stock = stock,
+            rowId = input.id,
+            name = input.name,
+            defaultPrice = input.price,
+            stock = input.stock,
         )
         database
             .productDao()

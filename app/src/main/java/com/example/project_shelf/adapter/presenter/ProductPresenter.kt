@@ -9,6 +9,7 @@ import com.example.project_shelf.adapter.dto.ui.ProductFilterDto
 import com.example.project_shelf.adapter.dto.ui.toDto
 import com.example.project_shelf.adapter.repository.ProductRepository
 import com.example.project_shelf.app.use_case.product.CreateProductUseCase
+import com.example.project_shelf.app.use_case.product.CreateProductUseCaseInput
 import com.example.project_shelf.app.use_case.product.FindProductUseCase
 import com.example.project_shelf.app.use_case.product.GetProductsUseCase
 import com.example.project_shelf.app.use_case.product.IsProductNameUniqueUseCase
@@ -39,17 +40,20 @@ class ProductPresenter @Inject constructor(
     private val isProductNameUniqueUseCase: IsProductNameUniqueUseCase,
 ) : ProductRepository {
     override fun get(): Flow<PagingData<ProductDto>> {
-        return getProductsUseCase.exec().map {
-            // TODO:
-            //  We can get the currency from a configuration option or something, but for now we'll
-            //  leave it hard coded.
-            it.map { product -> product.toDto(Currency.getInstance("COP")) }
-        }
+        return getProductsUseCase
+            .exec()
+            .map {
+                // TODO:
+                //  We can get the currency from a configuration option or something, but for now we'll
+                //  leave it hard coded.
+                it.map { product -> product.toDto(Currency.getInstance("COP")) }
+            }
     }
 
     override suspend fun find(id: Id): ProductDto {
         Log.d("PRESENTER", "Product[$id]: finding product with ID")
-        return findProductUseCase.exec(id)
+        return findProductUseCase
+            .exec(id)
             // TODO:
             //  We can get the currency from a configuration option or something, but for now we'll
             //  leave it hard coded.
@@ -58,12 +62,14 @@ class ProductPresenter @Inject constructor(
 
     override fun search(value: String): Flow<PagingData<ProductFilterDto>> {
         Log.d("PRESENTER", "Searching products with: $value")
-        return searchProductsUseCase.exec(value).map {
-            // TODO:
-            //  We can get the currency from a configuration option or something, but for now we'll
-            //  leave it hard coded.
-            it.map { dto -> dto.toDto() }
-        }
+        return searchProductsUseCase
+            .exec(value)
+            .map {
+                // TODO:
+                //  We can get the currency from a configuration option or something, but for now we'll
+                //  leave it hard coded.
+                it.map { dto -> dto.toDto() }
+            }
     }
 
     override suspend fun isProductNameUnique(name: String): Boolean {
@@ -78,7 +84,8 @@ class ProductPresenter @Inject constructor(
         stock: Int,
     ): ProductDto {
         Log.d("PRESENTER", "Creating product with: $name, $price, $stock")
-        return updateProductUseCase.exec(id, name, price, stock)
+        return updateProductUseCase
+            .exec(id, name, price, stock)
             // TODO: We can get the currency from a configuration option or something, but for now we'll
             // leave it hard coded.
             .toDto(Currency.getInstance("COP"))
@@ -87,13 +94,16 @@ class ProductPresenter @Inject constructor(
     override suspend fun create(name: String, price: BigDecimal, stock: Int): ProductDto {
         Log.d("PRESENTER", "Creating product with: $name, $price, $stock")
 
-        return createProductUseCase.exec(
-            name = name,
-            price = price,
-            stock = stock,
-        )
+        return createProductUseCase
+            .exec(
+                CreateProductUseCaseInput(
+                    name = name,
+                    price = price,
+                    stock = stock,
+                )
+            )
             // TODO: We can get the currency from a configuration option or something, but for now we'll
-            // leave it hard coded.
+            //  leave it hard coded.
             .toDto(Currency.getInstance("COP"))
     }
 

@@ -4,31 +4,24 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.project_shelf.app.entity.Product
+import java.util.Date
 
 @Entity(tableName = "product")
 data class ProductDto(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "rowid") val rowId: Long = 0,
     @ColumnInfo(name = "name") val name: String,
-    @ColumnInfo(name = "default_price") val defaultPrice: String,
+    @ColumnInfo(name = "default_price") val defaultPrice: Long,
     @ColumnInfo(name = "stock") val stock: Int,
     /// Functional properties
-    @ColumnInfo(name = "pending_delete_until") val pendingDeleteUntil: Long? = null,
+    @ColumnInfo(name = "created_at") val createdAt: Date = Date(),
+    @ColumnInfo(name = "pending_delete_until") val pendingDeleteUntil: Date? = null,
 )
 
 fun ProductDto.toEntity(): Product {
     return Product(
         id = this.rowId,
         name = this.name,
-        defaultPrice = this.defaultPrice.toBigDecimal(),
-        stock = this.stock,
-    )
-}
-
-fun Product.toDto(): ProductDto {
-    return ProductDto(
-        rowId = this.id,
-        name = this.name,
-        defaultPrice = this.defaultPrice.toString(),
+        defaultPrice = this.defaultPrice.toLong(),
         stock = this.stock,
     )
 }
