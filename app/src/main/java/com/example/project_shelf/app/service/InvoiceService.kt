@@ -6,58 +6,35 @@ import com.example.project_shelf.app.entity.InvoiceDraft
 import com.example.project_shelf.app.entity.InvoiceFilter
 import com.example.project_shelf.app.entity.InvoicePopulated
 import com.example.project_shelf.app.entity.InvoiceWithCustomer
+import com.example.project_shelf.app.service.model.CreateInvoiceDraftInput
+import com.example.project_shelf.app.service.model.CreateInvoiceInput
+import com.example.project_shelf.app.service.model.EditInvoiceDraftInput
 import kotlinx.coroutines.flow.Flow
-import java.math.BigDecimal
-import java.util.Date
 
 interface InvoiceService {
-    data class ProductParam(
-        val id: Long,
-        val count: Int,
-        val price: Long,
-    )
-
+    /// Search related
     fun get(): Flow<PagingData<Invoice>>
     fun getWithCustomer(): Flow<PagingData<InvoiceWithCustomer>>
     fun getPopulated(): Flow<PagingData<InvoicePopulated>>
-
     suspend fun getCurrentNumber(): Long
-
     fun search(value: String): Flow<PagingData<InvoiceFilter>>
 
-    suspend fun create(
-        number: Long,
-        customerId: Long,
-        date: Date,
-        products: List<ProductParam>,
-        discount: BigDecimal?,
-    ): Long
+    /// Create related
+    suspend fun create(input: CreateInvoiceInput): Long
 
+    /// Update related
     suspend fun update()
 
+    /// Delete related
     suspend fun delete()
     suspend fun delete(id: Long)
     suspend fun deletePendingForDeletion()
-
     suspend fun setPendingForDeletion(id: Long, until: Long)
     suspend fun unsetPendingForDeletion(id: Long)
 
+    /// Draft related
     suspend fun getDrafts(): List<InvoiceDraft>
-
-    suspend fun createDraft(
-        date: Date,
-        products: List<ProductParam>,
-        remainingUnpaidBalance: Long,
-        customerId: Long?,
-    ): Long
-
-    suspend fun editDraft(
-        draftId: Long,
-        date: Date,
-        products: List<ProductParam>,
-        remainingUnpaidBalance: Long,
-        customerId: Long?,
-    )
-
+    suspend fun createDraft(input: CreateInvoiceDraftInput): Long
+    suspend fun editDraft(input: EditInvoiceDraftInput)
     suspend fun deleteDrafts(vararg ids: Long)
 }

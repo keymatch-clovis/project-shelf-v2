@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -84,16 +85,33 @@ fun InvoiceListScreen(
                 enter = slideInVertically(),
                 exit = slideOutVertically(),
             ) {
-                FloatingActionButton(
-                    modifier = Modifier.height(56.dp),
-                    onClick = { onRequestCreate() },
-                    shape = MaterialTheme.shapes.small,
-                ) {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        contentDescription = null,
-                        imageVector = ImageVector.vectorResource(R.drawable.plus),
-                    )
+                Column {
+                    // TODO: ADD THIS AFTER THE INITIAL RELEASE BRO.
+                    // https://m3.material.io/components/floating-action-button/specs#9b01cb13-7a33-41c9-ab18-56443472d7e9
+//                    FloatingActionButton(
+//                        modifier = Modifier.size(80.dp),
+//                        onClick = onRequestCreate,
+//                        shape = MaterialTheme.shapes.medium,
+//                    ) {
+//                        Icon(
+//                            modifier = Modifier.size(28.dp),
+//                            imageVector = ImageVector.vectorResource(R.drawable.clipboard_pen),
+//                            contentDescription = null,
+//                        )
+//                    }
+
+                    // https://m3.material.io/components/floating-action-button/specs#0a064a5d-8373-4150-9665-40acd0f14b0a
+                    FloatingActionButton(
+                        modifier = Modifier.size(96.dp),
+                        onClick = onRequestCreate,
+                        shape = MaterialTheme.shapes.large,
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(36.dp),
+                            imageVector = ImageVector.vectorResource(R.drawable.plus),
+                            contentDescription = null,
+                        )
+                    }
                 }
             }
         }) { innerPadding ->

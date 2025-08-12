@@ -90,18 +90,18 @@ fun MainNavHost(
                 )
             }
 
-            composable(Destination.PRODUCT_EDIT.route) {
-                val product: ProductDto = it.toRoute()
-
-                EditProductScreen(
-                    viewModel = hiltViewModel<EditProductViewModel, EditProductViewModel.Factory> {
-                        it.create(product)
-                    },
-                    productDeletionViewModel = productDeletionViewModel,
-                    onDismissRequest = { navController.popBackStack() },
-                    onDeleteRequest = { navController.popBackStack() },
-                )
-            }
+//            composable(Destination.PRODUCT_EDIT.route) {
+//                val product: ProductDto = it.toRoute()
+//
+//                EditProductScreen(
+//                    viewModel = hiltViewModel<EditProductViewModel, EditProductViewModel.Factory> {
+//                        it.create(product)
+//                    },
+//                    productDeletionViewModel = productDeletionViewModel,
+//                    onDismissRequest = { navController.popBackStack() },
+//                    onDeleteRequest = { navController.popBackStack() },
+//                )
+//            }
         }
 
         /// Customer related

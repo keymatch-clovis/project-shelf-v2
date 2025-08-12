@@ -1,4 +1,4 @@
-package com.example.project_shelf.framework.ui.components
+package com.example.project_shelf.framework.ui.components.text_field
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,7 +29,7 @@ import com.example.project_shelf.R
 
 @Composable
 fun CustomTextField(
-    value: String,
+    value: String?,
     label: Int,
     modifier: Modifier = Modifier,
     onValueChange: ((String) -> Unit)? = null,
@@ -69,7 +69,7 @@ fun CustomTextField(
                 }
             },
         visualTransformation = visualTransformation,
-        value = value,
+        value = value?.toString() ?: "",
         onValueChange = {
             // Also, if the user starts typing, we have to mark the text field as dirty, so the
             // other possible errors are checked.
@@ -96,38 +96,29 @@ fun CustomTextField(
         },
         supportingText = {
             if (isDirty) {
-                errors.firstOrNull()?.let {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        // TODO: We are just showing the first error, maybe this is not wanted later.
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            text = stringResource(it)
-                        )
+                errors
+                    .firstOrNull()
+                    ?.let {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            // TODO: We are just showing the first error, maybe this is not wanted later.
+                            Text(
+                                modifier = Modifier.weight(1f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                text = stringResource(it)
+                            )
+                        }
                     }
-                }
             }
         },
         trailingIcon = {
-            if (value.isNotEmpty() && onClear != null) {
+            if (value?.isEmpty() == false && onClear != null) {
                 IconButton(onClick = onClear) {
                     Icon(
                         modifier = Modifier.size(24.dp),
                         imageVector = ImageVector.vectorResource(R.drawable.x),
-                        contentDescription = null,
-                    )
-                }
-            }
-
-            if (value.isNotEmpty() && readOnly) {
-                // TODO: do this
-                IconButton(onClick = {}) {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        imageVector = ImageVector.vectorResource(R.drawable.clipboard_copy),
                         contentDescription = null,
                     )
                 }

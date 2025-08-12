@@ -31,7 +31,7 @@ class ProductServiceImpl @Inject constructor(
     private val database: SqliteDatabase,
 ) : ProductService {
     override fun get(): Flow<PagingData<Product>> {
-        Log.d("SERVICE-IMPL", "Finding products")
+        Log.d("IMPL", "Finding products")
         return Pager(
             config = PagingConfig(pageSize = PAGE_SIZE)
         ) {
@@ -44,7 +44,7 @@ class ProductServiceImpl @Inject constructor(
     }
 
     override suspend fun findByName(name: String): Product? {
-        Log.d("SERVICE-IMPL", "Finding product with name: $name")
+        Log.d("IMPL", "Finding product with name: $name")
         return database
             .productDao()
             .selectByName(name)
@@ -52,7 +52,7 @@ class ProductServiceImpl @Inject constructor(
     }
 
     override suspend fun findById(id: Id): Product {
-        Log.d("SERVICE-IMPL", "Product[$id]: finding product with ID")
+        Log.d("IMPL", "Product[$id]: finding product with ID")
         return database
             .productDao()
             .select(id)
@@ -60,7 +60,7 @@ class ProductServiceImpl @Inject constructor(
     }
 
     override fun search(value: String): Flow<PagingData<ProductFilter>> {
-        Log.d("SERVICE-IMPL", "Searching products with: $value")
+        Log.d("IMPL", "Searching products with: $value")
         return Pager(
             config = PagingConfig(pageSize = PAGE_SIZE)
         ) {
@@ -151,7 +151,7 @@ class ProductServiceImpl @Inject constructor(
     }
 
     override suspend fun update(input: UpdateProductInput): Product {
-        Log.d("SERVICE-IMPL", "Updating product with: $input")
+        Log.d("IMPL", "Updating product with: $input")
         val dto = ProductDto(
             rowId = input.id,
             name = input.name,
@@ -166,12 +166,12 @@ class ProductServiceImpl @Inject constructor(
 
     override suspend fun delete() {
         database.withTransaction {
-            Log.d("SERVICE-IMPL", "Deleting all products")
+            Log.d("IMPL", "Deleting all products")
             database
                 .productDao()
                 .delete()
 
-            Log.d("SERVICE-IMPL", "Deleting all products FTS")
+            Log.d("IMPL", "Deleting all products FTS")
             database
                 .productFtsDao()
                 .delete()
@@ -180,12 +180,12 @@ class ProductServiceImpl @Inject constructor(
 
     override suspend fun delete(id: Long) {
         database.withTransaction {
-            Log.d("SERVICE-IMPL", "Product[$id]: Deleting product")
+            Log.d("IMPL", "Product[$id]: Deleting product")
             database
                 .productDao()
                 .delete(id)
 
-            Log.d("SERVICE-IMPL", "Product[$id]: Deleting product FTS")
+            Log.d("IMPL", "Product[$id]: Deleting product FTS")
             database
                 .productFtsDao()
                 .delete(id)
@@ -193,7 +193,7 @@ class ProductServiceImpl @Inject constructor(
     }
 
     override suspend fun deletePendingForDeletion() {
-        Log.d("SERVICE-IMPL", "Deleting products pending for deletion.")
+        Log.d("IMPL", "Deleting products pending for deletion.")
         // As we need to remove more than just the entity, we have to first select the items.
         // NOTE:
         //  This might not be the best way of doing this, but we don't expect this to have more than
@@ -207,14 +207,14 @@ class ProductServiceImpl @Inject constructor(
     }
 
     override suspend fun setPendingForDeletion(id: Long, until: Long) {
-        Log.d("SERVICE-IMPL", "Product[$id]: Setting product pending for deletion")
+        Log.d("IMPL", "Product[$id]: Setting product pending for deletion")
         database
             .productDao()
             .setPendingForDeletion(id, until)
     }
 
     override suspend fun unsetPendingForDeletion(id: Long) {
-        Log.d("SERVICE-IMPL", "Product[$id]: Unsetting product pending for deletion")
+        Log.d("IMPL", "Product[$id]: Unsetting product pending for deletion")
         database
             .productDao()
             .unsetPendingForDeletion(id)

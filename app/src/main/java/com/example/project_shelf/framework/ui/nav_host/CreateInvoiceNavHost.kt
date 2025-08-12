@@ -7,12 +7,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.dto.ui.CustomerFilterDto
-import com.example.project_shelf.adapter.view_model.invoice.CreateInvoiceViewModel
-import com.example.project_shelf.adapter.view_model.invoice.InvoiceProductState
-import com.example.project_shelf.adapter.view_model.util.Input
+import com.example.project_shelf.adapter.dto.ui.InvoiceProductDto
+import com.example.project_shelf.adapter.view_model.common.Input
 import com.example.project_shelf.framework.ui.components.form.invoice.CreateInvoiceDetailsForm
 import com.example.project_shelf.framework.ui.components.form.invoice.CreateInvoiceProductsForm
-import kotlinx.coroutines.flow.MutableSharedFlow
 
 enum class CreateInvoiceDestination(
     val route: String,
@@ -33,10 +31,12 @@ fun CreateInvoiceNavHost(
     modifier: Modifier,
     navHostController: NavHostController,
     startDestination: CreateInvoiceDestination,
-    emitter: MutableSharedFlow<CreateInvoiceViewModel.Event>,
-
-    invoiceProducts: List<InvoiceProductState>,
-    customerInput: Input<CustomerFilterDto, CustomerFilterDto>,
+    invoiceProducts: List<InvoiceProductDto>,
+    customerInput: Input<CustomerFilterDto>,
+    onOpenSearchCustomer: () -> Unit,
+    onOpenSearchProduct: () -> Unit,
+    onEditInvoiceProduct: (InvoiceProductDto) -> Unit,
+    onDeleteInvoiceProduct: (InvoiceProductDto) -> Unit,
 ) {
     NavHost(
         modifier = modifier,
@@ -46,14 +46,16 @@ fun CreateInvoiceNavHost(
         composable(CreateInvoiceDestination.DETAILS.route) {
             CreateInvoiceDetailsForm(
                 customerInput = customerInput,
-                emitter = emitter,
+                onOpenSearchCustomer = onOpenSearchCustomer,
             )
         }
 
         composable(CreateInvoiceDestination.PRODUCTS.route) {
             CreateInvoiceProductsForm(
                 invoiceProducts = invoiceProducts,
-                emitter = emitter,
+                onOpenSearchProduct = onOpenSearchProduct,
+                onEditInvoiceProduct = onEditInvoiceProduct,
+                onDeleteInvoiceProduct = onDeleteInvoiceProduct,
             )
         }
     }

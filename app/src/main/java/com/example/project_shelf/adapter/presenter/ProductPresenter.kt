@@ -29,7 +29,6 @@ import java.math.BigDecimal
 import javax.inject.Inject
 
 class ProductPresenter @Inject constructor(
-    private val getProductsUseCase: GetProductsUseCase,
     private val findProductUseCase: FindProductUseCase,
     private val createProductUseCase: CreateProductUseCase,
     private val updateProductUseCase: UpdateProductUseCase,
@@ -40,14 +39,7 @@ class ProductPresenter @Inject constructor(
     private val isProductNameUniqueUseCase: IsProductNameUniqueUseCase,
 ) : ProductRepository {
     override fun get(): Flow<PagingData<ProductDto>> {
-        return getProductsUseCase
-            .exec()
-            .map {
-                // TODO:
-                //  We can get the currency from a configuration option or something, but for now we'll
-                //  leave it hard coded.
-                it.map { product -> product.toDto(Currency.getInstance("COP")) }
-            }
+        TODO("REMOVE THIS METHOD")
     }
 
     override suspend fun find(id: Id): ProductDto {
@@ -83,28 +75,11 @@ class ProductPresenter @Inject constructor(
         price: BigDecimal,
         stock: Int,
     ): ProductDto {
-        Log.d("PRESENTER", "Creating product with: $name, $price, $stock")
-        return updateProductUseCase
-            .exec(id, name, price, stock)
-            // TODO: We can get the currency from a configuration option or something, but for now we'll
-            // leave it hard coded.
-            .toDto(Currency.getInstance("COP"))
+        TODO("remove")
     }
 
     override suspend fun create(name: String, price: BigDecimal, stock: Int): ProductDto {
-        Log.d("PRESENTER", "Creating product with: $name, $price, $stock")
-
-        return createProductUseCase
-            .exec(
-                CreateProductUseCaseInput(
-                    name = name,
-                    price = price,
-                    stock = stock,
-                )
-            )
-            // TODO: We can get the currency from a configuration option or something, but for now we'll
-            //  leave it hard coded.
-            .toDto(Currency.getInstance("COP"))
+        TODO("Remove")
     }
 
     override suspend fun setPendingForDeletion(id: Long) {

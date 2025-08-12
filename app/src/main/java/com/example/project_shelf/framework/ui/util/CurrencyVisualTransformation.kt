@@ -13,7 +13,9 @@ import java.util.Locale
 
 class CurrencyVisualTransformation(locale: Locale) : VisualTransformation {
     private val currencyUnit = CurrencyUnit.of(locale)
-    private val moneyFormatter = MoneyFormatterBuilder().appendAmountLocalized().toFormatter()
+    private val moneyFormatter = MoneyFormatterBuilder()
+        .appendAmountLocalized()
+        .toFormatter()
 
     override fun filter(text: AnnotatedString): TransformedText {
         val decimalValue = text.text.toBigDecimalOrNull()
@@ -27,7 +29,9 @@ class CurrencyVisualTransformation(locale: Locale) : VisualTransformation {
             )
         )
 
-        val formatted = moneyFormatter.withLocale(Locale.getDefault()).print(money)
+        val formatted = moneyFormatter
+            .withLocale(Locale.getDefault())
+            .print(money)
 
         val groupingSeparator =
             DecimalFormatSymbols.getInstance(Locale.getDefault()).groupingSeparator

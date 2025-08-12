@@ -1,6 +1,5 @@
-package com.example.project_shelf.adapter.view_model.util
+package com.example.project_shelf.adapter.view_model.common
 
-import androidx.compose.runtime.snapshotFlow
 import androidx.paging.PagingData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -8,31 +7,36 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 class SearchExtension<T : Any>(
-    private val scope: CoroutineScope,
-    private val onSearch: (String) -> Flow<PagingData<T>>,
+    scope: CoroutineScope,
+    onSearch: (String) -> Flow<PagingData<T>>,
 ) {
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+
     private val _query = MutableStateFlow("")
     val query = _query.asStateFlow()
 
-    val result: StateFlow<PagingData<T>> = snapshotFlow { _query.value }
-        .debounce(300)
+    val result: Flow<PagingData<T>> = _query
+        .onEach { _isLoading.update { true } }
+        .debounce(500)
         .filter { it.isNotEmpty() }
         .flatMapLatest { onSearch(it) }
-        .stateIn(
-            scope = scope,
-            started = SharingStarted.WhileSubscribed(),
-            initialValue = PagingData.empty<T>()
-        )
+        .also { _isLoading.update { false } }
+        .stateIn(scope, SharingStarted.WhileSubscribed(), PagingData.empty())
 
     fun updateQuery(value: String) {
         // NOTE: We are setting this as uppercase here just for UI purposes, as the business

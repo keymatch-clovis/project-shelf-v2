@@ -1,20 +1,22 @@
 package com.example.project_shelf.adapter.view_model.invoice
 
 import android.util.Log
+import androidx.compose.runtime.compositionLocalOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.project_shelf.adapter.dto.ui.CustomerFilterDto
 import com.example.project_shelf.adapter.dto.ui.InvoiceDraftDto
-import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.dto.ui.ProductFilterDto
-import com.example.project_shelf.adapter.dto.ui.toDto
 import com.example.project_shelf.adapter.dto.ui.toFilter
 import com.example.project_shelf.adapter.repository.CustomerRepository
 import com.example.project_shelf.adapter.repository.ProductRepository
-import com.example.project_shelf.adapter.view_model.util.Input
-import com.example.project_shelf.adapter.view_model.util.SearchExtension
-import com.example.project_shelf.adapter.view_model.util.validator.ObjectValidator
-import com.example.project_shelf.app.service.InvoiceService
+import com.example.project_shelf.adapter.view_model.common.Input
+import com.example.project_shelf.adapter.view_model.common.SearchExtension
+import com.example.project_shelf.adapter.view_model.common.validator.validateDouble
+import com.example.project_shelf.adapter.view_model.common.validator.validateObject
+import com.example.project_shelf.adapter.dto.ui.InvoiceProductDto
+import com.example.project_shelf.adapter.view_model.invoice.model.InvoiceProductInput
+import com.example.project_shelf.app.service.model.CreateInvoiceProductInput
 import com.example.project_shelf.app.use_case.customer.SearchCustomerUseCase
 import com.example.project_shelf.app.use_case.invoice.CreateInvoiceDraftUseCase
 import com.example.project_shelf.app.use_case.invoice.EditInvoiceDraftUseCase
@@ -30,31 +32,23 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Date
 
-data class InvoiceProductState(
-    val productId: Long,
-    val name: String,
-    val count: Int,
-    val price: Long,
-)
-
 sealed interface CreateInvoiceViewModelState {
-    data class State(
+    data class UiState(
         val isLoading: Boolean = false,
         val isSavingDraft: Boolean = false,
         val draftId: Long? = null,
+        val isShowingAddInvoiceProductDialog: Boolean = false,
     )
 
     data class InputState(
-        val customer: Input<CustomerFilterDto, CustomerFilterDto> = Input(null, ObjectValidator()),
-        val invoiceProducts: MutableStateFlow<List<InvoiceProductState>> = MutableStateFlow(
-            emptyList()
-        ),
+        val customer: Input<CustomerFilterDto> = Input(),
+        val invoiceProducts: List<InvoiceProductDto> = emptyList(),
+        val currentInvoiceProductInput: InvoiceProductInput = InvoiceProductInput(),
     )
 }
 
@@ -74,20 +68,13 @@ class CreateInvoiceViewModel @AssistedInject constructor(
         fun create(draft: InvoiceDraftDto?): CreateInvoiceViewModel
     }
 
-    /// State related
-    private val _state = MutableStateFlow(CreateInvoiceViewModelState.State())
-    val state = _state.asStateFlow()
+    /// UiState related
+    private val _uiState = MutableStateFlow(CreateInvoiceViewModelState.UiState())
+    val uiState = _uiState.asStateFlow()
 
     /// Input related
-    val inputState = CreateInvoiceViewModelState.InputState()
-
-    /// Event related
-    sealed interface Event {
-        object OpenSearchCustomer : Event
-        object OpenSearchProduct : Event
-    }
-
-    val eventFlow = MutableSharedFlow<Event>()
+    private val _inputState = MutableStateFlow(CreateInvoiceViewModelState.InputState())
+    val inputState = _inputState.asStateFlow()
 
     /// Related to customer search.
     private val _showCustomerSearchBar = MutableStateFlow(false)
@@ -105,10 +92,6 @@ class CreateInvoiceViewModel @AssistedInject constructor(
         onSearch = { productRepository.search(it) },
     )
 
-    /// Related to invoice product adding
-    private val _showAddInvoiceProductDialog = MutableStateFlow(false)
-    val showAddInvoiceProductBottomSheet = _showAddInvoiceProductDialog.asStateFlow()
-
     init {
         // When we start this view model, the FIRST thing we need to do is to either create or load
         // a draft, if present.
@@ -116,15 +99,6 @@ class CreateInvoiceViewModel @AssistedInject constructor(
             if (draft == null) createDraft() else loadDraft(draft)
 
             startSavingDraft()
-        }
-
-        viewModelScope.launch {
-            eventFlow.collectLatest {
-                when (it) {
-                    Event.OpenSearchCustomer -> openCustomerSearchBar()
-                    Event.OpenSearchProduct -> openProductSearchBar()
-                }
-            }
         }
     }
 
@@ -140,49 +114,118 @@ class CreateInvoiceViewModel @AssistedInject constructor(
         _showProductSearchBar.update { false }
     }
 
+    fun openAddInvoiceProductDialog(dto: InvoiceProductDto) {
+        closeProductSearchBar()
+
+        _inputState.value.invoiceProducts
+            .first { it.productId == dto.productId }
+            .let {
+                _inputState.update { it.copy(currentInvoiceProductInput = dto.toInput()) }
+            }
+
+        _uiState.update { it.copy(isShowingAddInvoiceProductDialog = true) }
+    }
+
     fun openAddInvoiceProductDialog(dto: ProductFilterDto) {
         // This is most likely called after searching a product using the search bar, so close that
         // before opening the dialog.
         closeProductSearchBar()
 
-        // _showAddInvoiceProductDialog.update { true }
-        inputState.invoiceProducts.update {
-            it + InvoiceProductState(
-                productId = dto.id,
-                name = dto.name,
-                count = 0,
-                price = 0L,
-            )
+        // We don't allow for multiple instances of the same item in the invoice. If we find the
+        // product is already in the list, we must update it instead.
+        val invoiceProduct = _inputState.value.invoiceProducts.find { it.productId == dto.id }
+
+        if (invoiceProduct != null) {
+            _inputState.update { it.copy(currentInvoiceProductInput = invoiceProduct.toInput()) }
+        } else {
+            _inputState.update {
+                it.copy(
+                    currentInvoiceProductInput = InvoiceProductInput(
+                        productId = dto.id,
+                        name = dto.name,
+                        count = Input(),
+                        price = Input(),
+                    )
+                )
+            }
         }
 
-        // TODO: Search for the product from the filter, so we can get the info to show in the dialog
-        //  after the dialog is closed, we can add the product to the list.
+        _uiState.update { it.copy(isShowingAddInvoiceProductDialog = true) }
     }
 
     fun closeAddInvoiceProductDialog() {
-        _showAddInvoiceProductDialog.update { false }
+        _uiState.update { it.copy(isShowingAddInvoiceProductDialog = false) }
+        clearCurrentInvoiceProduct()
     }
 
+    /// Update methods
     fun updateCustomer(dto: CustomerFilterDto) {
         closeCustomerSearchBar()
 
-        inputState.customer.update(dto)
+        _inputState.update {
+            it.copy(
+                customer = Input(
+                    value = dto,
+                    errors = dto.validateObject(required = true),
+                )
+            )
+        }
+    }
+
+    fun updateCurrentInvoiceProductPrice(value: String? = null) = _inputState.update {
+        it.copy(
+            currentInvoiceProductInput = it.currentInvoiceProductInput.copy(
+                price = Input(value = value, errors = value.validateDouble())
+            )
+        )
+    }
+
+    fun clearCurrentInvoiceProduct() = _inputState.update {
+        it.copy(currentInvoiceProductInput = InvoiceProductInput())
+    }
+
+    fun addCurrentInvoiceProduct() {
+        // NOTE:
+        // > This is a risky transaction!
+        // > Cephalon Sark
+        val dto = InvoiceProductDto(
+            productId = _inputState.value.currentInvoiceProductInput.productId!!,
+            name = _inputState.value.currentInvoiceProductInput.name!!,
+            price = _inputState.value.currentInvoiceProductInput.price.value?.toLong() ?: 0L,
+            count = _inputState.value.currentInvoiceProductInput.count.value?.toInt() ?: 0,
+        )
+
+        // Delete any occurrences of the current invoice product, if any.
+        deleteInvoiceProduct(dto)
+
+        _inputState.update { it.copy(invoiceProducts = it.invoiceProducts + dto) }
+
+        closeAddInvoiceProductDialog()
+    }
+
+    fun deleteInvoiceProduct(dto: InvoiceProductDto) {
+        Log.d("VIEW-MODEL", "Deleting invoice product: $dto")
+        _inputState.update {
+            it.copy(
+                invoiceProducts = it.invoiceProducts.filter { it.productId != dto.productId },
+            )
+        }
     }
 
     /// Private methods
     private suspend fun createDraft() {
         Log.d("VIEW-MODEL", "Creating invoice draft")
-        _state.update { it.copy(isSavingDraft = true) }
+        _uiState.update { it.copy(isSavingDraft = true) }
         createInvoiceDraftUseCase
             .exec()
             .apply {
-                _state.update { it.copy(isSavingDraft = false, draftId = this) }
+                _uiState.update { it.copy(isSavingDraft = false, draftId = this) }
             }
     }
 
     private suspend fun loadDraft(draft: InvoiceDraftDto) {
         Log.d("VIEW-MODEL", "Loading invoice draft: $draft")
-        _state.update { it.copy(isLoading = true) }
+        _uiState.update { it.copy(isLoading = true) }
 
         // As we allow customer deletion in our system, we need to check if the customer
         // assigned in the draft still exists.
@@ -190,8 +233,8 @@ class CreateInvoiceViewModel @AssistedInject constructor(
             searchCustomerUseCase
                 .exec(it)
                 ?.toFilter()
-                .let {
-                    inputState.customer.update(it)
+                .let { customer ->
+                    _inputState.update { it.copy(customer = Input(value = customer)) }
                 }
         }
 
@@ -208,47 +251,35 @@ class CreateInvoiceViewModel @AssistedInject constructor(
                     }
             }
             .map { (draftProduct, product) ->
-                Log.d("test", "$draftProduct, $product")
-                InvoiceProductState(
+                InvoiceProductDto(
                     productId = product.id,
                     name = product.name,
-                    count = draftProduct.count,
                     price = draftProduct.price,
+                    count = draftProduct.count,
                 )
             }
-            .let { items -> inputState.invoiceProducts.update { items } }
+            .let { items -> _inputState.update { it.copy(invoiceProducts = items) } }
 
-        _state.update { it.copy(isLoading = false, draftId = draft.id) }
+        _uiState.update { it.copy(isLoading = false, draftId = draft.id) }
     }
 
     private suspend fun startSavingDraft() {
-        //  > Suitable for scenarios where we want to process emissions from multiple flows
-        //  > concurrently without waiting for any particular flow to complete.
-        // https://www.baeldung.com/kotlin/combining-multiple-flows
-        //
-        // We need to listen whenever the input state changes.
-        merge(
-            inputState.customer.rawValue,
-            inputState.invoiceProducts,
-        )
-            .onEach { _state.update { it.copy(isSavingDraft = true) } }
+        _inputState
+            .onEach { _uiState.update { it.copy(isSavingDraft = true) } }
             .debounce(800)
             .collectLatest {
                 editInvoiceDraftUseCase.exec(
-                    draftId = _state.value.draftId!!,
-                    date = Date(),
-                    products = inputState.invoiceProducts.value.map {
-                        InvoiceService.ProductParam(
-                            id = it.productId,
-                            count = it.count,
-                            price = it.price,
-                        )
-                    },
-                    remainingUnpaidBalance = 0,
-                    customerId = inputState.customer.rawValue.value?.id,
+                    EditInvoiceDraftUseCase.Input(
+                        draftId = _uiState.value.draftId!!,
+                        date = Date(),
+                        products = it.invoiceProducts.map { it.toUseCaseInput() },
+                        customerId = it.customer.value?.id,
+                        // TODO: FIX THIS.
+                        remainingUnpaidBalance = 0,
+                    )
                 )
 
-                _state.update { it.copy(isSavingDraft = false) }
+                _uiState.update { it.copy(isSavingDraft = false) }
             }
     }
 }

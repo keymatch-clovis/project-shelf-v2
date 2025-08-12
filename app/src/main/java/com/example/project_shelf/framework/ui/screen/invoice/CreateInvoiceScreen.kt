@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,7 +23,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -68,18 +66,11 @@ fun CreateInvoiceScreen(
     val productQuery = viewModel.productSearch.query.collectAsState()
     val productSearchItems = viewModel.productSearch.result.collectAsLazyPagingItems()
 
-    /// Related to invoice product adding
-    val showAddInvoiceProductBottomSheet =
-        viewModel.showAddInvoiceProductBottomSheet.collectAsState()
+    /// Input state related
+    val inputState = viewModel.inputState.collectAsState()
 
-    /// Customer related
-    val customer = viewModel.inputState.customer.rawValue.collectAsState()
-
-    /// Products related
-    val invoiceProducts = viewModel.inputState.invoiceProducts.collectAsState()
-
-    /// State related
-    val state = viewModel.state.collectAsState()
+    /// UiState related
+    val uiState = viewModel.uiState.collectAsState()
 
     Box {
         Scaffold(
@@ -98,7 +89,7 @@ fun CreateInvoiceScreen(
                     },
                     actions = {
                         DraftIndicator(
-                            loading = state.value.isSavingDraft,
+                            loading = uiState.value.isSavingDraft,
                         )
                         Button(
                             // TODO: fix this
@@ -145,10 +136,12 @@ fun CreateInvoiceScreen(
                         .weight(1f),
                     navHostController = navHostController,
                     startDestination = CreateInvoiceDestination.DETAILS,
-                    emitter = viewModel.eventFlow,
-
-                    invoiceProducts = invoiceProducts.value,
-                    customerInput = viewModel.inputState.customer,
+                    invoiceProducts = inputState.value.invoiceProducts,
+                    customerInput = inputState.value.customer,
+                    onOpenSearchCustomer = { viewModel.openCustomerSearchBar() },
+                    onOpenSearchProduct = { viewModel.openProductSearchBar() },
+                    onEditInvoiceProduct = { viewModel.openAddInvoiceProductDialog(it) },
+                    onDeleteInvoiceProduct = { viewModel.deleteInvoiceProduct(it) },
                 )
             }
         }
@@ -213,19 +206,22 @@ fun CreateInvoiceScreen(
         }
     }
 
+    /// Dialogs related
     AnimatedVisibility(
-        visible = state.value.isLoading,
+        visible = uiState.value.isLoading,
     ) {
         LoadingDialog(
             headlineStringResource = R.string.invoice_loading_draft_dialog_headline,
         )
     }
 
-
-    /// Modals and other related components
-    if (showAddInvoiceProductBottomSheet.value) {
+    if (uiState.value.isShowingAddInvoiceProductDialog) {
         AddInvoiceProductDialog(
+            name = inputState.value.currentInvoiceProductInput.name!!,
+            price = inputState.value.currentInvoiceProductInput.price,
+            onChangePrice = { viewModel.updateCurrentInvoiceProductPrice(it) },
             onDismissRequest = { viewModel.closeAddInvoiceProductDialog() },
+            onAddRequest = { viewModel.addCurrentInvoiceProduct() },
         )
     }
 }

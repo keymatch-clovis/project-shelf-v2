@@ -58,7 +58,7 @@ fun InvoiceDraftListScreen(
     /// Alert dialog related
     var showConfirmDeletionDialog by remember { mutableStateOf(false) }
 
-    /// State related
+    /// UiState related
     val state = viewModel.state.collectAsState()
 
     BackHandler(enabled = state.value.isEditing) {

@@ -13,7 +13,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.project_shelf.R
-import com.example.project_shelf.framework.ui.components.CustomTextField
+import com.example.project_shelf.framework.ui.components.text_field.CustomTextField
 
 @Composable
 fun EditProductForm(

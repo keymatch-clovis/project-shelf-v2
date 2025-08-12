@@ -34,7 +34,7 @@ import com.example.project_shelf.adapter.dto.ui.CityFilterDto
 import com.example.project_shelf.adapter.dto.ui.CustomerDto
 import com.example.project_shelf.adapter.view_model.customer.CreateCustomerViewModel
 import com.example.project_shelf.framework.ui.components.CustomSearchBar
-import com.example.project_shelf.framework.ui.components.CustomTextField
+import com.example.project_shelf.framework.ui.components.text_field.CustomTextField
 import com.example.project_shelf.framework.ui.components.list_item.CityFilterListItem
 import com.example.project_shelf.framework.ui.getStringResource
 
@@ -45,21 +45,8 @@ fun CreateCustomerScreen(
     onCreated: (CustomerDto) -> Unit,
     onDismissed: () -> Unit,
 ) {
-    val name = viewModel.inputState.name.rawValue.collectAsState()
-    val nameErrors = viewModel.inputState.name.errors.collectAsState()
-
-    val phone = viewModel.inputState.phone.rawValue.collectAsState()
-    val phoneErrors = viewModel.inputState.phone.errors.collectAsState()
-
-    val address = viewModel.inputState.address.rawValue.collectAsState()
-    val addressErrors = viewModel.inputState.address.errors.collectAsState()
-
-    val businessName = viewModel.inputState.businessName.rawValue.collectAsState()
-    val businessNameErrors = viewModel.inputState.businessName.errors.collectAsState()
-
-    val city = viewModel.inputState.city.rawValue.collectAsState()
-    val cityErrors = viewModel.inputState.city.errors.collectAsState()
-
+    /// Input state related
+    val inputState = viewModel.inputState.collectAsState()
     val isValid = viewModel.isValid.collectAsState()
 
     /// Related to city search.
@@ -67,7 +54,6 @@ fun CreateCustomerScreen(
     val cityQuery = viewModel.citySearch.query.collectAsState()
     val citySearchItems = viewModel.citySearch.result.collectAsLazyPagingItems()
 
-    // Listen to ViewModel events.
     LaunchedEffect(Unit) {
         viewModel.eventFlow.collect {
             when (it) {
@@ -115,10 +101,10 @@ fun CreateCustomerScreen(
                     /// Name
                     CustomTextField(
                         required = true,
-                        value = name.value ?: "",
+                        value = inputState.value.name.value,
                         onValueChange = { viewModel.updateName(it) },
                         label = R.string.name,
-                        errors = nameErrors.value.map { it.getStringResource() },
+                        errors = inputState.value.name.errors.map { it.getStringResource() },
                         onClear = { viewModel.updateName("") },
                         keyboardOptions = KeyboardOptions(
                             capitalization = KeyboardCapitalization.Characters,
@@ -128,10 +114,10 @@ fun CreateCustomerScreen(
                     /// Phone
                     CustomTextField(
                         required = true,
-                        value = phone.value ?: "",
+                        value = inputState.value.phone.value,
                         onValueChange = { viewModel.updatePhone(it) },
                         label = R.string.phone,
-                        errors = phoneErrors.value.map { it.getStringResource() },
+                        errors = inputState.value.phone.errors.map { it.getStringResource() },
                         onClear = { viewModel.updatePhone("") },
                         keyboardOptions = KeyboardOptions(
                             capitalization = KeyboardCapitalization.Characters,
@@ -140,11 +126,10 @@ fun CreateCustomerScreen(
                     )
                     /// Address
                     CustomTextField(
-                        required = true,
-                        value = address.value ?: "",
+                        value = inputState.value.address.value,
                         onValueChange = { viewModel.updateAddress(it) },
                         label = R.string.address,
-                        errors = addressErrors.value.map { it.getStringResource() },
+                        errors = inputState.value.address.errors.map { it.getStringResource() },
                         onClear = { viewModel.updateAddress("") },
                         keyboardOptions = KeyboardOptions(
                             capitalization = KeyboardCapitalization.Characters,
@@ -155,18 +140,18 @@ fun CreateCustomerScreen(
                     CustomTextField(
                         required = true,
                         label = R.string.city,
-                        value = city.value?.name ?: "",
+                        value = inputState.value.city.value?.name,
                         readOnly = true,
                         onClick = { viewModel.openCitySearchBar() },
-                        errors = cityErrors.value.map { it.getStringResource() },
+                        errors = inputState.value.city.errors.map { it.getStringResource() },
                     )
                     /// Business Name
                     CustomTextField(
-                        value = businessName.value ?: "",
+                        value = inputState.value.businessName.value,
                         onValueChange = { viewModel.updateBusinessName(it) },
                         onClear = { viewModel.updateBusinessName("") },
                         label = R.string.business_name,
-                        errors = businessNameErrors.value.map { it.getStringResource() },
+                        errors = inputState.value.businessName.errors.map { it.getStringResource() },
                         keyboardOptions = KeyboardOptions(
                             capitalization = KeyboardCapitalization.Characters,
                             imeAction = ImeAction.Done
@@ -193,7 +178,9 @@ fun CreateCustomerScreen(
                     // If the user presses the search button, without selecting an item, we will
                     // assume it wanted to select the first-most item in the search list, if there
                     // was one.
-                    citySearchItems.takeIf { it.itemCount > 0 }?.peek(0)
+                    citySearchItems
+                        .takeIf { it.itemCount > 0 }
+                        ?.peek(0)
                         ?.let { viewModel.updateCity(it) }
 
                     viewModel.closeCitySearchBar()

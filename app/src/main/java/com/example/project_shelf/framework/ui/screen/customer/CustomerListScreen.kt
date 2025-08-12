@@ -99,15 +99,16 @@ fun CustomerListScreen(
                     enter = slideInHorizontally(),
                     exit = slideOutHorizontally(),
                 ) {
+                    // https://m3.material.io/components/floating-action-button/specs#0a064a5d-8373-4150-9665-40acd0f14b0a
                     FloatingActionButton(
-                        modifier = Modifier.height(56.dp),
+                        modifier = Modifier.size(96.dp),
                         onClick = onRequestCreate,
-                        shape = MaterialTheme.shapes.small,
+                        shape = MaterialTheme.shapes.large,
                     ) {
                         Icon(
-                            modifier = Modifier.size(24.dp),
-                            contentDescription = null,
+                            modifier = Modifier.size(36.dp),
                             imageVector = ImageVector.vectorResource(R.drawable.plus),
+                            contentDescription = null,
                         )
                     }
                 }

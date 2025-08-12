@@ -12,14 +12,14 @@ class UpdateProductUseCase @Inject constructor(private val productService: Produ
     suspend fun exec(
         id: Long,
         name: String,
-        price: BigDecimal,
+        price: Long,
         stock: Int,
     ): Product {
         // We are here converting from any value to COP. So, if we need later to change this to
         // any other currency, we can do it here.
         // TODO: We can get the currency from a configuration option or something, but for now we'll
         // leave it hard coded.
-        val money = Money.of(CurrencyUnit.of("COP"), price)
+        val money = Money.ofMinor(CurrencyUnit.of("COP"), price)
         return productService.update(
             UpdateProductInput(
                 id = id,

@@ -1,9 +1,6 @@
 package com.example.project_shelf.adapter.view_model.product
 
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import android.icu.util.Currency
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -11,14 +8,14 @@ import androidx.paging.map
 import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.dto.ui.toDto
 import com.example.project_shelf.adapter.repository.ProductRepository
-import com.example.project_shelf.adapter.view_model.util.SearchExtension
+import com.example.project_shelf.adapter.view_model.common.SearchExtension
+import com.example.project_shelf.app.use_case.product.GetProductsUseCase
 import com.example.project_shelf.app.use_case.product.SearchProductsUseCase
 import com.example.project_shelf.common.Id
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +29,7 @@ import javax.inject.Inject
 class ProductListViewModel @Inject constructor(
     private val repository: ProductRepository,
     private val searchProductsUseCase: SearchProductsUseCase,
+    private val getProductsUseCase: GetProductsUseCase,
 ) : ViewModel() {
     /// Event related
     sealed interface Event {
@@ -42,8 +40,14 @@ class ProductListViewModel @Inject constructor(
     val eventFlow = _eventFlow.asSharedFlow()
 
     /// List related
-    var products: Flow<PagingData<ProductDto>> = repository
-        .get()
+    var products: Flow<PagingData<ProductDto>> = getProductsUseCase
+        .exec()
+        .map {
+            // TODO:
+            //  We can get the currency from a configuration option or something, but for now we'll
+            //  leave it hard coded.
+            it.map { it.toDto(Currency.getInstance("COP")) }
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(),

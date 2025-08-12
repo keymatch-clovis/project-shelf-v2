@@ -19,6 +19,9 @@ import com.example.project_shelf.app.entity.InvoiceFilter
 import com.example.project_shelf.app.entity.InvoicePopulated
 import com.example.project_shelf.app.entity.InvoiceWithCustomer
 import com.example.project_shelf.app.service.InvoiceService
+import com.example.project_shelf.app.service.model.CreateInvoiceDraftInput
+import com.example.project_shelf.app.service.model.CreateInvoiceInput
+import com.example.project_shelf.app.service.model.EditInvoiceDraftInput
 import com.example.project_shelf.framework.room.SqliteDatabase
 import dagger.Binds
 import dagger.Module
@@ -90,24 +93,15 @@ class InvoiceServiceImpl @Inject constructor(
         }.flow.map { it.map { dto -> dto.toEntity() } }
     }
 
-    override suspend fun create(
-        number: Long,
-        customerId: Long,
-        date: Date,
-        products: List<InvoiceService.ProductParam>,
-        discount: BigDecimal?,
-    ): Long {
-        Log.d(
-            "SERVICE-IMPL",
-            "Creating invoice with: $number, $customerId, $date, $products, $discount"
-        )
+    override suspend fun create(input: CreateInvoiceInput): Long {
+        Log.d("SERVICE-IMPL", "Creating invoice with: $input")
         return database.withTransaction {
             // Create the invoice
             val invoiceId = database
                 .invoiceDao()
                 .insert(
                     InvoiceDto(
-                        number = number, customerId = customerId, date = Date().time,
+                        number = input.number, customerId = input.customerId, date = Date().time,
                         // TODO: fixthis
                         remainingUnpaidBalance = 0
                     )
@@ -117,11 +111,11 @@ class InvoiceServiceImpl @Inject constructor(
             database
                 .invoiceProductDao()
                 .insert(
-                    *products
+                    *input.products
                         .map {
                             InvoiceProductDto(
                                 invoiceId = invoiceId,
-                                productId = it.id,
+                                productId = it.productId,
                                 count = it.count,
                                 price = it.price,
                             )
@@ -131,7 +125,7 @@ class InvoiceServiceImpl @Inject constructor(
             // Get the customer to assign the search values.
             val customer = database
                 .customerDao()
-                .select(customerId)
+                .select(input.customerId)
 
             // Finally, store the FTS value.
             database
@@ -139,7 +133,7 @@ class InvoiceServiceImpl @Inject constructor(
                 .insert(
                     InvoiceFtsDto(
                         invoiceId = invoiceId,
-                        number = number,
+                        number = input.number,
                         customerName = customer.name,
                         customerBusinessName = customer.businessName,
                     )
@@ -217,21 +211,17 @@ class InvoiceServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun createDraft(
-        date: Date,
-        products: List<InvoiceService.ProductParam>,
-        remainingUnpaidBalance: Long,
-        customerId: Long?,
-    ): Long {
+    override suspend fun createDraft(input: CreateInvoiceDraftInput): Long {
+        Log.d("IMPL", "Creating draft with: $input")
         val invoiceDraft = InvoiceDraftDto(
-            date = date,
-            remainingUnpaidBalance = remainingUnpaidBalance,
-            customerId = customerId,
+            date = input.date,
+            remainingUnpaidBalance = input.remainingUnpaidBalance,
+            customerId = input.customerId,
         )
 
-        products.forEach {
+        input.products.forEach {
             val dto = InvoiceDraftProductDto(
-                productId = it.id,
+                productId = it.productId,
                 count = it.count,
                 price = it.price,
             )
@@ -247,22 +237,16 @@ class InvoiceServiceImpl @Inject constructor(
             .put(invoiceDraft)
     }
 
-    override suspend fun editDraft(
-        draftId: Long,
-        date: Date,
-        products: List<InvoiceService.ProductParam>,
-        remainingUnpaidBalance: Long,
-        customerId: Long?,
-    ) {
+    override suspend fun editDraft(input: EditInvoiceDraftInput) {
         // TODO: Maybe move all this to the application layer?
         //
         // > It seems we need to update both relationships, like a RDBMS, not like mongo, silly me.
         // https://docs.objectbox.io/relations#updating-tomany
 
         val box = boxStore.boxFor(InvoiceDraftDto::class.java)
-        val invoiceDraft = box.get(draftId)
+        val invoiceDraft = box.get(input.draftId)
 
-        invoiceDraft.customerId = customerId
+        invoiceDraft.customerId = input.customerId
 
         // FIXME: This can be improved, by filtering the ones that are not in this list, and
         //  removing the ones that are in the DTO and not in this list. But for now I think it is
@@ -280,9 +264,9 @@ class InvoiceServiceImpl @Inject constructor(
         //  adding them again.
         invoiceDraft.products.clear()
 
-        products.forEach {
+        input.products.forEach {
             val dto = InvoiceDraftProductDto(
-                productId = it.id,
+                productId = it.productId,
                 count = it.count,
                 price = it.price,
             )

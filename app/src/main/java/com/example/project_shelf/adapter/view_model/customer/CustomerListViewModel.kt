@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import com.example.project_shelf.adapter.dto.ui.CustomerDto
 import com.example.project_shelf.adapter.repository.CustomerRepository
-import com.example.project_shelf.adapter.view_model.util.SearchExtension
+import com.example.project_shelf.adapter.view_model.common.SearchExtension
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

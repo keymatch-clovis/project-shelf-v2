@@ -13,8 +13,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -22,25 +20,15 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.dto.ui.CustomerFilterDto
-import com.example.project_shelf.adapter.view_model.invoice.CreateInvoiceViewModel
-import com.example.project_shelf.adapter.view_model.util.Input
-import com.example.project_shelf.framework.ui.components.CustomTextField
+import com.example.project_shelf.adapter.view_model.common.Input
+import com.example.project_shelf.framework.ui.components.text_field.CustomTextField
 import com.example.project_shelf.framework.ui.getStringResource
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.launch
 
 @Composable
 fun CreateInvoiceDetailsForm(
-    customerInput: Input<CustomerFilterDto, CustomerFilterDto>,
-    emitter: MutableSharedFlow<CreateInvoiceViewModel.Event>,
+    customerInput: Input<CustomerFilterDto>,
+    onOpenSearchCustomer: () -> Unit,
 ) {
-    /// Related to event emitting
-    val scope = rememberCoroutineScope()
-
-    /// Customer related
-    val customer = customerInput.rawValue.collectAsState()
-    val customerErrors = customerInput.errors.collectAsState()
-
     Column(
         // https://m3.material.io/components/dialogs/specs#2b93ced7-9b0d-4a59-9bc4-8ff59dcd24c1
         modifier = Modifier
@@ -70,12 +58,10 @@ fun CreateInvoiceDetailsForm(
         CustomTextField(
             required = true,
             label = R.string.customer,
-            value = customer.value?.name ?: "",
+            value = customerInput.value?.name ?: "",
             readOnly = true,
-            onClick = {
-                scope.launch { emitter.emit(CreateInvoiceViewModel.Event.OpenSearchCustomer) }
-            },
-            errors = customerErrors.value.map { it.getStringResource() },
+            onClick = { onOpenSearchCustomer() },
+            errors = customerInput.errors.map { it.getStringResource() },
         )
     }
 }

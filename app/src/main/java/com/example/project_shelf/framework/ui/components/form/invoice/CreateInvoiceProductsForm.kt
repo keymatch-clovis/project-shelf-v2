@@ -11,9 +11,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -21,7 +23,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -31,17 +37,16 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.project_shelf.R
-import com.example.project_shelf.adapter.view_model.invoice.CreateInvoiceViewModel
-import com.example.project_shelf.adapter.view_model.invoice.InvoiceProductState
-import com.example.project_shelf.framework.ui.components.DropdownMenu
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.launch
+import com.example.project_shelf.adapter.dto.ui.InvoiceProductDto
+import androidx.compose.material3.DropdownMenu as ComposeDropdownMenu
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateInvoiceProductsForm(
-    invoiceProducts: List<InvoiceProductState>,
-    emitter: MutableSharedFlow<CreateInvoiceViewModel.Event>,
+    invoiceProducts: List<InvoiceProductDto>,
+    onOpenSearchProduct: () -> Unit,
+    onEditInvoiceProduct: (InvoiceProductDto) -> Unit,
+    onDeleteInvoiceProduct: (InvoiceProductDto) -> Unit,
 ) {
     /// Related to UI behavior.
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
@@ -53,11 +58,10 @@ fun CreateInvoiceProductsForm(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             CenterAlignedTopAppBar(
-                scrollBehavior = scrollBehavior, title = {
+                scrollBehavior = scrollBehavior,
+                title = {
                     Button(
-                        onClick = {
-                            scope.launch { emitter.emit(CreateInvoiceViewModel.Event.OpenSearchProduct) }
-                        },
+                        onClick = { onOpenSearchProduct() },
                     ) {
                         Icon(
                             // https://m3.material.io/components/split-button/specs
@@ -67,7 +71,8 @@ fun CreateInvoiceProductsForm(
                         )
                         Text(stringResource(R.string.product_add))
                     }
-                })
+                },
+            )
         },
         bottomBar = {
             HorizontalDivider()
@@ -124,7 +129,10 @@ fun CreateInvoiceProductsForm(
                             Text("supporting")
                         },
                         trailingContent = {
-                            DropdownMenu()
+                            DropdownMenu(
+                                onEdit = { onEditInvoiceProduct(item) },
+                                onDelete = { onDeleteInvoiceProduct(item) },
+                            )
                         },
                     )
 
@@ -133,6 +141,57 @@ fun CreateInvoiceProductsForm(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun DropdownMenu(
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    // https://developer.android.com/develop/ui/compose/components/menu
+    Box {
+        IconButton(
+            onClick = { expanded = !expanded }) {
+            Icon(
+                modifier = Modifier.size(20.dp),
+                imageVector = ImageVector.vectorResource(R.drawable.ellipsis_vertical),
+                contentDescription = null,
+            )
+        }
+        ComposeDropdownMenu(
+            expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                onClick = {
+                    expanded = false
+                    onEdit()
+                },
+                leadingIcon = {
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        imageVector = ImageVector.vectorResource(R.drawable.pencil),
+                        contentDescription = null,
+                    )
+                },
+                text = { Text(stringResource(R.string.edit)) },
+            )
+            DropdownMenuItem(
+                onClick = {
+                    expanded = false
+                    onDelete()
+                },
+                leadingIcon = {
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        imageVector = ImageVector.vectorResource(R.drawable.trash),
+                        contentDescription = null,
+                    )
+                },
+                text = { Text(stringResource(R.string.delete)) },
+            )
         }
     }
 }

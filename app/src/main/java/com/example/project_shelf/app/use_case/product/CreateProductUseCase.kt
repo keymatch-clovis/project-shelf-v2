@@ -11,8 +11,8 @@ import javax.inject.Inject
 
 data class CreateProductUseCaseInput(
     val name: String,
-    val price: BigDecimal,
-    val stock: Int,
+    val price: Long?,
+    val stock: Int?,
 )
 
 class CreateProductUseCase @Inject constructor(private val productService: ProductService) {
@@ -28,12 +28,12 @@ class CreateProductUseCase @Inject constructor(private val productService: Produ
         // any other currency, we can do it here.
         // TODO: We can get the currency from a configuration option or something, but for now we'll
         //  leave it hard coded.
-        val money = Money.of(CurrencyUnit.of("COP"), input.price)
+        val money = Money.ofMinor(CurrencyUnit.of("COP"), input.price ?: 0L)
         return productService.create(
             CreateProductInput(
                 name = input.name.uppercase(),
                 price = money.amountMinorLong,
-                stock = input.stock,
+                stock = input.stock ?: 0,
             )
         )
     }

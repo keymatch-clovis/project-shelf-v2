@@ -5,7 +5,6 @@ import android.os.Parcelable
 import com.example.project_shelf.app.entity.Product
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
-import java.math.BigDecimal
 import kotlin.math.pow
 
 @Serializable

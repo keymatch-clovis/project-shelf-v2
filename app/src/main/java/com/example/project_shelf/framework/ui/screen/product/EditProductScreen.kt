@@ -36,27 +36,24 @@ fun EditProductScreen(
     onDismissRequest: () -> Unit,
     onDeleteRequest: () -> Unit,
 ) {
-    val name = viewModel.inputState.name.rawValue.collectAsState()
-    val nameErrors = viewModel.inputState.name.errors.collectAsState()
-
-    val price = viewModel.inputState.price.rawValue.collectAsState()
-    val priceErrors = viewModel.inputState.price.errors.collectAsState()
-
-    val stock = viewModel.inputState.stock.rawValue.collectAsState()
-    val stockErrors = viewModel.inputState.stock.errors.collectAsState()
-
-    val uiState = viewModel.uiState.collectAsState()
+    /// Input state related
+    val inputState = viewModel.inputState.collectAsState()
     val isValid = viewModel.isValid.collectAsState()
+
+    /// UI state related
+    val uiState = viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.eventFlow.collect {
             when (it) {
-                is EditProductViewModel.Event.ProductUpdated -> Toast.makeText(
-                    context,
-                    context.getText(R.string.product_updated),
-                    Toast.LENGTH_SHORT,
-                ).show()
+                is EditProductViewModel.Event.ProductUpdated -> Toast
+                    .makeText(
+                        context,
+                        context.getText(R.string.product_updated),
+                        Toast.LENGTH_SHORT,
+                    )
+                    .show()
 
                 is EditProductViewModel.Event.ProductMarkedForDeletion -> onDeleteRequest()
             }
@@ -104,19 +101,20 @@ fun EditProductScreen(
             )
         }
 
+        // TODO: FIX THIS ?????
         EditProductForm(
             innerPadding = innerPadding,
 
-            name = name.value ?: "",
-            nameErrors = nameErrors.value.map { it.getStringResource() },
+            name = inputState.value.name.value ?: "",
+            nameErrors = inputState.value.name.errors.map { it.getStringResource() },
             onNameChange = { viewModel.updateName(it) },
 
-            price = price.value ?: "",
-            priceErrors = priceErrors.value.map { it.getStringResource() },
+            price = inputState.value.price.value ?: "",
+            priceErrors = inputState.value.price.errors.map { it.getStringResource() },
             onPriceChange = { viewModel.updatePrice(it) },
 
-            stock = stock.value ?: "",
-            stockErrors = stockErrors.value.map { it.getStringResource() },
+            stock = inputState.value.stock.value ?: "",
+            stockErrors = inputState.value.stock.errors.map { it.getStringResource() },
             onStockChange = { viewModel.updateStock(it) },
         )
     }

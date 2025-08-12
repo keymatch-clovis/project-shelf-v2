@@ -80,12 +80,13 @@ interface ProductFtsDao {
     // marked for deletion.
     @Query(
         """
-       SELECT fts.* FROM product_fts fts
-       JOIN product e ON (e.rowid = fts.product_id)
-       WHERE
-        e.pending_delete_until IS NULL
-        AND product_fts MATCH :value 
-    """
+        SELECT fts.* FROM product_fts fts
+            JOIN product e ON (e.rowid = fts.product_id) 
+        WHERE 
+            e.pending_delete_until IS NULL
+            AND product_fts MATCH :value 
+        ORDER BY fts.name ASC
+        """
     )
     fun match(value: String): PagingSource<Int, ProductFtsDto>
 }

@@ -1,4 +1,4 @@
-package com.example.project_shelf.adapter.view_model.util
+package com.example.project_shelf.adapter.view_model.common
 
 import java.math.BigDecimal
 

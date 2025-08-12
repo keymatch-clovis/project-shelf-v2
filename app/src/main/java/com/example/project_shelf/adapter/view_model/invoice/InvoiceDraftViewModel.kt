@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.project_shelf.adapter.dto.ui.InvoiceDraftDto
-import com.example.project_shelf.adapter.view_model.util.Consumable
+import com.example.project_shelf.adapter.view_model.common.Consumable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
