@@ -32,8 +32,7 @@ import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.view_model.product.CreateProductViewModel
 import com.example.project_shelf.framework.ui.components.text_field.CustomTextField
 import com.example.project_shelf.framework.ui.getStringResource
-import com.example.project_shelf.framework.ui.util.CurrencyVisualTransformation
-import java.util.Locale
+import com.example.project_shelf.framework.ui.common.CurrencyVisualTransformation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -110,7 +109,7 @@ fun CreateProductScreen(
                 /// Default price
                 CustomTextField(
                     value = inputState.value.price.value,
-                    visualTransformation = CurrencyVisualTransformation(Locale.getDefault()),
+                    visualTransformation = CurrencyVisualTransformation(),
                     onValueChange = { viewModel.updatePrice(it) },
                     onClear = { viewModel.updatePrice("") },
                     label = R.string.default_price,

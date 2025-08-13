@@ -3,6 +3,7 @@ package com.example.project_shelf.framework.ui.components.form.invoice
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -38,21 +39,22 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.dto.ui.InvoiceProductDto
+import com.example.project_shelf.adapter.view_model.common.extension.toFormattedString
+import com.example.project_shelf.adapter.view_model.invoice.model.InvoiceProductInput
+import org.joda.money.Money
 import androidx.compose.material3.DropdownMenu as ComposeDropdownMenu
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateInvoiceProductsForm(
-    invoiceProducts: List<InvoiceProductDto>,
+    invoiceProducts: List<InvoiceProductInput>,
+    totalValue: Money,
     onOpenSearchProduct: () -> Unit,
-    onEditInvoiceProduct: (InvoiceProductDto) -> Unit,
-    onDeleteInvoiceProduct: (InvoiceProductDto) -> Unit,
+    onEditInvoiceProduct: (InvoiceProductInput) -> Unit,
+    onDeleteInvoiceProduct: (InvoiceProductInput) -> Unit,
 ) {
     /// Related to UI behavior.
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-
-    /// Related to event emitting
-    val scope = rememberCoroutineScope()
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -77,7 +79,16 @@ fun CreateInvoiceProductsForm(
         bottomBar = {
             HorizontalDivider()
             Column(modifier = Modifier.padding(8.dp)) {
-                Text(stringResource(R.string.total).uppercase())
+                Row {
+                    Text(
+                        style = MaterialTheme.typography.bodyLarge,
+                        text = "${stringResource(R.string.total).uppercase()}:",
+                    )
+                    Text(
+                        style = MaterialTheme.typography.bodyLarge,
+                        text = totalValue.toFormattedString(),
+                    )
+                }
             }
         },
     ) { innerPadding ->
@@ -122,11 +133,14 @@ fun CreateInvoiceProductsForm(
                                 style = MaterialTheme.typography.titleLarge,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1,
-                                text = item.name,
+                                text = item.name!!,
                             )
                         },
                         supportingContent = {
-                            Text("supporting")
+                            Column {
+                                Text(item.formattedPrice)
+                                Text(item.formattedCount)
+                            }
                         },
                         trailingContent = {
                             DropdownMenu(

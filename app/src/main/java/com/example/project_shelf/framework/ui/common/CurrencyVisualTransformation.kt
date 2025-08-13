@@ -1,18 +1,17 @@
-package com.example.project_shelf.framework.ui.util
+package com.example.project_shelf.framework.ui.common
 
 import android.icu.text.DecimalFormatSymbols
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
-import org.joda.money.CurrencyUnit
-import org.joda.money.Money
+import com.example.project_shelf.adapter.view_model.common.extension.toMoney
+import com.example.project_shelf.common.DefaultConfig
 import org.joda.money.format.MoneyFormatterBuilder
-import java.math.RoundingMode
+import java.math.BigDecimal
 import java.util.Locale
 
-class CurrencyVisualTransformation(locale: Locale) : VisualTransformation {
-    private val currencyUnit = CurrencyUnit.of(locale)
+class CurrencyVisualTransformation() : VisualTransformation {
     private val moneyFormatter = MoneyFormatterBuilder()
         .appendAmountLocalized()
         .toFormatter()
@@ -23,15 +22,16 @@ class CurrencyVisualTransformation(locale: Locale) : VisualTransformation {
             return TransformedText(text, OffsetMapping.Identity)
         }
 
-        val money = Money.of(
-            currencyUnit, decimalValue.setScale(
-                currencyUnit.decimalPlaces, RoundingMode.FLOOR
-            )
-        )
+        if (decimalValue.stripTrailingZeros() == BigDecimal.ZERO) {
+            return TransformedText(text, OffsetMapping.Identity)
+        }
 
-        val formatted = moneyFormatter
-            .withLocale(Locale.getDefault())
-            .print(money)
+        if (decimalValue.scale() > DefaultConfig.getDefaultCurrencyUnit().decimalPlaces) {
+            return TransformedText(text, OffsetMapping.Identity)
+        }
+
+        val money = text.text.toMoney()
+        val formatted = moneyFormatter.print(money)
 
         val groupingSeparator =
             DecimalFormatSymbols.getInstance(Locale.getDefault()).groupingSeparator

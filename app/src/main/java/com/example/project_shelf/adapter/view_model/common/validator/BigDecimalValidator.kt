@@ -2,9 +2,11 @@ package com.example.project_shelf.adapter.view_model.common.validator
 
 import com.example.project_shelf.adapter.ViewModelError
 
-fun String?.validateInt(required: Boolean = false): List<ViewModelError> {
+fun String?.validateBigDecimal(
+    required: Boolean = false,
+): List<ViewModelError> {
     val errors = mutableListOf<ViewModelError>()
-    val transformed = this?.toIntOrNull()
+    val transformed = this?.toBigDecimalOrNull()
 
     if (required) {
         if (this != null) {
@@ -15,19 +17,18 @@ fun String?.validateInt(required: Boolean = false): List<ViewModelError> {
             errors.add(ViewModelError.NULL_VALUE)
         }
         if (transformed == null) {
-            errors.add(ViewModelError.INVALID_INTEGER_VALUE)
+            errors.add(ViewModelError.INVALID_DECIMAL_VALUE)
         }
     } else {
         // If the this is not null, we have to check the inside of the string, to see if it is what
         // we expect.
         if (this != null) {
-            if (this.isNotBlank()) {
-                if (transformed == null) {
-                    errors.add(ViewModelError.INVALID_INTEGER_VALUE)
-                }
+            if (this.isNotBlank() && transformed == null) {
+                errors.add(ViewModelError.INVALID_DECIMAL_VALUE)
             }
         }
     }
+
 
     return errors
 }

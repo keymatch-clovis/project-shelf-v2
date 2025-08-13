@@ -60,4 +60,5 @@
     <string name="invoice_draft_save_success">The invoice draft has been saved.</string>
     <string name="invoice_draft_save_loading">Saving invoice draft.</string>
     <string name="invoice_loading_draft_dialog_headline">Loading draft</string>
+    <string name="err_not_enough_stock">Not enough stock available</string>
 </resources>

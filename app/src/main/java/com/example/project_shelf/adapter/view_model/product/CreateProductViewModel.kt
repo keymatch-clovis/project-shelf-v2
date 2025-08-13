@@ -9,6 +9,7 @@ import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.dto.ui.toDto
 import com.example.project_shelf.adapter.repository.ProductRepository
 import com.example.project_shelf.adapter.view_model.common.Input
+import com.example.project_shelf.adapter.view_model.common.validator.validateBigDecimal
 import com.example.project_shelf.adapter.view_model.common.validator.validateDouble
 import com.example.project_shelf.adapter.view_model.common.validator.validateInt
 import com.example.project_shelf.adapter.view_model.common.validator.validateString
@@ -108,7 +109,9 @@ class CreateProductViewModel @Inject constructor(
     fun updatePrice(value: String? = null) = _inputState.update {
         it.copy(
             price = Input(
-                value = value, errors = value.validateDouble()
+                // We need to set a blank value to null, so the `String` to `BigDecimal`
+                // transforming doesn't need another step.
+                value = value?.ifBlank { null }, errors = value.validateBigDecimal()
             )
         )
     }
@@ -116,7 +119,9 @@ class CreateProductViewModel @Inject constructor(
     fun updateStock(value: String? = null) = _inputState.update {
         it.copy(
             stock = Input(
-                value = value, errors = value.validateInt()
+                // We need to set a blank value to null, so the `String` to `Int` transforming
+                // doesn't need another step.
+                value = value?.ifBlank { null }, errors = value.validateInt()
             )
         )
     }

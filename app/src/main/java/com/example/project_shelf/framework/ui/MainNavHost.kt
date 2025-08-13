@@ -11,14 +11,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.navigation
-import androidx.navigation.toRoute
-import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.view_model.MainViewModel
 import com.example.project_shelf.adapter.view_model.customer.CustomerDeletionViewModel
 import com.example.project_shelf.adapter.view_model.invoice.CreateInvoiceViewModel
 import com.example.project_shelf.adapter.view_model.invoice.InvoiceDraftViewModel
 import com.example.project_shelf.adapter.view_model.product.ProductDeletionViewModel
-import com.example.project_shelf.adapter.view_model.product.EditProductViewModel
 import com.example.project_shelf.framework.ui.screen.ConfigScreen
 import com.example.project_shelf.framework.ui.screen.LoadingScreen
 import com.example.project_shelf.framework.ui.screen.customer.CreateCustomerScreen
@@ -27,9 +24,8 @@ import com.example.project_shelf.framework.ui.screen.invoice.CreateInvoiceScreen
 import com.example.project_shelf.framework.ui.screen.invoice.InvoiceListScreen
 import com.example.project_shelf.framework.ui.screen.invoice.InvoiceDraftListScreen
 import com.example.project_shelf.framework.ui.screen.product.CreateProductScreen
-import com.example.project_shelf.framework.ui.screen.product.EditProductScreen
 import com.example.project_shelf.framework.ui.screen.product.ProductListScreen
-import com.example.project_shelf.framework.ui.util.navigation.sharedViewModel
+import com.example.project_shelf.framework.ui.common.navigation.sharedViewModel
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable

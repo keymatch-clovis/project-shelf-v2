@@ -117,7 +117,7 @@ class InvoiceServiceImpl @Inject constructor(
                                 invoiceId = invoiceId,
                                 productId = it.productId,
                                 count = it.count,
-                                price = it.price,
+                                price = it.price.amountMinorLong,
                             )
                         }
                         .toTypedArray())
@@ -223,7 +223,7 @@ class InvoiceServiceImpl @Inject constructor(
             val dto = InvoiceDraftProductDto(
                 productId = it.productId,
                 count = it.count,
-                price = it.price,
+                price = it.price.amountMinorLong,
             )
 
             // https://docs.objectbox.io/relations#updating-toone
@@ -268,7 +268,7 @@ class InvoiceServiceImpl @Inject constructor(
             val dto = InvoiceDraftProductDto(
                 productId = it.productId,
                 count = it.count,
-                price = it.price,
+                price = it.price.amountMinorLong,
             )
 
             // https://docs.objectbox.io/relations#updating-toone

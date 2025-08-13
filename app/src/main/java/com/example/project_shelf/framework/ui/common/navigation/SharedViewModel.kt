@@ -1,4 +1,4 @@
-package com.example.project_shelf.framework.ui.util.navigation
+package com.example.project_shelf.framework.ui.common.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember

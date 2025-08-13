@@ -4,6 +4,9 @@ import com.example.project_shelf.app.entity.InvoiceDraftProduct
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
 import io.objectbox.relation.ToOne
+import org.joda.money.CurrencyUnit
+import org.joda.money.Money
+import java.util.Locale
 
 @Entity
 data class InvoiceDraftProductDto(
@@ -18,7 +21,7 @@ data class InvoiceDraftProductDto(
 
     fun toEntity(): InvoiceDraftProduct = InvoiceDraftProduct(
         count = this.count,
-        price = this.price,
+        price = Money.ofMinor(CurrencyUnit.of(Locale.getDefault()), this.price),
         productId = this.productId,
     )
 }

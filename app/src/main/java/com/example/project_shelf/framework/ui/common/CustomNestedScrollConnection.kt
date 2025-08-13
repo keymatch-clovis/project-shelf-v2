@@ -1,4 +1,4 @@
-package com.example.project_shelf.framework.ui.util
+package com.example.project_shelf.framework.ui.common
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState

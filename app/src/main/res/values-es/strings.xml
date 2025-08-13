@@ -60,4 +60,5 @@
     <string name="invoice_draft_save_success">El borrador de la factura ha sido guardado.</string>
     <string name="invoice_draft_save_loading">Guardando borrador de la factura.</string>
     <string name="invoice_loading_draft_dialog_headline">Cargando borrador</string>
+    <string name="err_not_enough_stock">No hay suficiente inventario</string>
 </resources>

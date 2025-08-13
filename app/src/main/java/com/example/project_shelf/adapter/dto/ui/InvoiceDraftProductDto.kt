@@ -1,11 +1,12 @@
 package com.example.project_shelf.adapter.dto.ui
 
 import com.example.project_shelf.app.entity.InvoiceDraftProduct
+import org.joda.money.Money
 
 data class InvoiceDraftProductDto(
     val productId: Long,
     val count: Int,
-    val price: Long,
+    val price: Money,
 )
 
 fun InvoiceDraftProduct.toDto() = InvoiceDraftProductDto(
