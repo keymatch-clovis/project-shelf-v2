@@ -27,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,9 +37,10 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.project_shelf.R
-import com.example.project_shelf.adapter.dto.ui.InvoiceProductDto
-import com.example.project_shelf.adapter.view_model.common.extension.toFormattedString
+import com.example.project_shelf.adapter.view_model.common.extension.toMoneyOrZero
 import com.example.project_shelf.adapter.view_model.invoice.model.InvoiceProductInput
+import com.example.project_shelf.framework.ui.common.extension.toFormattedString
+import com.example.project_shelf.framework.ui.common.extension.toIntOrZero
 import org.joda.money.Money
 import androidx.compose.material3.DropdownMenu as ComposeDropdownMenu
 
@@ -86,7 +86,7 @@ fun CreateInvoiceProductsForm(
                     )
                     Text(
                         style = MaterialTheme.typography.bodyLarge,
-                        text = totalValue.toFormattedString(),
+                        text = totalValue.toFormattedString(withSymbol = true)
                     )
                 }
             }
@@ -138,8 +138,15 @@ fun CreateInvoiceProductsForm(
                         },
                         supportingContent = {
                             Column {
-                                Text(item.formattedPrice)
-                                Text(item.formattedCount)
+                                Text(
+                                    item.price.value
+                                        .toMoneyOrZero()
+                                        .toFormattedString()
+                                )
+                                Text(
+                                    item.count.value
+                                        .toIntOrZero()
+                                        .let { if (it > 9999) "+9999" else it.toString() })
                             }
                         },
                         trailingContent = {

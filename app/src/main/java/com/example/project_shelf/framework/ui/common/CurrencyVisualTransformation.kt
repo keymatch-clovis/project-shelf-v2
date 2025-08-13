@@ -6,16 +6,12 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import com.example.project_shelf.adapter.view_model.common.extension.toMoney
-import com.example.project_shelf.common.DefaultConfig
-import org.joda.money.format.MoneyFormatterBuilder
+import com.example.project_shelf.framework.ui.common.extension.toFormattedString
 import java.math.BigDecimal
+import java.util.Currency
 import java.util.Locale
 
 class CurrencyVisualTransformation() : VisualTransformation {
-    private val moneyFormatter = MoneyFormatterBuilder()
-        .appendAmountLocalized()
-        .toFormatter()
-
     override fun filter(text: AnnotatedString): TransformedText {
         val decimalValue = text.text.toBigDecimalOrNull()
         if (decimalValue == null) {
@@ -26,12 +22,12 @@ class CurrencyVisualTransformation() : VisualTransformation {
             return TransformedText(text, OffsetMapping.Identity)
         }
 
-        if (decimalValue.scale() > DefaultConfig.getDefaultCurrencyUnit().decimalPlaces) {
+        if (decimalValue.scale() > Currency.getInstance(Locale.getDefault()).defaultFractionDigits) {
             return TransformedText(text, OffsetMapping.Identity)
         }
 
         val money = text.text.toMoney()
-        val formatted = moneyFormatter.print(money)
+        val formatted = money.toFormattedString(withDecimals = true)
 
         val groupingSeparator =
             DecimalFormatSymbols.getInstance(Locale.getDefault()).groupingSeparator

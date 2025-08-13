@@ -13,6 +13,7 @@ import com.example.project_shelf.adapter.repository.CustomerRepository
 import com.example.project_shelf.adapter.repository.ProductRepository
 import com.example.project_shelf.adapter.view_model.common.Input
 import com.example.project_shelf.adapter.view_model.common.SearchExtension
+import com.example.project_shelf.adapter.view_model.common.extension.currencyUnitFromDefaultLocale
 import com.example.project_shelf.adapter.view_model.common.extension.toMoney
 import com.example.project_shelf.adapter.view_model.common.extension.toMoneyOrZero
 import com.example.project_shelf.adapter.view_model.common.validator.validateBigDecimal
@@ -25,7 +26,6 @@ import com.example.project_shelf.app.use_case.invoice.EditInvoiceDraftUseCase
 import com.example.project_shelf.app.use_case.invoice.model.CreateInvoiceProductUseCaseInput
 import com.example.project_shelf.app.use_case.product.FindProductUseCase
 import com.example.project_shelf.app.use_case.product.SearchProductUseCase
-import com.example.project_shelf.common.DefaultConfig
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -50,7 +50,7 @@ sealed interface CreateInvoiceViewModelState {
         val isSavingDraft: Boolean = false,
         val isShowingAddInvoiceProductDialog: Boolean = false,
         val draftId: Long? = null,
-        val totalValue: Money = Money.zero(DefaultConfig.getDefaultCurrencyUnit()),
+        val totalValue: Money = Money.zero(currencyUnitFromDefaultLocale()),
     )
 
     data class InputState(
@@ -116,7 +116,7 @@ class CreateInvoiceViewModel @AssistedInject constructor(
                 .distinctUntilChangedBy { _inputState.value.invoiceProducts }
                 .mapLatest {
                     it.invoiceProducts.fold(
-                        initial = Money.zero(DefaultConfig.getDefaultCurrencyUnit()),
+                        initial = Money.zero(currencyUnitFromDefaultLocale()),
                         operation = { acc, item ->
                             acc + item.price.value.toMoneyOrZero()
                         },
