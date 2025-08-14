@@ -22,8 +22,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.example.project_shelf.R
-import com.example.project_shelf.adapter.view_model.product.ProductDeletionViewModel
 import com.example.project_shelf.adapter.view_model.product.EditProductViewModel
+import com.example.project_shelf.adapter.view_model.product.ProductViewModel
 import com.example.project_shelf.framework.ui.components.dialog.AlertDialog
 import com.example.project_shelf.framework.ui.components.form.EditProductForm
 import com.example.project_shelf.framework.ui.getStringResource
@@ -31,8 +31,8 @@ import com.example.project_shelf.framework.ui.getStringResource
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProductScreen(
+    productViewModel: ProductViewModel,
     viewModel: EditProductViewModel,
-    productDeletionViewModel: ProductDeletionViewModel,
     onDismissRequest: () -> Unit,
     onDeleteRequest: () -> Unit,
 ) {
@@ -95,7 +95,7 @@ fun EditProductScreen(
                 headerTextResource = R.string.product_delete_alert,
                 onDismissRequest = { viewModel.closeConfirmDeletionDialog() },
                 onAcceptRequest = {
-                    productDeletionViewModel.markProductForDeletion(viewModel.product)
+                    productViewModel.setProductPendingForDeletion(viewModel.productId)
                     onDeleteRequest()
                 },
             )

@@ -6,7 +6,7 @@ import com.example.project_shelf.app.use_case.DELETION_TIMEOUT
 import java.util.Date
 import javax.inject.Inject
 
-class MarkForDeletionUseCase @Inject constructor(private val productService: ProductService) {
+class SetProductPendingForDeletionUseCase @Inject constructor(private val productService: ProductService) {
     suspend fun exec(id: Long) {
         Log.d("USE-CASE", "Marking product with ID: $id for deletion")
         val timeout = Date().time + DELETION_TIMEOUT.inWholeMilliseconds

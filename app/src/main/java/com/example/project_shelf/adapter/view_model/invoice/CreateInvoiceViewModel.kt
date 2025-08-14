@@ -3,14 +3,14 @@ package com.example.project_shelf.adapter.view_model.invoice
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.map
 import com.example.project_shelf.adapter.ViewModelError
 import com.example.project_shelf.adapter.dto.ui.CustomerFilterDto
 import com.example.project_shelf.adapter.dto.ui.InvoiceDraftDto
-import com.example.project_shelf.adapter.dto.ui.InvoiceProductDto
 import com.example.project_shelf.adapter.dto.ui.ProductFilterDto
+import com.example.project_shelf.adapter.dto.ui.toDto
 import com.example.project_shelf.adapter.dto.ui.toFilter
 import com.example.project_shelf.adapter.repository.CustomerRepository
-import com.example.project_shelf.adapter.repository.ProductRepository
 import com.example.project_shelf.adapter.view_model.common.Input
 import com.example.project_shelf.adapter.view_model.common.SearchExtension
 import com.example.project_shelf.adapter.view_model.common.extension.currencyUnitFromDefaultLocale
@@ -26,6 +26,8 @@ import com.example.project_shelf.app.use_case.invoice.EditInvoiceDraftUseCase
 import com.example.project_shelf.app.use_case.invoice.model.CreateInvoiceProductUseCaseInput
 import com.example.project_shelf.app.use_case.product.FindProductUseCase
 import com.example.project_shelf.app.use_case.product.SearchProductUseCase
+import com.example.project_shelf.app.use_case.product.SearchProductsUseCase
+import com.example.project_shelf.app.use_case.product.SearchProductsUseCase_Factory
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -37,6 +39,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -65,11 +68,11 @@ sealed interface CreateInvoiceViewModelState {
 class CreateInvoiceViewModel @AssistedInject constructor(
     @Assisted val draft: InvoiceDraftDto?,
     customerRepository: CustomerRepository,
-    productRepository: ProductRepository,
     private val createInvoiceDraftUseCase: CreateInvoiceDraftUseCase,
     private val searchCustomerUseCase: SearchCustomerUseCase,
     private val editInvoiceDraftUseCase: EditInvoiceDraftUseCase,
     private val searchProductUseCase: SearchProductUseCase,
+    private val searchProductsUseCase: SearchProductsUseCase,
     private val findProductUseCase: FindProductUseCase,
 ) : ViewModel() {
     @AssistedFactory
@@ -98,7 +101,11 @@ class CreateInvoiceViewModel @AssistedInject constructor(
     val showProductSearchBar = _showProductSearchBar.asStateFlow()
     val productSearch = SearchExtension<ProductFilterDto>(
         scope = viewModelScope,
-        onSearch = { productRepository.search(it) },
+        onSearch = {
+            searchProductsUseCase
+                .exec(it)
+                .map { it.map { it.toDto() } }
+        },
     )
 
     init {

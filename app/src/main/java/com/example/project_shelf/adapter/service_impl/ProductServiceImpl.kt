@@ -9,6 +9,7 @@ import androidx.room.withTransaction
 import com.example.project_shelf.adapter.dto.room.ProductDto
 import com.example.project_shelf.adapter.dto.room.ProductFtsDto
 import com.example.project_shelf.adapter.dto.room.toEntity
+import com.example.project_shelf.adapter.view_model.common.extension.currencyUnitFromDefaultLocale
 import com.example.project_shelf.app.entity.Product
 import com.example.project_shelf.app.entity.ProductFilter
 import com.example.project_shelf.app.service.ProductService
@@ -22,6 +23,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import org.joda.money.Money
 import javax.inject.Inject
 
 // Recommended value for simple text data.
@@ -91,7 +93,7 @@ class ProductServiceImpl @Inject constructor(
                 .insert(
                     ProductDto(
                         name = input.name,
-                        defaultPrice = input.price,
+                        defaultPrice = input.defaultPrice,
                         stock = input.stock,
                     )
                 )
@@ -109,7 +111,7 @@ class ProductServiceImpl @Inject constructor(
             Product(
                 id = productId,
                 name = input.name,
-                defaultPrice = input.price,
+                defaultPrice = Money.ofMinor(currencyUnitFromDefaultLocale(), input.defaultPrice),
                 stock = input.stock,
             )
         }
@@ -125,7 +127,7 @@ class ProductServiceImpl @Inject constructor(
                     .insert(
                         ProductDto(
                             name = it.name,
-                            defaultPrice = it.price,
+                            defaultPrice = it.defaultPrice,
                             stock = it.stock,
                         )
                     )
@@ -143,7 +145,7 @@ class ProductServiceImpl @Inject constructor(
                 Product(
                     id = productId,
                     name = it.name,
-                    defaultPrice = it.price,
+                    defaultPrice = Money.ofMinor(currencyUnitFromDefaultLocale(), it.defaultPrice),
                     stock = it.stock,
                 )
             }

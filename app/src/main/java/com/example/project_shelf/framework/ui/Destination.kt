@@ -48,7 +48,7 @@ enum class Destination(
     /// Product Category
     PRODUCT_LIST("main.product.list"),
     PRODUCT_CREATE("main.product.create"),
-    PRODUCT_EDIT("main.product.create"),
+    PRODUCT_EDIT("main.product.edit"),
 
     /// Invoice Category
     INVOICE_LIST("main.invoice.list"),

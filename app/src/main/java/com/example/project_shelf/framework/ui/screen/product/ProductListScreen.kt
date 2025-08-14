@@ -5,7 +5,6 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -15,7 +14,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -32,10 +34,10 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.project_shelf.R
-import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.dto.ui.ProductFilterDto
-import com.example.project_shelf.adapter.view_model.product.ProductDeletionViewModel
 import com.example.project_shelf.adapter.view_model.product.ProductListViewModel
+import com.example.project_shelf.adapter.view_model.product.ProductViewModel
+import com.example.project_shelf.common.Id
 import com.example.project_shelf.framework.ui.components.CustomList
 import com.example.project_shelf.framework.ui.components.CustomSearchBar
 import com.example.project_shelf.framework.ui.components.list_item.ProductFilterListItem
@@ -46,14 +48,17 @@ import kotlinx.coroutines.flow.collectLatest
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class, FlowPreview::class)
 @Composable
 fun ProductListScreen(
+    productViewModel: ProductViewModel,
     viewModel: ProductListViewModel,
-    productDeletionViewModel: ProductDeletionViewModel,
     onRequestCreate: () -> Unit,
-    onRequestEdit: (ProductDto) -> Unit,
+    onRequestEdit: (Id) -> Unit,
 ) {
+    /// Related to product state
+    val productState = productViewModel.state.collectAsState()
+    val context = LocalContext.current
+
     /// Related to UI behavior.
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-    val localContext = LocalContext.current
 
     /// Related to listing the items.
     val productList = viewModel.products.collectAsLazyPagingItems()
@@ -64,21 +69,33 @@ fun ProductListScreen(
     val searchItems = viewModel.search.result.collectAsLazyPagingItems()
 
     /// Related to deletion snackbar.
-    // Start the undo deletion snackbar. The snackbar state might recreate, when the user wants to
-    // edit, or create an object. As such, we have to be aware of this.
-    val snackbarState = productDeletionViewModel.snackbarState.collectAsState()
-    LaunchedEffect(snackbarState.value) {
-        productDeletionViewModel.startSnackbar(
-            localContext.getString(R.string.product_deleted),
-            localContext.getString(R.string.undo),
-        )
+    val snackbarState = SnackbarHostState()
+    LaunchedEffect(productState.value.productsMarkedForDeletion) {
+        productState.value.productsMarkedForDeletion.forEach {
+            val result = snackbarState.showSnackbar(
+                message = context.getString(R.string.product_deleted),
+                actionLabel = context.getString(R.string.undo),
+                duration = SnackbarDuration.Long,
+                withDismissAction = true,
+            )
+
+            when (result) {
+                SnackbarResult.ActionPerformed -> {
+                    productViewModel.unsetProductPendingForDeletion(it)
+                }
+
+                SnackbarResult.Dismissed -> {
+                    productViewModel.setProductPendingForDeletion(it)
+                }
+            }
+        }
     }
 
     /// Related to event consumption
     LaunchedEffect(Unit) {
         viewModel.eventFlow.collectLatest {
             when (it) {
-                is ProductListViewModel.Event.RequestEdit -> onRequestEdit(it.dto)
+                is ProductListViewModel.Event.RequestEdit -> onRequestEdit(it.id)
             }
         }
     }
@@ -88,7 +105,7 @@ fun ProductListScreen(
     Box {
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-            snackbarHost = { SnackbarHost(hostState = snackbarState.value) },
+            snackbarHost = { SnackbarHost(hostState = snackbarState) },
             topBar = {
                 TopAppBar(
                     modifier = Modifier.padding(horizontal = 4.dp),
@@ -111,14 +128,14 @@ fun ProductListScreen(
                     enter = slideInVertically(),
                     exit = slideOutVertically(),
                 ) {
-                    // https://m3.material.io/components/floating-action-button/specs#0a064a5d-8373-4150-9665-40acd0f14b0a
+                    // https://m3.material.io/components/floating-action-button/specs#9b01cb13-7a33-41c9-ab18-56443472d7e9
                     FloatingActionButton(
-                        modifier = Modifier.size(96.dp),
+                        modifier = Modifier.size(80.dp),
                         onClick = onRequestCreate,
                         shape = MaterialTheme.shapes.large,
                     ) {
                         Icon(
-                            modifier = Modifier.size(36.dp),
+                            modifier = Modifier.size(28.dp),
                             imageVector = ImageVector.vectorResource(R.drawable.plus),
                             contentDescription = null,
                         )

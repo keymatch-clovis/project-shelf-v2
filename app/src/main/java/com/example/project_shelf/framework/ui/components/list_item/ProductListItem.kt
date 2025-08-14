@@ -51,7 +51,7 @@ fun ProductListItem(
                     )
                     Text(
                         style = MaterialTheme.typography.bodyMedium,
-                        text = dto.stock,
+                        text = dto.stock.toString(),
                     )
                 }
             },

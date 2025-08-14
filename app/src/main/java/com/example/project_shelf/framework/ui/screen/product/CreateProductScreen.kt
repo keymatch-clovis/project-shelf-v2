@@ -53,12 +53,6 @@ fun CreateProductScreen(
         }
     }
 
-    /// Related to initial focus.
-    val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -76,9 +70,7 @@ fun CreateProductScreen(
                 actions = {
                     Button(
                         enabled = isValid.value,
-                        onClick = {
-                            viewModel.create()
-                        },
+                        onClick = { viewModel.create() },
                     ) {
                         Text(stringResource(R.string.save))
                     }
@@ -95,15 +87,14 @@ fun CreateProductScreen(
                 /// Name
                 CustomTextField(
                     value = inputState.value.name.value,
-                    modifier = Modifier.focusRequester(focusRequester),
                     required = true,
                     onValueChange = { viewModel.updateName(it) },
-                    onClear = { viewModel.updateName("") },
+                    onClear = { viewModel.updateName(null) },
                     label = R.string.name,
                     errors = inputState.value.name.errors.map { it.getStringResource() },
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Characters,
-                        imeAction = ImeAction.Next
+                        imeAction = ImeAction.Next,
                     ),
                 )
                 /// Default price
@@ -111,22 +102,24 @@ fun CreateProductScreen(
                     value = inputState.value.price.value,
                     visualTransformation = CurrencyVisualTransformation(),
                     onValueChange = { viewModel.updatePrice(it) },
-                    onClear = { viewModel.updatePrice("") },
+                    onClear = { viewModel.updatePrice(null) },
                     label = R.string.default_price,
                     errors = inputState.value.price.errors.map { it.getStringResource() },
                     keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = ImeAction.Next,
                     ),
                 )
                 /// Stock
                 CustomTextField(
                     value = inputState.value.stock.value,
                     onValueChange = { viewModel.updateStock(it) },
-                    onClear = { viewModel.updateStock("") },
+                    onClear = { viewModel.updateStock(null) },
                     label = R.string.amount,
                     errors = inputState.value.stock.errors.map { it.getStringResource() },
                     keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = ImeAction.Done,
                     ),
                 )
             }

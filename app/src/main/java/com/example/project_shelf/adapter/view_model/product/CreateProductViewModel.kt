@@ -1,21 +1,20 @@
 package com.example.project_shelf.adapter.view_model.product
 
-import android.icu.util.Currency
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.project_shelf.adapter.ViewModelError
 import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.dto.ui.toDto
-import com.example.project_shelf.adapter.repository.ProductRepository
 import com.example.project_shelf.adapter.view_model.common.Input
 import com.example.project_shelf.adapter.view_model.common.validator.validateBigDecimal
-import com.example.project_shelf.adapter.view_model.common.validator.validateDouble
 import com.example.project_shelf.adapter.view_model.common.validator.validateInt
 import com.example.project_shelf.adapter.view_model.common.validator.validateString
 import com.example.project_shelf.app.use_case.product.CreateProductUseCase
 import com.example.project_shelf.app.use_case.product.CreateProductUseCaseInput
+import com.example.project_shelf.app.use_case.product.IsProductNameUniqueUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -27,6 +26,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -44,27 +44,30 @@ sealed class CreateProductViewModelState {
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class CreateProductViewModel @Inject constructor(
-    private val productRepository: ProductRepository,
     private val createProductUseCase: CreateProductUseCase,
+    private val isProductNameUniqueUseCase: IsProductNameUniqueUseCase,
 ) : ViewModel() {
+    private val isLoading = MutableStateFlow(false)
+
+    /// Event related
     sealed interface Event {
         data class Created(val dto: ProductDto) : Event
     }
 
-    private val isLoading = MutableStateFlow(false)
-
     private val _eventFlow = MutableSharedFlow<Event>()
     val eventFlow: SharedFlow<Event> = _eventFlow
 
+    /// Input state related
     private val _inputState = MutableStateFlow(CreateProductViewModelState.InputState())
     val inputState = _inputState.asStateFlow()
 
-    val isValid = _inputState
+    val isValid = merge(_inputState, isLoading)
         .mapLatest {
-            it.name.errors
+            _inputState.value.name.errors
                 .isEmpty()
-                .and(it.price.errors.isEmpty())
-                .and(it.stock.errors.isEmpty())
+                .and(_inputState.value.price.errors.isEmpty())
+                .and(_inputState.value.stock.errors.isEmpty())
+                .and(!isLoading.value)
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
@@ -74,8 +77,8 @@ class CreateProductViewModel @Inject constructor(
         updatePrice()
         updateStock()
 
+        // We need to check the name of the product is not repeated in the database.
         viewModelScope.launch {
-            // We need to check the name of the product is not repeated in the database.
             _inputState
                 .distinctUntilChangedBy { _inputState.value.name.value }
                 .onEach { isLoading.update { true } }
@@ -83,17 +86,15 @@ class CreateProductViewModel @Inject constructor(
                 .mapLatest {
                     mutableListOf<ViewModelError>().apply {
                         _inputState.value.name.value?.let {
-                            if (!productRepository.isProductNameUnique(it)) {
+                            if (!isProductNameUniqueUseCase.exec(it)) {
                                 this.add(ViewModelError.PRODUCT_NAME_TAKEN)
                             }
                         }
                     }
                 }
+                .onEach { isLoading.update { false } }
                 .collectLatest { errors ->
                     _inputState.update { it.copy(name = it.name.copy(errors = it.name.errors + errors)) }
-                }
-                .also {
-                    isLoading.update { false }
                 }
         }
     }
@@ -126,29 +127,24 @@ class CreateProductViewModel @Inject constructor(
         )
     }
 
-    fun create() = viewModelScope.launch {
-        Log.d("VIEW-MODEL", "Creating product")
-        // NOTE: We should only call this method when all input data has been validated.
-        assert(isValid.value)
+    fun create() {
+        viewModelScope.launch(context = Dispatchers.IO) {
+            Log.d("VIEW-MODEL", "Creating product")
+            // NOTE: We should only call this method when all input data has been validated.
+            assert(isValid.value)
 
-        // NOTE:
-        // > This is a risky transaction!
-        // > Cephalon Sark
-        val entity = createProductUseCase.exec(
-            CreateProductUseCaseInput(
-                name = _inputState.value.name.value!!,
-                price = _inputState.value.price.value?.toLong(),
-                stock = _inputState.value.stock.value?.toInt(),
+            // NOTE:
+            // > This is a risky transaction!
+            // > Cephalon Sark
+            val entity = createProductUseCase.exec(
+                CreateProductUseCaseInput(
+                    name = _inputState.value.name.value!!,
+                    price = _inputState.value.price.value?.toBigDecimal(),
+                    stock = _inputState.value.stock.value?.toInt(),
+                )
             )
-        )
 
-        _eventFlow.emit(
-            Event.Created(
-                entity
-                    // TODO: We can get the currency from a configuration option or something, but
-                    //  for now we'll leave it hard coded.
-                    .toDto(Currency.getInstance("COP"))
-            )
-        )
+            _eventFlow.emit(Event.Created(entity.toDto()))
+        }
     }
 }

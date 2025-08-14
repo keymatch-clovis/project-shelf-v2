@@ -1,6 +1,7 @@
 package com.example.project_shelf.adapter.view_model.common
 
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -35,8 +36,8 @@ class SearchExtension<T : Any>(
         .debounce(500)
         .filter { it.isNotEmpty() }
         .flatMapLatest { onSearch(it) }
-        .also { _isLoading.update { false } }
-        .stateIn(scope, SharingStarted.WhileSubscribed(), PagingData.empty())
+        .onEach { _isLoading.update { false } }
+        .cachedIn(scope)
 
     fun updateQuery(value: String) {
         // NOTE: We are setting this as uppercase here just for UI purposes, as the business

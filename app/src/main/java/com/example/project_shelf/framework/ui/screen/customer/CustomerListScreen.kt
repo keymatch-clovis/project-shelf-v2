@@ -6,7 +6,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -15,7 +14,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -33,8 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.dto.ui.CustomerFilterDto
-import com.example.project_shelf.adapter.view_model.customer.CustomerDeletionViewModel
 import com.example.project_shelf.adapter.view_model.customer.CustomerListViewModel
+import com.example.project_shelf.adapter.view_model.customer.CustomerViewModel
 import com.example.project_shelf.framework.ui.components.CustomList
 import com.example.project_shelf.framework.ui.components.CustomSearchBar
 import com.example.project_shelf.framework.ui.components.list_item.CustomerFilterListItem
@@ -43,11 +45,15 @@ import com.example.project_shelf.framework.ui.components.list_item.CustomerListI
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomerListScreen(
+    customerViewModel: CustomerViewModel,
     viewModel: CustomerListViewModel,
-    deletionViewModel: CustomerDeletionViewModel,
     onRequestCreate: () -> Unit,
     onRequestEdit: (CustomerFilterDto) -> Unit,
 ) {
+    /// Related to customer state
+    val customerState = customerViewModel.state.collectAsState()
+    val context = LocalContext.current
+
     /// Related to UI behavior.
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val localContext = LocalContext.current
@@ -61,14 +67,26 @@ fun CustomerListScreen(
     val searchItems = viewModel.search.result.collectAsLazyPagingItems()
 
     /// Related to deletion snackbar.
-    // Start the undo deletion snackbar. The snackbar state might recreate, when the user wants to
-    // edit, or create an object. As such, we have to be aware of this.
-    val snackbarState = deletionViewModel.snackbarState.collectAsState()
-    LaunchedEffect(snackbarState.value) {
-        deletionViewModel.startSnackbar(
-            localContext.getString(R.string.customer_deleted),
-            localContext.getString(R.string.undo),
-        )
+    val snackbarState = SnackbarHostState()
+    LaunchedEffect(customerState.value.customersMarkedForDeletion) {
+        customerState.value.customersMarkedForDeletion.forEach {
+            val result = snackbarState.showSnackbar(
+                message = context.getString(R.string.customer_deleted),
+                actionLabel = context.getString(R.string.undo),
+                duration = SnackbarDuration.Long,
+                withDismissAction = true,
+            )
+
+            when (result) {
+                SnackbarResult.ActionPerformed -> {
+                    customerViewModel.unsetCustomerPendingForDeletion(it)
+                }
+
+                SnackbarResult.Dismissed -> {
+                    customerViewModel.removeCustomerFromMarkedForDeletion(it)
+                }
+            }
+        }
     }
 
     // This box is used to render the search bars over all the content. If this is not this way, we
@@ -76,7 +94,7 @@ fun CustomerListScreen(
     Box {
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-            snackbarHost = { SnackbarHost(hostState = snackbarState.value) },
+            snackbarHost = { SnackbarHost(hostState = snackbarState) },
             topBar = {
                 TopAppBar(
                     modifier = Modifier.padding(horizontal = 4.dp),

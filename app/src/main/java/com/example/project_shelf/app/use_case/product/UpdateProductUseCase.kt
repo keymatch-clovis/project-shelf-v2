@@ -1,9 +1,9 @@
 package com.example.project_shelf.app.use_case.product
 
+import com.example.project_shelf.adapter.view_model.common.extension.currencyUnitFromDefaultLocale
 import com.example.project_shelf.app.entity.Product
 import com.example.project_shelf.app.service.ProductService
 import com.example.project_shelf.app.service.model.UpdateProductInput
-import org.joda.money.CurrencyUnit
 import org.joda.money.Money
 import java.math.BigDecimal
 import javax.inject.Inject
@@ -12,20 +12,22 @@ class UpdateProductUseCase @Inject constructor(private val productService: Produ
     suspend fun exec(
         id: Long,
         name: String,
-        price: Long,
-        stock: Int,
+        price: BigDecimal?,
+        stock: Int?,
     ): Product {
-        // We are here converting from any value to COP. So, if we need later to change this to
-        // any other currency, we can do it here.
-        // TODO: We can get the currency from a configuration option or something, but for now we'll
-        // leave it hard coded.
-        val money = Money.ofMinor(CurrencyUnit.of("COP"), price)
+        // As we allow soft deletes in our little app, we need to handle those cases here.
+        // We will assume that the products marked for deletion have passed checks and they are
+        // ready to be deleted. So we just have to clean that table before doing anything else.
+        productService.deletePendingForDeletion()
+
+        val money = Money.of(currencyUnitFromDefaultLocale(), price ?: BigDecimal.ZERO)
+
         return productService.update(
             UpdateProductInput(
                 id = id,
                 name = name.uppercase(),
                 price = money.amountMinorLong,
-                stock = stock,
+                stock = stock ?: 0,
             )
         )
     }

@@ -3,7 +3,9 @@ package com.example.project_shelf.adapter.dto.room
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.project_shelf.adapter.view_model.common.extension.currencyUnitFromDefaultLocale
 import com.example.project_shelf.app.entity.Product
+import org.joda.money.Money
 import java.util.Date
 
 @Entity(tableName = "product")
@@ -21,7 +23,7 @@ fun ProductDto.toEntity(): Product {
     return Product(
         id = this.rowId,
         name = this.name,
-        defaultPrice = this.defaultPrice.toLong(),
+        defaultPrice = Money.ofMinor(currencyUnitFromDefaultLocale(), this.defaultPrice),
         stock = this.stock,
     )
 }

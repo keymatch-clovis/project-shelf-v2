@@ -27,7 +27,7 @@ class LoadProductsUseCase @Inject constructor(private val service: ProductServic
             .map {
                 CreateProductInput(
                     name = it.uppercase(),
-                    price = Random.nextLong(0, 1_000_000L),
+                    defaultPrice = Random.nextLong(0, 1_000_000L),
                     stock = Random.nextInt(0, 100),
                 )
             }
