@@ -2,6 +2,7 @@ package com.example.project_shelf.framework.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -11,10 +12,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.navigation
 import com.example.project_shelf.adapter.view_model.MainViewModel
-import com.example.project_shelf.adapter.view_model.invoice.CreateInvoiceViewModel
+import com.example.project_shelf.adapter.view_model.common.DeletionExtension
+import com.example.project_shelf.adapter.view_model.common.SearchExtension
+import com.example.project_shelf.adapter.view_model.customer.CreateCustomerScreenViewModel
+import com.example.project_shelf.adapter.view_model.customer.CustomerListScreenViewModel
+import com.example.project_shelf.adapter.view_model.invoice.CreateInvoiceProductDialogViewModel
+import com.example.project_shelf.adapter.view_model.invoice.CreateInvoiceScreenViewModel
+import com.example.project_shelf.adapter.view_model.invoice.InvoiceDetailsFormViewModel
 import com.example.project_shelf.adapter.view_model.invoice.InvoiceDraftViewModel
-import com.example.project_shelf.adapter.view_model.product.EditProductViewModel
-import com.example.project_shelf.adapter.view_model.product.ProductViewModel
+import com.example.project_shelf.adapter.view_model.invoice.InvoiceProductListFormViewModel
+import com.example.project_shelf.adapter.view_model.product.EditProductScreenViewModel
+import com.example.project_shelf.adapter.view_model.product.ProductRouteViewModel
 import com.example.project_shelf.framework.ui.common.navigation.sharedViewModel
 import com.example.project_shelf.framework.ui.screen.ConfigScreen
 import com.example.project_shelf.framework.ui.screen.LoadingScreen
@@ -51,19 +59,44 @@ fun MainNavHost(
             startDestination = Destination.PRODUCT_LIST.route,
         ) {
             composable(Destination.PRODUCT_LIST.route) { backStackEntry ->
-                val productViewModel =
-                    backStackEntry.sharedViewModel<ProductViewModel>(navController)
+                // NOTE: We COULD create a new view model for the route, and leave the product list
+                //  view model alone. But I'm tired man.
+                val routeViewModel =
+                    backStackEntry.sharedViewModel<ProductRouteViewModel>(navController)
+
+                val searchState = routeViewModel.searchExtension.state.collectAsState()
+                val deletionState = routeViewModel.deletionExtension.state.collectAsState()
 
                 ProductListScreen(
-                    productViewModel = productViewModel,
-                    viewModel = hiltViewModel(),
-                    onRequestCreate = {
-                        navController.navigate(Destination.PRODUCT_CREATE.route)
-                    },
-                    onRequestEdit = { id ->
-                        productViewModel.setSelectedProductId(id)
-                        navController.navigate(Destination.PRODUCT_EDIT.route)
-                    },
+                    productList = routeViewModel.products,
+                    callback = ProductRouteViewModel.Callback(
+                        onRequestCreateProduct = {
+                            navController.navigate(Destination.PRODUCT_CREATE.route)
+                        },
+                        onRequestOpenProduct = {
+                            routeViewModel.setSelectedProduct(it)
+                            navController.navigate(Destination.PRODUCT_EDIT.route)
+                        },
+                    ),
+                    searchState = searchState.value,
+                    searchCallback = SearchExtension.Callback(
+                        onOpenSearch = { routeViewModel.searchExtension.openSearch() },
+                        onCloseSearch = { routeViewModel.searchExtension.closeSearch() },
+                        onUpdateQuery = { routeViewModel.searchExtension.updateQuery(it) },
+                    ),
+                    searchResult = routeViewModel.searchExtension.result,
+                    deletionState = deletionState.value,
+                    deletionCallback = DeletionExtension.Callback(
+                        onSetItemPendingForDeletion = {
+                            routeViewModel.deletionExtension.onSetItemPendingForDeletion(it)
+                        },
+                        onUnsetItemPendingForDeletion = {
+                            routeViewModel.deletionExtension.onUnsetItemPendingForDeletion(it)
+                        },
+                        onDismissItemPendingForDeletion = {
+                            routeViewModel.deletionExtension.onDismissItemPendingForDeletion(it)
+                        },
+                    )
                 )
             }
 
@@ -76,38 +109,88 @@ fun MainNavHost(
             }
 
             composable(Destination.PRODUCT_EDIT.route) { backStackEntry ->
-                val productViewModel =
-                    backStackEntry.sharedViewModel<ProductViewModel>(navController)
+                // NOTE: We COULD create a new view model for the route, and leave the product list
+                //  view model alone. But I'm tired man.
+                val routeViewModel =
+                    backStackEntry.sharedViewModel<ProductRouteViewModel>(navController)
+
+                val viewModel =
+                    hiltViewModel<EditProductScreenViewModel, EditProductScreenViewModel.Factory> {
+                        it.create(routeViewModel.consumeSelectedProduct())
+                    }
 
                 EditProductScreen(
-                    productViewModel = productViewModel,
-                    viewModel = hiltViewModel<EditProductViewModel, EditProductViewModel.Factory> {
-                        it.create(productViewModel.getSelectedProductId())
-                    },
-                    onDismissRequest = { navController.popBackStack() },
-                    onDeleteRequest = { navController.popBackStack() },
+                    state = viewModel.state.collectAsState().value,
+                    callback = EditProductScreenViewModel.Callback(
+                        onNavigateBack = { navController.popBackStack() },
+                        onRequestDeleteProduct = {},
+                        onRequestEditProduct = {},
+                        onUpdateName = { viewModel.updateName(it) },
+                        onUpdateDefaultPrice = { viewModel.updateDefaultPrice(it) },
+                        onUpdateStock = { viewModel.updateStock(it) },
+                    )
                 )
             }
         }
 
         /// Customer related
         composable(MainDestination.CUSTOMER.route) { backStackEntry ->
+            val viewModel = hiltViewModel<CustomerListScreenViewModel>()
+
+            val state = viewModel.state.collectAsState()
+            val searchState = viewModel.search.state.collectAsState()
+
             CustomerListScreen(
-                customerViewModel = backStackEntry.sharedViewModel(navController),
-                viewModel = hiltViewModel(),
-                onRequestCreate = {
-                    navController.navigate(Destination.CUSTOMER_CREATE.route)
-                },
-                onRequestEdit = {
-                    navController.navigate(it)
-                },
+                state = state.value,
+                callback = CustomerListScreenViewModel.Callback(
+                    onOpenSearch = { viewModel.onOpenSearch() },
+                    onCloseSearch = { viewModel.onCloseSearch() },
+                    onRequestCreateCustomer = { navController.navigate(Destination.CUSTOMER_CREATE.route) },
+                    onRequestEditCustomer = { TODO() },
+                    onSetCustomerPendingForDeletion = { viewModel.setCustomerPendingForDeletion(it) },
+                    onUnsetCustomerPendingForDeletion = {
+                        viewModel.unsetCustomerPendingForDeletion(it)
+                    },
+                    onDismissCustomerMarkedForDeletion = {
+                        viewModel.dismissCustomerMarkedForDeletion(it)
+                    },
+                ),
+                searchState = searchState.value,
+                searchCallback = SearchExtension.Callback(
+                    onOpenSearch = TODO(),
+                    onCloseSearch = TODO(),
+                    onUpdateQuery = { viewModel.search.updateQuery(it) },
+                ),
+                searchResult = viewModel.search.result,
             )
         }
+
         composable(Destination.CUSTOMER_CREATE.route) {
+            val viewModel = hiltViewModel<CreateCustomerScreenViewModel>()
+
+            val state = viewModel.state.collectAsState()
+            val citySearchState = viewModel.citySearch.state.collectAsState()
+
             CreateCustomerScreen(
-                viewModel = hiltViewModel(),
-                onDismissed = { navController.popBackStack() },
-                onCreated = { navController.popBackStack() },
+                state = state.value,
+                callback = CreateCustomerScreenViewModel.Callback(
+                    onNameChange = { viewModel.updateName(it) },
+                    onPhoneChange = { viewModel.updatePhone(it) },
+                    onAddressChange = { viewModel.updateAddress(it) },
+                    onBusinessNameChange = { viewModel.updateBusinessName(it) },
+                    onCityChange = { viewModel.updateCity(it) },
+                    onCreateRequest = { viewModel.create() },
+                    onDismissRequest = { navController.popBackStack() },
+                    openCitySearch = { viewModel.openCitySearchBar() },
+                    closeCitySearch = { viewModel.closeCitySearchBar() },
+                ),
+                citySearchState = citySearchState.value,
+                citySearchCallback = SearchExtension.Callback(
+                    onOpenSearch = TODO(),
+                    onCloseSearch = TODO(),
+                    onUpdateQuery = { viewModel.citySearch.updateQuery(it) },
+                ),
+                citySearchResult = viewModel.citySearch.result,
             )
         }
 
@@ -153,18 +236,84 @@ fun MainNavHost(
             composable(Destination.INVOICE_CREATE.route) { backStackEntry ->
                 val draftViewModel =
                     backStackEntry.sharedViewModel<InvoiceDraftViewModel>(navController)
+                val currentDraft = TODO()
 
-                val viewModel =
-                    hiltViewModel<CreateInvoiceViewModel, CreateInvoiceViewModel.Factory> {
-                        it.create(draftViewModel.currentDraft.consume())
+                val mainViewModel =
+                    hiltViewModel<CreateInvoiceScreenViewModel, CreateInvoiceScreenViewModel.Factory> {
+                        it.create(currentDraft)
                     }
+
+                val detailsViewModel =
+                    hiltViewModel<InvoiceDetailsFormViewModel, InvoiceDetailsFormViewModel.Factory> {
+                        it.create(currentDraft)
+                    }
+
+                val invoiceProductListViewModel =
+                    hiltViewModel<InvoiceProductListFormViewModel, InvoiceProductListFormViewModel.Factory> {
+                        it.create(draftProducts = TODO())
+                    }
+
+                val createInvoiceProductDialogViewModel =
+                    hiltViewModel<CreateInvoiceProductDialogViewModel>()
+
+                val createInvoiceState = mainViewModel.state.collectAsState()
+                val invoiceDetailsFormState = detailsViewModel.state.collectAsState()
+                val invoiceProductListFormState = invoiceProductListViewModel.state.collectAsState()
+                val createInvoiceProductDialogState =
+                    createInvoiceProductDialogViewModel.state.collectAsState()
 
                 CreateInvoiceScreen(
                     draftViewModel = backStackEntry.sharedViewModel(navController),
-                    viewModel = viewModel,
-                    onRequestDismiss = {
-                        navController.popBackStack()
-                    },
+                    state = createInvoiceState.value,
+                    callback = CreateInvoiceScreenViewModel.Callback(
+                        onCloseRequest = { navController.popBackStack() },
+                        onCreateRequest = {
+                            mainViewModel.createInvoice(
+                                customerId = invoiceDetailsFormState.value.customer.value!!.id,
+                                products = invoiceProductListFormState.value.invoiceProducts,
+                            )
+                        },
+                        onOpenCustomerSearch = { mainViewModel.openCustomerSearch() },
+                        onCloseCustomerSearch = { mainViewModel.closeCustomerSearch() },
+                        onOpenProductSearch = { mainViewModel.openProductSearch() },
+                        onCloseProductSearch = { mainViewModel.closeProductSearch() },
+                    ),
+                    invoiceDetailsFormState = invoiceDetailsFormState.value,
+                    invoiceDetailsFormCallback = InvoiceDetailsFormViewModel.Callback(
+                        onOpenCustomerSearch = { mainViewModel.openCustomerSearch() },
+                        onSetCustomer = TODO(),
+                    ),
+                    invoiceProductListFormState = invoiceProductListFormState.value,
+                    invoiceProductListFormCallback = InvoiceProductListFormViewModel.Callback(
+                        onOpenSearchProduct = { mainViewModel.openProductSearch() },
+                        onAddRequest = { createInvoiceProductDialogViewModel.setInvoiceProduct(dto = it) },
+                        onEditRequest = { dto, index ->
+                            createInvoiceProductDialogViewModel.setInvoiceProduct(
+                                dto = dto, index = index
+                            )
+                        },
+                        onRemoveRequest = { invoiceProductListViewModel.removeInvoiceProduct(it) },
+                    ),
+                    createInvoiceProductDialogState = createInvoiceProductDialogState.value,
+                    createInvoiceProductDialogCallback = CreateInvoiceProductDialogViewModel.Callback(
+                        onPriceChange = {
+                            createInvoiceProductDialogViewModel.updatePrice(it)
+                        },
+                        onCountChange = { createInvoiceProductDialogViewModel.updateCount(it) },
+                        onCreateRequest = {
+                            invoiceProductListViewModel.addInvoiceProduct(
+                                dto = createInvoiceProductDialogViewModel.toDto(),
+                                index = createInvoiceProductDialogState.value.index,
+                            )
+                        },
+                        onDismissRequest = { createInvoiceProductDialogViewModel.clear() },
+                    ),
+                    customerSearchState = TODO(),
+                    customerSearchCallback = TODO(),
+                    customerSearchResult = TODO(),
+                    productSearchState = TODO(),
+                    productSearchCallback = TODO(),
+                    productSearchResult = TODO(),
                 )
             }
         }

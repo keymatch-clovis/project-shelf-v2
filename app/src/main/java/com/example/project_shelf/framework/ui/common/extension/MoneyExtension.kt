@@ -17,8 +17,8 @@ fun Money.toFormattedString(
         .let { it as DecimalFormat }
         .apply {
             if (!withDecimals) {
-                maximumIntegerDigits = 0
-                minimumIntegerDigits = 0
+                maximumFractionDigits = 0
+                minimumFractionDigits = 0
             }
 
             if (!withSymbol) {

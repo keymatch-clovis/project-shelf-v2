@@ -29,7 +29,7 @@ import com.example.project_shelf.R
 
 @Composable
 fun CustomTextField(
-    value: String?,
+    value: String,
     label: Int,
     modifier: Modifier = Modifier,
     onValueChange: ((String) -> Unit)? = null,
@@ -69,7 +69,7 @@ fun CustomTextField(
                 }
             },
         visualTransformation = visualTransformation,
-        value = value?.toString() ?: "",
+        value = value,
         onValueChange = {
             // Also, if the user starts typing, we have to mark the text field as dirty, so the
             // other possible errors are checked.
@@ -114,7 +114,7 @@ fun CustomTextField(
             }
         },
         trailingIcon = {
-            if (value?.isEmpty() == false && onClear != null) {
+            if (value.isNotEmpty() && onClear != null) {
                 IconButton(onClick = onClear) {
                     Icon(
                         modifier = Modifier.size(24.dp),

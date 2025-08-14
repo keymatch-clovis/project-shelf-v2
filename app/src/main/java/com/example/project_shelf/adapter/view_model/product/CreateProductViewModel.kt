@@ -35,9 +35,9 @@ import javax.inject.Inject
 
 sealed class CreateProductViewModelState {
     data class InputState(
-        val name: Input<String> = Input(),
-        val price: Input<String> = Input(),
-        val stock: Input<String> = Input(),
+        val name: Input = Input(),
+        val price: Input = Input(),
+        val stock: Input = Input(),
     )
 }
 
@@ -61,26 +61,23 @@ class CreateProductViewModel @Inject constructor(
     private val _inputState = MutableStateFlow(CreateProductViewModelState.InputState())
     val inputState = _inputState.asStateFlow()
 
-    val isValid = merge(_inputState, isLoading)
-        .mapLatest {
-            _inputState.value.name.errors
-                .isEmpty()
-                .and(_inputState.value.price.errors.isEmpty())
-                .and(_inputState.value.stock.errors.isEmpty())
-                .and(!isLoading.value)
-        }
+    val isValid = merge(_inputState, isLoading).mapLatest {
+        _inputState.value.name.errors.isEmpty()
+            .and(_inputState.value.price.errors.isEmpty())
+            .and(_inputState.value.stock.errors.isEmpty())
+            .and(!isLoading.value)
+    }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
     init {
         // Initialize all fields so the validations check all the default values.
-        updateName()
-        updatePrice()
-        updateStock()
+        updateName("")
+        updatePrice("")
+        updateStock("")
 
         // We need to check the name of the product is not repeated in the database.
         viewModelScope.launch {
-            _inputState
-                .distinctUntilChangedBy { _inputState.value.name.value }
+            _inputState.distinctUntilChangedBy { _inputState.value.name.value }
                 .onEach { isLoading.update { true } }
                 .debounce(500)
                 .mapLatest {
@@ -99,32 +96,22 @@ class CreateProductViewModel @Inject constructor(
         }
     }
 
-    fun updateName(value: String? = null) = _inputState.update {
-        it.copy(
-            name = Input(
-                value = value, errors = value.validateString(required = true)
-            )
-        )
+    fun updateName(value: String) {
+        _inputState.update {
+            it.copy(name = Input(value = value, errors = value.validateString(required = true)))
+        }
     }
 
-    fun updatePrice(value: String? = null) = _inputState.update {
-        it.copy(
-            price = Input(
-                // We need to set a blank value to null, so the `String` to `BigDecimal`
-                // transforming doesn't need another step.
-                value = value?.ifBlank { null }, errors = value.validateBigDecimal()
-            )
-        )
+    fun updatePrice(value: String) {
+        _inputState.update {
+            it.copy(price = Input(value = value, errors = value.validateBigDecimal()))
+        }
     }
 
-    fun updateStock(value: String? = null) = _inputState.update {
-        it.copy(
-            stock = Input(
-                // We need to set a blank value to null, so the `String` to `Int` transforming
-                // doesn't need another step.
-                value = value?.ifBlank { null }, errors = value.validateInt()
-            )
-        )
+    fun updateStock(value: String) {
+        _inputState.update {
+            it.copy(stock = Input(value = value, errors = value.validateInt()))
+        }
     }
 
     fun create() {
@@ -132,15 +119,16 @@ class CreateProductViewModel @Inject constructor(
             Log.d("VIEW-MODEL", "Creating product")
             // NOTE: We should only call this method when all input data has been validated.
             assert(isValid.value)
+            assert(_inputState.value.name.value.isNotBlank())
 
             // NOTE:
             // > This is a risky transaction!
             // > Cephalon Sark
             val entity = createProductUseCase.exec(
                 CreateProductUseCaseInput(
-                    name = _inputState.value.name.value!!,
-                    price = _inputState.value.price.value?.toBigDecimal(),
-                    stock = _inputState.value.stock.value?.toInt(),
+                    name = _inputState.value.name.value,
+                    price = _inputState.value.price.value.toBigDecimalOrNull(),
+                    stock = _inputState.value.stock.value.toIntOrNull(),
                 )
             )
 

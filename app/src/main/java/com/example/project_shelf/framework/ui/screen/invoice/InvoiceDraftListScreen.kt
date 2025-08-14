@@ -178,7 +178,8 @@ fun InvoiceDraftListScreen(
                                         viewModel.checkItem(item.id)
                                     }
                                 } else {
-                                    draftViewModel.setCurrentDraft(item)
+                                    // draftViewModel.setCurrentDraft(item)
+                                    TODO()
                                     onSelectedDraft()
                                 }
                             },

@@ -7,7 +7,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,11 +48,6 @@ fun InvoiceListScreen(
     /// Related to invoice listing.
     val lazyPagingItems = viewModel.invoices.collectAsLazyPagingItems()
 
-    /// Related to invoice search
-    var showSearchBar = viewModel.showSearchBar.collectAsState()
-    var query = viewModel.query.collectAsState()
-    val lazyPagingSearchItems = viewModel.searchResult.collectAsLazyPagingItems()
-
     // This box is used to render the search bars over all the content. If this is not this way, we
     // might have problems showing the contents correctly.
     Box {
@@ -70,7 +64,7 @@ fun InvoiceListScreen(
                             contentDescription = null,
                         )
                     }
-                    IconButton(onClick = { viewModel.openSearchBar() }) {
+                    IconButton(onClick = { TODO() }) {
                         Icon(
                             modifier = Modifier.size(24.dp),
                             imageVector = ImageVector.vectorResource(R.drawable.search),
@@ -81,7 +75,7 @@ fun InvoiceListScreen(
             )
         }, floatingActionButton = {
             AnimatedVisibility(
-                visible = !showSearchBar.value,
+                visible = true,
                 enter = slideInVertically(),
                 exit = slideOutVertically(),
             ) {
@@ -115,44 +109,44 @@ fun InvoiceListScreen(
                 }
             }
         }) { innerPadding ->
-            Box(
-                modifier = Modifier.padding(innerPadding),
-                contentAlignment = Alignment.TopCenter,
-            ) {
-                CustomList(
-                    lazyPagingItems = lazyPagingItems,
-                    lazyListState = viewModel.lazyListState,
-                    emptyMessage = stringResource(R.string.invoices_none),
-                ) {
-                    Text(it.customer.name)
-                }
-            }
+//            Box(
+//                modifier = Modifier.padding(innerPadding),
+//                contentAlignment = Alignment.TopCenter,
+//            ) {
+//                CustomList(
+//                    lazyPagingItems = lazyPagingItems,
+//                    lazyListState = viewModel.lazyListState,
+//                    emptyMessage = stringResource(R.string.invoices_none),
+//                ) {
+//                    Text(it.customer.name)
+//                }
+//            }
 
-            AnimatedVisibility(
-                visible = showSearchBar.value,
-                enter = fadeIn(),
-                exit = fadeOut(),
-            ) {
-                CustomSearchBar<InvoiceFilterDto>(
-                    query = query.value,
-                    onQueryChange = { viewModel.updateQuery(it) },
-                    expanded = showSearchBar.value,
-                    onExpandedChange = { if (it) viewModel.openSearchBar() else viewModel.closeSearchBar() },
-                    onSearch = {
-                        // If the user presses the search button, without selecting an item, we
-                        // will assume it wanted to select the first-most item in the search
-                        // list, if there was one.
-                        lazyPagingSearchItems
-                            .takeIf { it.itemCount > 0 }
-                            ?.peek(0)
-                            ?.let { onRequestEdit(it.id) }
-                        viewModel.closeSearchBar()
-                    },
-                    lazyPagingItems = lazyPagingSearchItems,
-                ) {
-                    Text(it.number.toString())
-                }
-            }
+//            AnimatedVisibility(
+//                visible = showSearchBar.value,
+//                enter = fadeIn(),
+//                exit = fadeOut(),
+//            ) {
+//                CustomSearchBar<InvoiceFilterDto>(
+//                    query = query.value,
+//                    onQueryChange = { viewModel.updateQuery(it) },
+//                    expanded = showSearchBar.value,
+//                    onExpandedChange = { if (it) viewModel.openSearchBar() else viewModel.closeSearchBar() },
+//                    onSearch = {
+//                        // If the user presses the search button, without selecting an item, we
+//                        // will assume it wanted to select the first-most item in the search
+//                        // list, if there was one.
+//                        lazyPagingSearchItems
+//                            .takeIf { it.itemCount > 0 }
+//                            ?.peek(0)
+//                            ?.let { onRequestEdit(it.id) }
+//                        viewModel.closeSearchBar()
+//                    },
+//                    lazyPagingItems = lazyPagingSearchItems,
+//                ) {
+//                    Text(it.number.toString())
+//                }
+//            }
         }
     }
 }

@@ -12,7 +12,7 @@ class UpdateProductUseCase @Inject constructor(private val productService: Produ
     suspend fun exec(
         id: Long,
         name: String,
-        price: BigDecimal?,
+        defaultPrice: BigDecimal?,
         stock: Int?,
     ): Product {
         // As we allow soft deletes in our little app, we need to handle those cases here.
@@ -20,7 +20,7 @@ class UpdateProductUseCase @Inject constructor(private val productService: Produ
         // ready to be deleted. So we just have to clean that table before doing anything else.
         productService.deletePendingForDeletion()
 
-        val money = Money.of(currencyUnitFromDefaultLocale(), price ?: BigDecimal.ZERO)
+        val money = Money.of(currencyUnitFromDefaultLocale(), defaultPrice ?: BigDecimal.ZERO)
 
         return productService.update(
             UpdateProductInput(

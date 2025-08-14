@@ -16,10 +16,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -30,9 +27,9 @@ import androidx.compose.ui.unit.dp
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.dto.ui.ProductDto
 import com.example.project_shelf.adapter.view_model.product.CreateProductViewModel
+import com.example.project_shelf.framework.ui.common.CurrencyVisualTransformation
 import com.example.project_shelf.framework.ui.components.text_field.CustomTextField
 import com.example.project_shelf.framework.ui.getStringResource
-import com.example.project_shelf.framework.ui.common.CurrencyVisualTransformation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,10 +83,10 @@ fun CreateProductScreen(
             ) {
                 /// Name
                 CustomTextField(
-                    value = inputState.value.name.value,
                     required = true,
+                    value = inputState.value.name.value,
                     onValueChange = { viewModel.updateName(it) },
-                    onClear = { viewModel.updateName(null) },
+                    onClear = { viewModel.updateName("") },
                     label = R.string.name,
                     errors = inputState.value.name.errors.map { it.getStringResource() },
                     keyboardOptions = KeyboardOptions(
@@ -102,7 +99,7 @@ fun CreateProductScreen(
                     value = inputState.value.price.value,
                     visualTransformation = CurrencyVisualTransformation(),
                     onValueChange = { viewModel.updatePrice(it) },
-                    onClear = { viewModel.updatePrice(null) },
+                    onClear = { viewModel.updatePrice("") },
                     label = R.string.default_price,
                     errors = inputState.value.price.errors.map { it.getStringResource() },
                     keyboardOptions = KeyboardOptions(
@@ -114,7 +111,7 @@ fun CreateProductScreen(
                 CustomTextField(
                     value = inputState.value.stock.value,
                     onValueChange = { viewModel.updateStock(it) },
-                    onClear = { viewModel.updateStock(null) },
+                    onClear = { viewModel.updateStock("") },
                     label = R.string.amount,
                     errors = inputState.value.stock.errors.map { it.getStringResource() },
                     keyboardOptions = KeyboardOptions(

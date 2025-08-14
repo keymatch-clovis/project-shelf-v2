@@ -53,12 +53,19 @@ fun MainScreen(
             ) {
                 HorizontalDivider()
                 NavigationBar {
-                    MainDestination.entries.forEach {
+                    MainDestination.entries.forEach { destination ->
+                        val selected: Boolean =
+                            currentBackStackEntry.value?.destination?.route?.startsWith(destination.route) == true
+
                         NavigationBarItem(
-                            selected = currentBackStackEntry.value?.destination?.route?.startsWith(
-                                it.route
-                            ) != false,
+                            selected = selected,
                             onClick = {
+                                // Different from `selected`---This one works for checking the route
+                                // is not a leaf route.
+                                if (currentBackStackEntry.value?.destination?.parent?.route == destination.route) {
+                                    return@NavigationBarItem
+                                }
+
                                 // FIXME: I don't know if this is correct
                                 //  I have searched the interwebs for information about how to clear
                                 //  _completely_ the back stack, and nothing seems to work as I
@@ -67,18 +74,18 @@ fun MainScreen(
                                 //  explains otherwise.
                                 navController.popBackStack(0, false)
 
-                                navController.navigate(it.route) {
+                                navController.navigate(destination.route) {
                                     launchSingleTop = true
                                     restoreState = true
                                 }
                             },
                             icon = {
                                 Icon(
-                                    imageVector = ImageVector.vectorResource(it.iconVectorResource),
+                                    imageVector = ImageVector.vectorResource(destination.iconVectorResource),
                                     contentDescription = null,
                                 )
                             },
-                            label = { Text(stringResource(it.labelStringResource)) },
+                            label = { Text(stringResource(destination.labelStringResource)) },
                         )
                     }
                 }

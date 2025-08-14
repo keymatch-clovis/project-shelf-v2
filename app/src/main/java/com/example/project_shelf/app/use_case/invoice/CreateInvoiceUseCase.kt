@@ -7,46 +7,46 @@ import com.example.project_shelf.app.service.model.CreateInvoiceInput
 import com.example.project_shelf.app.service.model.CreateInvoiceProductInput
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.math.BigDecimal
 import java.util.Date
 import javax.inject.Inject
 
 class CreateInvoiceUseCase @Inject constructor(
     private val service: InvoiceService,
 ) {
-    // https://medium.com/androiddevelopers/coroutines-on-android-part-i-getting-the-background-3e0e54d20bb
-    suspend fun exec(
-        customerId: Long,
-        products: List<CreateInvoiceProductInput>,
-        date: Date = Date(),
-        discount: BigDecimal? = null,
-    ): Invoice = withContext(Dispatchers.IO) {
-        Log.d("USE-CASE", "Creating invoice with: $customerId, $products, $date, $discount")
-        assert(products.isNotEmpty())
+    data class Input(
+        val customerId: Long,
+        val products: List<CreateInvoiceProductInput>,
+    )
 
-        // First, get the consecutive number we are going to assign to this invoice.
-        // NOTE:
+    // https://medium.com/androiddevelopers/coroutines-on-android-part-i-getting-the-background-3e0e54d20bb
+    suspend fun exec(input: Input): Invoice = withContext(Dispatchers.IO) {
+        Log.d("USE-CASE", "Creating invoice with: $input")
+        assert(input.products.isNotEmpty())
+
         //  We are doing a simple numbering, we just take the latest number + 1.
         Log.d("USE-CASE", "Getting consecutive number")
         val consecutiveNumber = service.getCurrentNumber() + 1
 
+        val date = Date()
         val invoiceId = service.create(
             CreateInvoiceInput(
                 number = consecutiveNumber,
-                customerId = customerId,
-                products = products,
+                customerId = input.customerId,
+                products = input.products,
                 date = date,
-                discount = discount,
+                discount = TODO(),
             )
         )
 
         Invoice(
             id = invoiceId,
             number = consecutiveNumber,
-            customerId = customerId,
+            customerId = input.customerId,
             date = date,
             // TODO: THIS
             remainingUnpaidBalance = 0,
         )
     }
+
+    companion object
 }

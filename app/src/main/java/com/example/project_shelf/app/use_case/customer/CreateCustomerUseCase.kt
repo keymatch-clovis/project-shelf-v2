@@ -11,9 +11,9 @@ class CreateCustomerUseCase @Inject constructor(private val customerService: Cus
     suspend fun exec(
         name: String,
         phone: String,
-        address: String,
         cityId: Long,
         businessName: String?,
+        address: String?,
     ): Customer = withContext(Dispatchers.IO) {
         Log.d("USE-CASE", "Creating customer with: $name, $phone, $address, $cityId, $businessName")
 
@@ -25,7 +25,7 @@ class CreateCustomerUseCase @Inject constructor(private val customerService: Cus
         customerService.create(
             name = name,
             phone = phone,
-            address = address,
+            address = TODO("See: #4"),
             cityId = cityId,
             businessName = businessName,
         )

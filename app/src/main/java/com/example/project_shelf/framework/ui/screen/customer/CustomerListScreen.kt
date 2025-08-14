@@ -8,6 +8,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -24,7 +25,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -32,44 +32,39 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.project_shelf.R
 import com.example.project_shelf.adapter.dto.ui.CustomerFilterDto
-import com.example.project_shelf.adapter.view_model.customer.CustomerListViewModel
-import com.example.project_shelf.adapter.view_model.customer.CustomerViewModel
+import com.example.project_shelf.adapter.view_model.common.SearchExtension
+import com.example.project_shelf.adapter.view_model.customer.CustomerListScreenViewModel
 import com.example.project_shelf.framework.ui.components.CustomList
 import com.example.project_shelf.framework.ui.components.CustomSearchBar
 import com.example.project_shelf.framework.ui.components.list_item.CustomerFilterListItem
 import com.example.project_shelf.framework.ui.components.list_item.CustomerListItem
+import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomerListScreen(
-    customerViewModel: CustomerViewModel,
-    viewModel: CustomerListViewModel,
-    onRequestCreate: () -> Unit,
-    onRequestEdit: (CustomerFilterDto) -> Unit,
+    state: CustomerListScreenViewModel.State,
+    callback: CustomerListScreenViewModel.Callback,
+    searchState: SearchExtension.State,
+    searchCallback: SearchExtension.Callback,
+    searchResult: Flow<PagingData<CustomerFilterDto>>,
 ) {
-    /// Related to customer state
-    val customerState = customerViewModel.state.collectAsState()
     val context = LocalContext.current
 
     /// Related to UI behavior.
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-    val localContext = LocalContext.current
 
-    /// Related to listing the items
-    val customerList = viewModel.customers.collectAsLazyPagingItems()
-
-    /// Related to search.
-    var showSearchBar = viewModel.showSearchBar.collectAsState()
-    val query = viewModel.search.query.collectAsState()
-    val searchItems = viewModel.search.result.collectAsLazyPagingItems()
+    /// Related to search
+    val searchItems = searchResult.collectAsLazyPagingItems()
 
     /// Related to deletion snackbar.
     val snackbarState = SnackbarHostState()
-    LaunchedEffect(customerState.value.customersMarkedForDeletion) {
-        customerState.value.customersMarkedForDeletion.forEach {
+    LaunchedEffect(state.customersMarkedForDeletion) {
+        state.customersMarkedForDeletion.forEach {
             val result = snackbarState.showSnackbar(
                 message = context.getString(R.string.customer_deleted),
                 actionLabel = context.getString(R.string.undo),
@@ -79,11 +74,11 @@ fun CustomerListScreen(
 
             when (result) {
                 SnackbarResult.ActionPerformed -> {
-                    customerViewModel.unsetCustomerPendingForDeletion(it)
+                    callback.onUnsetCustomerPendingForDeletion(it)
                 }
 
                 SnackbarResult.Dismissed -> {
-                    customerViewModel.removeCustomerFromMarkedForDeletion(it)
+                    callback.onDismissCustomerMarkedForDeletion(it)
                 }
             }
         }
@@ -101,7 +96,7 @@ fun CustomerListScreen(
                     scrollBehavior = scrollBehavior,
                     title = { Text(stringResource(R.string.customers)) },
                     actions = {
-                        IconButton(onClick = { viewModel.openSearchBar() }) {
+                        IconButton(onClick = { callback.onRequestCreateCustomer }) {
                             Icon(
                                 modifier = Modifier.size(24.dp),
                                 imageVector = ImageVector.vectorResource(R.drawable.search),
@@ -113,14 +108,14 @@ fun CustomerListScreen(
             },
             floatingActionButton = {
                 AnimatedVisibility(
-                    visible = !showSearchBar.value,
+                    visible = !state.isShowingSearch,
                     enter = slideInHorizontally(),
                     exit = slideOutHorizontally(),
                 ) {
                     // https://m3.material.io/components/floating-action-button/specs#0a064a5d-8373-4150-9665-40acd0f14b0a
                     FloatingActionButton(
                         modifier = Modifier.size(96.dp),
-                        onClick = onRequestCreate,
+                        onClick = { callback.onRequestCreateCustomer() },
                         shape = MaterialTheme.shapes.large,
                     ) {
                         Icon(
@@ -134,44 +129,42 @@ fun CustomerListScreen(
         ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
                 CustomList(
-                    lazyPagingItems = customerList,
-                    lazyListState = viewModel.lazyListState,
+                    lazyPagingItems = searchItems,
+                    lazyListState = rememberLazyListState(),
                     emptyMessage = stringResource(R.string.customers_none),
                 ) {
-                    CustomerListItem(dto = it, onClick = {})
+                    Text(it.name)
                 }
             }
 
             /// Search bar
             AnimatedVisibility(
-                visible = showSearchBar.value,
+                visible = state.isShowingSearch,
                 enter = slideInVertically(initialOffsetY = { -it * 2 }),
                 exit = slideOutVertically(targetOffsetY = { -it * 2 })
             ) {
                 CustomSearchBar<CustomerFilterDto>(
-                    query = query.value,
-                    onQueryChange = { viewModel.search.updateQuery(it) },
-                    expanded = showSearchBar.value,
-                    onExpandedChange = {
-                        if (it) viewModel.openSearchBar() else viewModel.closeSearchBar()
-                    },
+                    query = searchState.query,
+                    onQueryChange = { searchCallback.onUpdateQuery(it) },
+                    expanded = state.isShowingSearch,
+                    onExpandedChange = { if (it) callback.onOpenSearch() else callback.onCloseSearch },
                     onSearch = {
+                        callback.onCloseSearch()
+
                         // If the user presses the search button, without selecting an item, we
                         // will assume it wanted to select the first-most item in the search
                         // list, if there was one.
-                        searchItems
-                            .takeIf { it.itemCount > 0 }
+                        searchItems.takeIf { it.itemCount > 0 }
                             ?.peek(0)
-                            ?.let { onRequestEdit(it) }
-                        viewModel.closeSearchBar()
+                            ?.let { callback.onRequestEditCustomer(it.id) }
                     },
                     lazyPagingItems = searchItems,
                 ) {
                     CustomerFilterListItem(
                         dto = it,
                         onClick = {
-                            onRequestEdit(it)
-                            viewModel.closeSearchBar()
+                            callback.onCloseSearch()
+                            callback.onRequestEditCustomer(it.id)
                         },
                     )
                 }
