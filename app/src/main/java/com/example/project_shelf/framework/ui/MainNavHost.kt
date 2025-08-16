@@ -1,5 +1,6 @@
 package com.example.project_shelf.framework.ui
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -11,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.navigation
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.project_shelf.adapter.view_model.MainViewModel
 import com.example.project_shelf.adapter.view_model.common.DeletionExtension
 import com.example.project_shelf.adapter.view_model.common.SearchExtension
@@ -56,7 +58,7 @@ fun MainNavHost(
         //  https://stackoverflow.com/questions/68548488/sharing-viewmodel-within-jetpack-compose-navigation
         navigation(
             route = MainDestination.PRODUCT.route,
-            startDestination = Destination.PRODUCT_LIST.route,
+            startDestination = MainDestination.PRODUCT.startDestination,
         ) {
             composable(Destination.PRODUCT_LIST.route) { backStackEntry ->
                 // NOTE: We COULD create a new view model for the route, and leave the product list

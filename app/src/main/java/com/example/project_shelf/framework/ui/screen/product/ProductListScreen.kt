@@ -1,5 +1,6 @@
 package com.example.project_shelf.framework.ui.screen.product
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.slideInHorizontally
@@ -66,6 +67,10 @@ fun ProductListScreen(
 
     /// Related to listing the items.
     val items = productList.collectAsLazyPagingItems()
+
+    LaunchedEffect(items.itemCount) {
+        Log.d("test", items.itemCount.toString())
+    }
 
     /// Related to deletion snackbar.
     val snackbarState = SnackbarHostState()
@@ -149,13 +154,18 @@ fun ProductListScreen(
 
         // Search Product Search Bar.
         CustomSearchExtension(
-            result = searchResult,
-            state = searchState,
-            callback = searchCallback,
-            onSearch = { callback.onRequestOpenProduct(it.id) }) {
+            result = searchResult, state = searchState, callback = searchCallback,
+            onSearch = {
+                callback.onRequestOpenProduct(it.id)
+                searchCallback.onCloseSearch()
+            },
+        ) {
             ProductFilterListItem(
                 dto = it,
-                onClick = { callback.onRequestOpenProduct(it.id) },
+                onClick = {
+                    callback.onRequestOpenProduct(it.id)
+                    searchCallback.onCloseSearch()
+                },
             )
         }
     }

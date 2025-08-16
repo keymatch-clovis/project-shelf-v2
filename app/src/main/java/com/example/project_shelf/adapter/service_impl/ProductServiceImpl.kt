@@ -35,6 +35,7 @@ class ProductServiceImpl @Inject constructor(
     override fun get(): Flow<PagingData<Product>> {
         Log.d("IMPL", "Finding products")
         return Pager(
+            // TODO: This seems to be implemented incorrectly.
             config = PagingConfig(pageSize = PAGE_SIZE)
         ) {
             database

@@ -53,16 +53,18 @@ fun MainScreen(
             ) {
                 HorizontalDivider()
                 NavigationBar {
-                    MainDestination.entries.forEach { destination ->
+                    MainDestination.entries.forEach { mainDestination ->
                         val selected: Boolean =
-                            currentBackStackEntry.value?.destination?.route?.startsWith(destination.route) == true
+                            currentBackStackEntry.value?.destination?.route?.startsWith(
+                                mainDestination.route
+                            ) == true
 
                         NavigationBarItem(
                             selected = selected,
                             onClick = {
                                 // Different from `selected`---This one works for checking the route
                                 // is not a leaf route.
-                                if (currentBackStackEntry.value?.destination?.parent?.route == destination.route) {
+                                if (currentBackStackEntry.value?.destination?.route == mainDestination.startDestination) {
                                     return@NavigationBarItem
                                 }
 
@@ -74,18 +76,18 @@ fun MainScreen(
                                 //  explains otherwise.
                                 navController.popBackStack(0, false)
 
-                                navController.navigate(destination.route) {
+                                navController.navigate(mainDestination.route) {
                                     launchSingleTop = true
                                     restoreState = true
                                 }
                             },
                             icon = {
                                 Icon(
-                                    imageVector = ImageVector.vectorResource(destination.iconVectorResource),
+                                    imageVector = ImageVector.vectorResource(mainDestination.iconVectorResource),
                                     contentDescription = null,
                                 )
                             },
-                            label = { Text(stringResource(destination.labelStringResource)) },
+                            label = { Text(stringResource(mainDestination.labelStringResource)) },
                         )
                     }
                 }
